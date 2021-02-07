@@ -6,7 +6,17 @@ const authRouter = require('./routes/auth');
 
 const app = new express();
 
-app.use(express.urlencoded({extended:false}));
+//middlewares
+app.use(express.json());
+
+//add a general middleware for set cors free requests
+app.use((req,res,next)=>{
+    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Access-Control-Allow-Methods','*');
+    res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization');
+    next();
+});
+
 
 app.use('/auth',authRouter);
 

@@ -3,16 +3,19 @@ const { body } = require('express-validator');
 const authController = require('../controllers/auth');
 
 
+
 router.post('/login',authController.postLogin);
 router.post('/signup',[
-    body('email').isEmail().withMessage('Invalid Email'),
+    body('email').isEmail().withMessage('Invalid Email').normalizeEmail(),
     body('password').isLength({min:6}).withMessage('Password must have atleast 6 character long'),
-    body('password').isLength({min:6}).withMessage('Password must have atleast 6 character long').custom((value,{req})=>{
-        if(value !== req.password){
+    body('confirm_password').isLength({min:6}).withMessage('Password must have atleast 6 character long').custom((value,{req})=>{
+        console.log(value);
+        if(value !== req.body.password){
             return Promise.reject('Passwords must be same');
         }
         return true;
     }),
-],authController.postLogin);
+],authController.postSignup);
+
 
 module.exports = router;
