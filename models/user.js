@@ -12,5 +12,9 @@ class User{
         return getDb().collection('users').insertOne(this);
     }
 
-    
+    static findByEmail(email){
+        return getDb().collection('users').findOne({email:email});
+    }
 }
+
+module.exports = User;

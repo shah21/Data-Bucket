@@ -23,6 +23,6 @@ app.use('/auth',authRouter);
 
 db.connectDb(()=>{
     console.log('Databse connection successfull...');
-    app.listen(3000);
+    app.listen(8080);
 })
 

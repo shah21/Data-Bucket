@@ -25,7 +25,7 @@ exports.postSignup = async (req,res,next)=>{
         const hashedPass = await bcrypt.hash(password,12);
         const newUser = new User(email,hashedPass,Date.now());
         const result = await newUser.save();
-        res.staus(201).json({messge:'user created successfully',user:result.ops[0]});
+        res.status(201).json({messge:'user created successfully'});
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;

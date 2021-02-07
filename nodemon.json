@@ -1,7 +1,7 @@
 {
     "env":{
         "MONGO_USER":"shah",
-        "MONGO_PASSWORD":"24rnVNb9dX9KxMZ",
+        "MONGO_PASSWORD":"BiQM70uZIzkvF1fB",
         "MONGO_DEFAULT_DB":"databucket"
     }
 }
