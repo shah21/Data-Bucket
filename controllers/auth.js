@@ -1,7 +1,9 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require('bcryptjs');
-const User = require("../models/user");
 const jwt = require('jsonwebtoken');
+
+const User = require("../models/user");
+
 
 
 exports.postLogin = async (req,res,next)=>{
@@ -28,7 +30,7 @@ exports.postLogin = async (req,res,next)=>{
         const token = jwt.sign({
             email:user.email,
             userId:user._id,
-        },'youwillneverwalkalone',{expiresIn:'1hr'});
+        },process.env.JWT_SECRET_KEY,{expiresIn:'1hr'});
 
         res.status(201).json({messge:'login successfull.',token:token,userId:user._id});
     }catch(err){
@@ -69,6 +71,7 @@ exports.postSignup = async (req,res,next)=>{
     }
 
 }
+
 
 
 

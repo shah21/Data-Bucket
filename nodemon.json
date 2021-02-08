@@ -2,6 +2,7 @@
     "env":{
         "MONGO_USER":"shah",
         "MONGO_PASSWORD":"BiQM70uZIzkvF1fB",
-        "MONGO_DEFAULT_DB":"databucket"
+        "MONGO_DEFAULT_DB":"databucket",
+        "JWT_SECRET_KEY":"youwillneverwalkalone"
     }
 }

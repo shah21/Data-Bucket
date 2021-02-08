@@ -15,6 +15,10 @@ class User{
     static findByEmail(email){
         return getDb().collection('users').findOne({email:email});
     }
+
+    static findById(id){
+        return getDb().collection('users').findOne({id:new ObjectId(id)});
+    }
 }
 
 module.exports = User;

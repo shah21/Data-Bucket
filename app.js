@@ -2,6 +2,7 @@ const express = require('express');
 
 const db = require('./utils/database');
 const authRouter = require('./routes/auth');
+const bucketRouter = require('./routes/bucket');
 
 
 const app = new express();
@@ -19,6 +20,7 @@ app.use((req,res,next)=>{
 
 
 app.use('/auth',authRouter);
+app.use('/bucket',bucketRouter);
 
 app.use((error,req,res,next)=>{
     const status = error.statusCode || 500;
