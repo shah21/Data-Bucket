@@ -12,7 +12,6 @@ module.exports = (req,res,next)=>{
     const token = headers.split(' ')[1];
     let decodedToken;
     try{
-        console.log(token);
         decodedToken = jwt.verify(token,process.env.JWT_SECRET_KEY);
     }catch(err){
         console.log('failed to decode');

@@ -12,6 +12,10 @@ class Bucket{
         return getDb().collection('buckets').insertOne(this);
     }
 
+    static getBuckets(query){
+        return getDb().collection('buckets').find(query).toArray();
+    }
+
     static findByName(name){
         return getDb().collection('buckets').findOne({name:name});
     }
