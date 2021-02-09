@@ -2,7 +2,7 @@ const { validationResult } = require("express-validator");
 const ObjectId = require('mongodb').ObjectID;
 
 const Bucket = require("../models/bucket");
-const LIMIT_PER_PAGE = 10;
+const LIMIT_PER_PAGE = 1;
 
 //buckets
 exports.getBuckets = async (req,res,next)=>{
@@ -119,6 +119,24 @@ exports.deleteBucket = async (req,res,next)=>{
 
 
 //bucket data
+exports.getData = async (req,res,next)=>{
+    const bucketId = req.params.bucketId;
+    const page = req.query.page || 1;
+    
+    try{
+        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,page);
+        
+        res.status(200).json({messge:'success',bucket:bucket});
+    }catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+
+}
+
 exports.postCreateData = async (req,res,next)=>{
     const bucketId = req.body.bucketId;
     const info = req.body.info;

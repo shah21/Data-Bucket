@@ -9,6 +9,7 @@ const isAuth = require('../middlewares/is-auth');
 //get
 router.get('/',isAuth,bucketController.getBuckets);
 router.get('/:bucketId',isAuth,bucketController.getBucket);
+router.get('/:bucketId/data',isAuth,bucketController.getData);
 
 //create
 router.post('/create',isAuth,[

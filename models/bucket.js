@@ -21,6 +21,11 @@ class Bucket{
         return getDb().collection('buckets').find(query).skip((page-1)*limit).limit(limit).toArray();
     }
 
+    static getDataPerPage(query,limit,page){
+        const skipDocs = (page-1)*limit;
+        return getDb().collection('buckets').find(query,{data:{$slice: [skipDocs,limit]}}).toArray();
+    }
+
     static findByName(name){
         return getDb().collection('buckets').findOne({name:name});
     }
