@@ -17,6 +17,10 @@ class Bucket{
         return getDb().collection('buckets').find(query).toArray();
     }
 
+    static getBucketsWithPagination(query,limit,page){
+        return getDb().collection('buckets').find(query).skip((page-1)*limit).limit(limit).toArray();
+    }
+
     static findByName(name){
         return getDb().collection('buckets').findOne({name:name});
     }

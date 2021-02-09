@@ -2,14 +2,15 @@ const { validationResult } = require("express-validator");
 const ObjectId = require('mongodb').ObjectID;
 
 const Bucket = require("../models/bucket");
-
+const LIMIT_PER_PAGE = 10;
 
 //buckets
 exports.getBuckets = async (req,res,next)=>{
+    const page = req.query.page || 1;
     
     try{
         const query = {ownedBy:new ObjectId(req.userId)};
-        const buckets = await Bucket.getBuckets(query);
+        const buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,page);
         res.status(200).json({messge:'success',buckets:buckets});
     }catch(err){
         if(!err.statusCode){
