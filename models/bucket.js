@@ -30,7 +30,11 @@ class Bucket{
     }
 
     static updateById(id,values){
-        return getDb().collection('buckets').findOneAndUpdate({_id:new ObjectId(id)},{$set:values});
+        return getDb().collection('buckets').findOneAndUpdate({_id:new ObjectId(id)},{$set:values},{returnOriginal:false});
+    }
+
+    static deleteByQuery(query){
+        return getDb().collection('buckets').deleteOne(query);
     }
 }
 

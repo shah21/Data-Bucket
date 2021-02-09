@@ -6,10 +6,11 @@ const bucketController = require('../controllers/bucket');
 const Bucket = require('../models/bucket');
 const isAuth = require('../middlewares/is-auth');
 
-
+//get
 router.get('/',isAuth,bucketController.getBuckets);
 router.get('/:bucketId',isAuth,bucketController.getBucket);
 
+//create
 router.post('/create',isAuth,[
     body('name').trim().not().isEmpty().custom(async (value,{req})=>{
         const query = {name:value,ownedBy:new ObjectId(req.userId)}
@@ -20,9 +21,16 @@ router.post('/create',isAuth,[
     })
 ],bucketController.postCreateBucket);
 
-router.post('/add_data',isAuth,[
+router.post('/add-data',isAuth,[
     body('info').trim().not().isEmpty(),
 ],bucketController.postCreateData);
+
+//update
+router.put('/update-bucket',isAuth,bucketController.updateBucket);
+
+//delete
+router.delete('/delete-data',isAuth,bucketController.deleteData);
+router.delete('/delete-bucket/:bucketId',isAuth,bucketController.deleteBucket);
 
 
 module.exports = router;
