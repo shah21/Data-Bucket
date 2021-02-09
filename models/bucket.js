@@ -2,10 +2,11 @@ const getDb = require('../utils/database').getDb;
 const ObjectId = require('mongodb').ObjectID;
 
 class Bucket{
-    constructor(name,ownedBy,createdAt){
+    constructor(name,ownedBy,createdAt,data){
         this.name = name;
         this.ownedBy = ownedBy;
         this.createdAt = createdAt;
+        this.data = data;
     } 
 
     save(){
@@ -21,11 +22,15 @@ class Bucket{
     }
 
     static findById(id){
-        return getDb().collection('buckets').findOne({id:new ObjectId(id)});
+        return getDb().collection('buckets').findOne({_id:new ObjectId(id)});
     }
 
     static findByQuery(query){
         return getDb().collection('buckets').findOne(query);
+    }
+
+    static updateById(id,values){
+        return getDb().collection('buckets').findOneAndUpdate({_id:new ObjectId(id)},{$set:values});
     }
 }
 

@@ -52,7 +52,7 @@ exports.postCreateBucket = async (req,res,next)=>{
             throw error;    
         }
 
-        const newBucket = new Bucket(name,new ObjectId(req.userId),Date.now());
+        const newBucket = new Bucket(name,new ObjectId(req.userId),Date.now(),[]);
         const result = await newBucket.save();
         res.status(201).json({messge:'user created successfully',bucket:result.ops[0]});
     }catch(err){
@@ -68,9 +68,12 @@ exports.postCreateBucket = async (req,res,next)=>{
 
 
 //bucket data
-exports.postCreateBucket = async (req,res,next)=>{
-    const name = req.body.name;
+exports.postCreateData = async (req,res,next)=>{
+    const bucketId = req.body.bucketId;
+    const info = req.body.info;
+    const file = req.file;
     const errors = validationResult(req).array();
+
 
     try{
 
@@ -81,9 +84,21 @@ exports.postCreateBucket = async (req,res,next)=>{
             throw error;    
         }
 
-        const newBucket = new Bucket(name,new ObjectId(req.userId),Date.now());
-        const result = await newBucket.save();
-        res.status(201).json({messge:'user created successfully',bucket:result.ops[0]});
+        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const bucket = await Bucket.findByQuery(query);
+
+        if(!bucket){
+            const error = new Error('Bucket not found');
+            error.statusCode = 402;
+            error.data = errors;
+            throw error;    
+        }
+
+        const dataArray = bucket.data;
+        const newData = {_id:new ObjectId(Date.now()),data:info,file_path:null,addedAt:Date.now()};
+        const updateValues = {data:[...dataArray,newData]};
+        const updateBucket = await Bucket.updateById(bucketId,updateValues);
+        res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;

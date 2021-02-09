@@ -20,5 +20,9 @@ router.post('/create',isAuth,[
     })
 ],bucketController.postCreateBucket);
 
+router.post('/add_data',isAuth,[
+    body('info').trim().not().isEmpty(),
+],bucketController.postCreateData);
+
 
 module.exports = router;
