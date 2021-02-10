@@ -127,7 +127,7 @@ exports.getData = async (req,res,next)=>{
         const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
         const bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,page);
         
-        res.status(200).json({messge:'success',bucket:bucket});
+        res.status(200).json({messge:'success',bucket:bucket[0]});
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;

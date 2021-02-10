@@ -23,7 +23,13 @@ class Bucket{
 
     static getDataPerPage(query,limit,page){
         const skipDocs = (page-1)*limit;
-        return getDb().collection('buckets').find(query,{data:{$slice: [skipDocs,limit]}}).toArray();
+        return getDb().collection('buckets').aggregate([
+            {$match: query},
+            {$unwind:"$data"},
+            {$skip:skipDocs},
+            {$limit:limit},
+            {$group:{_id:"$_id",data: {"$push": "$data" }}}
+        ]).toArray();
     }
 
     static findByName(name){
