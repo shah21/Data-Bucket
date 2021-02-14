@@ -64,7 +64,7 @@ exports.postCreateBucket = async (req,res,next)=>{
 }
 
 exports.updateBucket = async (req,res,next)=>{
-    const bucketId = req.body.bucketId;
+    const bucketId = req.params.bucketId;
     const name = req.body.name;
     const errors = validationResult(req).array();
 
@@ -141,6 +141,7 @@ exports.postCreateData = async (req,res,next)=>{
     const bucketId = req.body.bucketId;
     const info = req.body.info;
     const file = req.file;
+    const deviceName = req.body.deviceName;
     const errors = validationResult(req).array();
 
 
@@ -164,7 +165,7 @@ exports.postCreateData = async (req,res,next)=>{
         }
 
         const dataArray = bucket.data;
-        const newData = {_id:new ObjectId(Date.now()),data:info,file_path:null,addedAt:Date.now()};
+        const newData = {_id:new ObjectId(Date.now()),data:info,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         const updateBucket = await Bucket.updateById(bucketId,updateValues);
         res.status(201).json({messge:'Successfully added',data:newData});

@@ -24,10 +24,11 @@ router.post('/create',isAuth,[
 
 router.post('/add-data',isAuth,[
     body('info').trim().not().isEmpty(),
+    body('deviceName').trim().not().isEmpty(),
 ],bucketController.postCreateData);
 
 //update
-router.put('/update-bucket',isAuth,bucketController.updateBucket);
+router.put('/update-bucket/:bucketId',isAuth,bucketController.updateBucket);
 
 //delete
 router.delete('/delete-data',isAuth,bucketController.deleteData);
