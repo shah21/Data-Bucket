@@ -1,67 +1,52 @@
-import React from 'react';
-import {Route,BrowserRouter as Router,Switch,Redirect} from 'react-router-dom'
+import React from "react";
+import {BrowserRouter as Router,Switch,Route,Redirect} from "react-router-dom";
 
-import Header from './components/Header/Header.js';
-import Home from "./components/Home/Home.js";
-import Signup from './Pages/Auth/Signup.js';
-import Login from './Pages/Auth/Login.js';
+import './App.css';
+import Login from "./Pages/Auth/Login/Login.js"
+import Signup from "./Pages/Auth/Signup/Signup.js"
+import Home from "./Pages/Home/Home.js"
+import useToken from "./Hooks/useToken.js";
 
 
-class App extends React.Component {
+function App() {
 
-    state = {
-      isAuth : false,
-      token:null,
-    }
+  const {token,setToken} = useToken();
 
-    componentDidMount(){
-      const token = localStorage.getItem('token');
-      const expiryDate = localStorage.getItem('expiryDate');
-      if(!expiryDate || token){
-        return;
-      }
-      if(new Date(expiryDate) <= new Date()){
-        return;
-      }
-      const userId = localStorage.getItem('userId');
-      this.setState({
-        isAuth:true,
-        token:token,
-        userId:userId,
-      });
-      
-    }
+  let routes = (
+    <Router>
+      <Switch>
+        <Route exact path="/login" render={()=>(
+          <Login setToken={setToken} />
+        )}/>
+        <Route exact path="/signup" render={Signup}/>
+        <Redirect to="/login" />
+      </Switch>
+    </Router>
+  );
+
+  //if user logged in
+  if(token){
+    routes = (
+      <Router>
+      <Switch>
+        <Route exact path="/" component={Home} />
+        <Redirect to="/" />
+      </Switch>
+    </Router>
+    )
+  }
 
   
-    render(){
-      let routes = (
-        <Switch>
-          <Route path="/" exact render={props=>{
-            <Login {...props} />
-          }}/>
-          <Route path="/signup" exact render={props=>{
-            <Signup {...props} />
-          }}/>
-          <Redirect to="/" />
-        </Switch>
-      )
-      
-      if(this.state.isAuth){
-        console.log(this.state.isAuth)
-        routes = (
-          <Switch>
-            <Route path="/" exact component={Home}/>
-            <Redirect to="/" />
-          </Switch>
-        )
-      }
 
-      return (
-          <Router> 
-            {routes}
-          </Router>
-        );
-    }
+  return (
+    <div className="app">
+      <Router>
+        <Switch>
+          {routes}
+        </Switch>
+      </Router>
+    </div>
+  );
 }
 
 export default App;

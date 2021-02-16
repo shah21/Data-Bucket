@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 
 const db = require('./utils/database');
 const authRouter = require('./routes/auth');
@@ -8,6 +9,7 @@ const bucketRouter = require('./routes/bucket');
 const app = new express();
 
 //middlewares
+app.use(cors());
 app.use(express.json());
 
 //add a general middleware for set cors free requests

@@ -15,7 +15,7 @@ exports.postLogin = async (req,res,next)=>{
         if (!user) {
           const error = new Error("Incorrect Email");
           error.statusCode = 422;
-          error.data = errors;
+          error.data =  error.message;
           throw error;
         }
 
