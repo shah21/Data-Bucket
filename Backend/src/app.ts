@@ -1,12 +1,14 @@
-const express = require('express');
-const cors = require('cors');
+import express,{Request,Response,NextFunction} from "express";
+import cors from "cors";
 
-const db = require('./utils/database');
-const authRouter = require('./routes/auth');
-const bucketRouter = require('./routes/bucket');
+import {connectDb} from "./utils/database";
+import HttpException, {  } from "./utils/HttpException";
+import  authRouter from "./routes/auth";
+import  bucketRouter from "./routes/bucket";
 
 
-const app = new express();
+const app = express();
+
 
 //middlewares
 app.use(cors());
@@ -24,14 +26,15 @@ app.use((req,res,next)=>{
 app.use('/auth',authRouter);
 app.use('/bucket',bucketRouter);
 
-app.use((error,req,res,next)=>{
+app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
     const status = error.statusCode || 500;
     const message = error.message;
     const data = error.data;
     res.status(status).json({message:message,data:data});
 }); 
 
-db.connectDb(()=>{
+
+connectDb(()=>{
     console.log('Databse connection successfull...');
     app.listen(8080);
 })

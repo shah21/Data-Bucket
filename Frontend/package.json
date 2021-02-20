@@ -37,5 +37,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "resolutions": {
+    "**/react": "16.7.0-alpha.2",
+    "**/react-dom": "16.7.0-alpha.2"
   }
 }

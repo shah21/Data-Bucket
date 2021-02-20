@@ -5,11 +5,17 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": "nodemon ./dist/app.js"
   },
   "author": "muhsin shah",
   "license": "ISC",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/cors": "^2.8.10",
+    "@types/express": "^4.17.11",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongodb": "^3.6.8",
+    "@types/node": "^14.14.30",
     "nodemon": "^2.0.7"
   },
   "dependencies": {

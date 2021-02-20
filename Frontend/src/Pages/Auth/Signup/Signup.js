@@ -12,6 +12,7 @@ import Input from "../../../components/Input/Input.js";
 import Button from "../../../components/Button/Button.js";
 
 
+
 const formReducer = (state, event) => {
     return {
       ...state,
@@ -35,65 +36,65 @@ const loginUser = credentails =>{
 
 export default function Signup({setToken}) {
     
-    // const [formData,setFormData] = useReducer(formReducer,{});
+    const [formData,setFormData] = useReducer(formReducer,{});
     
     const [fieldArrays,setField] = useState({})
     const [errorArray,setError] = useState({})
  
 
-    // const loginHandler = async (event) =>{
-    //     event.preventDefault();
-    //     const response = await loginUser(formData);
-    //     setToken(response.token);
-    // }
+    const loginHandler = async (event) =>{
+        event.preventDefault();
+        const response = await loginUser(formData);
+        setToken(response.token);
+    }
 
-    // const handleChange = event =>{
-    //     setFormData({
-    //         [event.target.name]:event.target.value,
-    //     });
-    // }
+    const handleChange = event =>{
+        setFormData({
+            [event.target.name]:event.target.value,
+        });
+    }
 
 
-  //   const handleValidation = () =>{
-  //       let fields = fieldArrays;
-  //       let errors = {};
-  //       let formIsValid = true;
+    const handleValidation = () =>{
+        let fields = fieldArrays;
+        let errors = {};
+        let formIsValid = true;
 
     
-  //       //Email
-  //       if(!fields["email"]){
-  //          formIsValid = false;
-  //          errors["email"] = "Cannot be empty";
-  //       }
+        //Email
+        if(!fields["email"]){
+           formIsValid = false;
+           errors["email"] = "Cannot be empty";
+        }
   
-  //       if(typeof fields["email"] !== "undefined"){
-  //          let lastAtPos = fields["email"].lastIndexOf('@');
-  //          let lastDotPos = fields["email"].lastIndexOf('.');
+        if(typeof fields["email"] !== "undefined"){
+           let lastAtPos = fields["email"].lastIndexOf('@');
+           let lastDotPos = fields["email"].lastIndexOf('.');
 
-  //          if (!(lastAtPos < lastDotPos && lastAtPos > 0 && fields["email"].indexOf('@@') == -1 && lastDotPos > 2 && (fields["email"].length - lastDotPos) > 2)) {
-  //             formIsValid = false;
-  //             errors["email"] = "Email is not valid";
-  //           }
-  //      }  
+           if (!(lastAtPos < lastDotPos && lastAtPos > 0 && fields["email"].indexOf('@@') == -1 && lastDotPos > 2 && (fields["email"].length - lastDotPos) > 2)) {
+              formIsValid = false;
+              errors["email"] = "Email is not valid";
+            }
+       }  
 
-  //      if (!fields["password"]) {
-  //        formIsValid = false;
-  //        errors["password"] = "Cannot be empty";
-  //      }
+       if (!fields["password"]) {
+         formIsValid = false;
+         errors["password"] = "Cannot be empty";
+       }
 
-  //      if (fields["password"].length >= 6) {
-  //        formIsValid = false;
-  //        errors["password"] = "Password must have atleast 6 characters";
-  //      }
+       if (fields["password"].length >= 6) {
+         formIsValid = false;
+         errors["password"] = "Password must have atleast 6 characters";
+       }
 
-  //      if (fields["password"] !== fields["confirm_password"]) {
-  //       formIsValid = false;
-  //       errors["password"] = "Passwords must be same";
-  //     }
+       if (fields["password"] !== fields["confirm_password"]) {
+        formIsValid = false;
+        errors["password"] = "Passwords must be same";
+      }
 
-  //      this.setState({errors: errors});
-  //      return formIsValid;
-  //  }
+       this.setState({errors: errors});
+       return formIsValid;
+   }
 
   
 

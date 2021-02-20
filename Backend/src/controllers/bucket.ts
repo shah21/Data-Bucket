@@ -1,15 +1,20 @@
-const { validationResult } = require("express-validator");
-const ObjectId = require('mongodb').ObjectID;
+import { validationResult } from "express-validator";
+import {Request,Response,NextFunction} from "express";
+import { ObjectID } from "mongodb";
+import HttpException from "../utils/HttpException";
+
 
 const Bucket = require("../models/bucket");
 const LIMIT_PER_PAGE = 1;
 
+type UserId = {userId:string};
+
 //buckets
-exports.getBuckets = async (req,res,next)=>{
-    const page = req.query.page || 1;
+export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
+    const page = req.query.page || 1; 
     
     try{
-        const query = {ownedBy:new ObjectId(req.userId)};
+        const query = {ownedBy:new ObjectID(req.userId)};
         const buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,page);
         res.status(200).json({messge:'success',buckets:buckets});
     }catch(err){
@@ -21,11 +26,11 @@ exports.getBuckets = async (req,res,next)=>{
 
 }
 
-exports.getBucket = async (req,res,next)=>{
+exports.getBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     
     try{
-        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const bucket = await Bucket.findByQuery(query);
         res.status(200).json({messge:'success',bucket:bucket});
     }catch(err){
@@ -38,20 +43,20 @@ exports.getBucket = async (req,res,next)=>{
 }
 
 
-exports.postCreateBucket = async (req,res,next)=>{
+exports.postCreateBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const name = req.body.name;
     const errors = validationResult(req).array();
 
     try{
 
         if(errors.length > 0){
-            const error = new Error('Invalid data');
+            const error = new HttpException('Invalid data');
             error.statusCode = 422;
             error.data = errors;
             throw error;    
         }
 
-        const newBucket = new Bucket(name,new ObjectId(req.userId),Date.now(),[]);
+        const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),[]);
         const result = await newBucket.save();
         res.status(201).json({messge:'bucket created',bucket:result.ops[0]});
     }catch(err){
@@ -63,7 +68,7 @@ exports.postCreateBucket = async (req,res,next)=>{
 
 }
 
-exports.updateBucket = async (req,res,next)=>{
+exports.updateBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const name = req.body.name;
     const errors = validationResult(req).array();
@@ -71,7 +76,7 @@ exports.updateBucket = async (req,res,next)=>{
     try{
 
         if(errors.length > 0){
-            const error = new Error('Invalid data');
+            const error = new HttpException('Invalid data');
             error.statusCode = 422;
             error.data = errors;
             throw error;    
@@ -89,18 +94,17 @@ exports.updateBucket = async (req,res,next)=>{
 
 }
 
-exports.deleteBucket = async (req,res,next)=>{
+exports.deleteBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     
     try{
         
-        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const bucket = await Bucket.deleteByQuery(query);
 
         if(!bucket){
-            const error = new Error('Invalid data');
+            const error = new HttpException('Invalid data');
             error.statusCode = 422;
-            error.data = errors;
             throw error;    
         }
 
@@ -119,12 +123,12 @@ exports.deleteBucket = async (req,res,next)=>{
 
 
 //bucket data
-exports.getData = async (req,res,next)=>{
+exports.getData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const page = req.query.page || 1;
     
     try{
-        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,page);
         
         res.status(200).json({messge:'success',bucket:bucket[0]});
@@ -137,7 +141,7 @@ exports.getData = async (req,res,next)=>{
 
 }
 
-exports.postCreateData = async (req,res,next)=>{
+exports.postCreateData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.body.bucketId;
     const info = req.body.info;
     const file = req.file;
@@ -148,24 +152,24 @@ exports.postCreateData = async (req,res,next)=>{
     try{
 
         if(errors.length > 0){
-            const error = new Error('Invalid data');
+            const error = new HttpException('Invalid data');
             error.statusCode = 422;
             error.data = errors;
             throw error;    
         }
 
-        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const bucket = await Bucket.findByQuery(query);
 
         if(!bucket){
-            const error = new Error('Bucket not found');
+            const error = new HttpException('Bucket not found');
             error.statusCode = 402;
             error.data = errors;
             throw error;    
         }
 
         const dataArray = bucket.data;
-        const newData = {_id:new ObjectId(Date.now()),data:info,file_path:null,deviceName,addedAt:Date.now()};
+        const newData = {_id:new ObjectID(Date.now()),data:info,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         const updateBucket = await Bucket.updateById(bucketId,updateValues);
         res.status(201).json({messge:'Successfully added',data:newData});
@@ -179,23 +183,22 @@ exports.postCreateData = async (req,res,next)=>{
 }
 
 
-exports.deleteData = async (req,res,next)=>{
-    const dataId = req.query.dataId;
+exports.deleteData = async (req:Request,res:Response,next:NextFunction)=>{
+    const dataId = req.query.dataId as string;
     const bucketId = req.query.bucketId;
     
     try{
         
-        const query = {ownedBy:new ObjectId(req.userId),_id:new ObjectId(bucketId)};
+        const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId as string)};
         const bucket = await Bucket.findByQuery(query);
 
         if(!bucket){
-            const error = new Error('Bucket not found');
+            const error = new HttpException('Bucket not found');
             error.statusCode = 402;
-            error.data = errors;
             throw error;    
         }
 
-        const dataArray = bucket.data.filter(x=>x._id.toString()!==dataId.toString());
+        const dataArray = bucket.data.filter((x: { _id: { toString: () => string; }; })=>x._id.toString()!==dataId.toString());
         const updateValues = {data:dataArray};
         const updateBucket = await Bucket.updateById(bucketId,updateValues);
         res.status(200).json({messge:'deleted successfully'});

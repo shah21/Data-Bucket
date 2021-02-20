@@ -1,27 +1,29 @@
-const getDb = require('../utils/database').getDb;
-const ObjectId = require('mongodb').ObjectID;
+import  {getDb} from '../utils/database';
+import {ObjectID} from'mongodb';
 
 class Bucket{
-    constructor(name,ownedBy,createdAt,data){
-        this.name = name;
-        this.ownedBy = ownedBy;
-        this.createdAt = createdAt;
-        this.data = data;
-    } 
+
+
+    constructor(
+        private name:string,
+        private ownedBy:ObjectID,
+        private createdAt:Date,
+        private data:string
+        ){} 
 
     save(){
         return getDb().collection('buckets').insertOne(this);
     }
 
-    static getBuckets(query){
+    static getBuckets(query:object){
         return getDb().collection('buckets').find(query).toArray();
     }
 
-    static getBucketsWithPagination(query,limit,page){
+    static getBucketsWithPagination(query:object,limit:number,page:number){
         return getDb().collection('buckets').find(query).skip((page-1)*limit).limit(limit).toArray();
     }
 
-    static getDataPerPage(query,limit,page){
+    static getDataPerPage(query:object,limit:number,page:number){
         const skipDocs = (page-1)*limit;
         return getDb().collection('buckets').aggregate([
             {$match: query},
@@ -32,23 +34,23 @@ class Bucket{
         ]).toArray();
     }
 
-    static findByName(name){
+    static findByName(name:string){
         return getDb().collection('buckets').findOne({name:name});
     }
 
-    static findById(id){
-        return getDb().collection('buckets').findOne({_id:new ObjectId(id)});
+    static findById(id:string){
+        return getDb().collection('buckets').findOne({_id:new ObjectID(id)});
     }
 
-    static findByQuery(query){
+    static findByQuery(query:object){
         return getDb().collection('buckets').findOne(query);
     }
 
-    static updateById(id,values){
-        return getDb().collection('buckets').findOneAndUpdate({_id:new ObjectId(id)},{$set:values},{returnOriginal:false});
+    static updateById(id:string,values:object){
+        return getDb().collection('buckets').findOneAndUpdate({_id:new ObjectID(id)},{$set:values},{returnOriginal:false});
     }
 
-    static deleteByQuery(query){
+    static deleteByQuery(query:object){
         return getDb().collection('buckets').deleteOne(query);
     }
 }

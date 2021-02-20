@@ -1,10 +1,12 @@
-const router = require('express').Router();
-const { body } = require('express-validator');
-const ObjectId = require('mongodb').ObjectID;
+import { Router } from "express";
+import { body } from "express-validator";
+import { ObjectId } from "mongodb";
 
 const bucketController = require('../controllers/bucket');
 const Bucket = require('../models/bucket');
 const isAuth = require('../middlewares/is-auth');
+
+const router = Router();
 
 //get
 router.get('/',isAuth,bucketController.getBuckets);
@@ -35,4 +37,4 @@ router.delete('/delete-data',isAuth,bucketController.deleteData);
 router.delete('/delete-bucket/:bucketId',isAuth,bucketController.deleteBucket);
 
 
-module.exports = router;
+export default router;

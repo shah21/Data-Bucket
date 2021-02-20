@@ -1,27 +1,30 @@
-const { validationResult } = require("express-validator");
-const bcrypt = require('bcryptjs');
+import {Request,Response,NextFunction} from "express";
+import { validationResult } from "express-validator";
+import bcryptjs from "bcryptjs";
+import HttpException from "../utils/HttpException";
 const jwt = require('jsonwebtoken');
 
 const User = require("../models/user");
 
 
 
-exports.postLogin = async (req,res,next)=>{
+const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
     const email = req.body.email;
     const password = req.body.password;
+    const errors = validationResult(req).array();
 
     try{
         const user = await User.findByEmail(email);
         if (!user) {
-          const error = new Error("Incorrect Email");
+          const error = new HttpException("Incorrect Email");
           error.statusCode = 422;
-          error.data =  error.message;
+          error.data =  errors;
           throw error;
         }
 
-        const isPasswordsEqual = await bcrypt.compare(password,user.password);
+        const isPasswordsEqual = await bcryptjs.compare(password,user.password);
         if(!isPasswordsEqual){
-            const error = new Error('Incorrect Password');
+            const error = new HttpException('Incorrect Password');
             error.statusCode = 422;
             error.data = errors;
             throw error;    
@@ -43,7 +46,7 @@ exports.postLogin = async (req,res,next)=>{
 
 }
 
-exports.postSignup = async (req,res,next)=>{
+const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 
 
     const email = req.body.email;
@@ -53,13 +56,14 @@ exports.postSignup = async (req,res,next)=>{
     try{
 
         if(errors.length > 0){
-            const error = new Error('Invalid data');
+            const error = new HttpException("Invalid data");
             error.statusCode = 422;
             error.data = errors;
             throw error;    
         }
 
-        const hashedPass = await bcrypt.hash(password,12);
+        
+        const hashedPass = await bcryptjs.hash(password,12);
         const newUser = new User(email,hashedPass,Date.now());
         const result = await newUser.save();
         res.status(201).json({messge:'user created successfully'});
@@ -71,6 +75,8 @@ exports.postSignup = async (req,res,next)=>{
     }
 
 }
+
+export {postLogin,postSignup};
 
 
 
