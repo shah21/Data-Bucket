@@ -39,59 +39,66 @@ class Signup extends React.Component {
   }
 
   handleChange(event){
-    this.setState({
-      formData:{
-        ...this.state.formData,
-        [event.target.name]:event.target.value,
-    }});
+    const fields = this.state.fields;
+    console.log(typeof fields);
+    // // const contains = fields.includes(event.target.name);
+    // this.setState({
+    //   fields:!contains && [...fields,event.target.name],
+    //   formData:{
+    //     ...this.state.formData,
+    //     [event.target.name]:event.target.value,
+    // }});
   }
 
   signupHandler(e){
     e.preventDefault();
-    registerUser(this.state.formData,()=>{
-      this.props.history.push('/login');
-    });
+    if(this.handleValidation()){
+      registerUser(this.state.formData,()=>{
+        this.props.history.push('/login');
+      });
+    }
   }
 
 
   handleValidation(){
-    let fields = this.fields;
+    let fields = this.state.fields;
     let errors = {};
     let formIsValid = true;
 
+    console.log(fields);
 
-    //Email
-    if(!fields["email"]){
-       formIsValid = false;
-       errors["email"] = "Cannot be empty";
-    }
+  //   //Email
+  //   if(!fields["email"]){
+  //      formIsValid = false;
+  //      errors["email"] = "Cannot be empty";
+  //   }
 
-    if(typeof fields["email"] !== "undefined"){
-       let lastAtPos = fields["email"].lastIndexOf('@');
-       let lastDotPos = fields["email"].lastIndexOf('.');
+  //   if(typeof fields["email"] !== "undefined"){
+  //      let lastAtPos = fields["email"].lastIndexOf('@');
+  //      let lastDotPos = fields["email"].lastIndexOf('.');
 
-       if (!(lastAtPos < lastDotPos && lastAtPos > 0 && fields["email"].indexOf('@@') == -1 && lastDotPos > 2 && (fields["email"].length - lastDotPos) > 2)) {
-          formIsValid = false;
-          errors["email"] = "Email is not valid";
-        }
-   }  
+  //      if (!(lastAtPos < lastDotPos && lastAtPos > 0 && fields["email"].indexOf('@@') == -1 && lastDotPos > 2 && (fields["email"].length - lastDotPos) > 2)) {
+  //         formIsValid = false;
+  //         errors["email"] = "Email is not valid";
+  //       }
+  //  }  
 
-   if (!fields["password"]) {
-     formIsValid = false;
-     errors["password"] = "Cannot be empty";
-   }
+  //  if (!fields["password"]) {
+  //    formIsValid = false;
+  //    errors["password"] = "Cannot be empty";
+  //  }
 
-   if (fields["password"].length >= 6) {
-     formIsValid = false;
-     errors["password"] = "Password must have atleast 6 characters";
-   }
+  //  if (fields["password"].length >= 6) {
+  //    formIsValid = false;
+  //    errors["password"] = "Password must have atleast 6 characters";
+  //  }
 
-   if (fields["password"] !== fields["confirm_password"]) {
-    formIsValid = false;
-    errors["password"] = "Passwords must be same";
-  }
+  //  if (fields["password"] !== fields["confirm_password"]) {
+  //   formIsValid = false;
+  //   errors["password"] = "Passwords must be same";
+  // }
 
-   this.setState({errors: errors});
+  //  this.setState({errors: errors});
    return formIsValid;
 }
 
