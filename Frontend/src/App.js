@@ -18,7 +18,9 @@ function App() {
         <Route exact path="/login" render={()=>(
           <Login setToken={setToken} />
         )}/>
-        <Route exact path="/signup" render={Signup}/>
+        <Route exact path="/signup" render={()=>(
+          <Signup/>
+        )}/>
         <Redirect to="/login" />
       </Switch>
     </Router>
