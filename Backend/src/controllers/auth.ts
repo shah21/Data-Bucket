@@ -35,9 +35,8 @@ const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
             userId:user._id,
         },process.env.JWT_SECRET_KEY,{expiresIn:'1hr'});
 
-        res.status(201).json({messge:'login successfull.',token:token,userId:user._id});
+        res.status(200).json({messge:'login successfull.',token:token,userId:user._id});
     }catch(err){
-        console.log(err);
         if(!err.statusCode){
             err.statusCode = 500;
         }

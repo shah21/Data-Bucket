@@ -2,10 +2,12 @@ import React from "react";
 import {BrowserRouter as Router,Switch,Route,Redirect} from "react-router-dom";
 
 import './App.css';
-import Login from "./Pages/Auth/Login/Login.jsx"
-import Signup from "./Pages/Auth/Signup/Signup.jsx"
-import Home from "./Pages/Home/Home.jsx"
-import useToken from "./Hooks/useToken.js";
+import Login from "./Pages/Auth/Login/Login"
+import Signup from "./Pages/Auth/Signup/Signup"
+import Home from "./Pages/Home/Home"
+import useToken from "./Hooks/useToken";
+
+
 
 
 function App() {

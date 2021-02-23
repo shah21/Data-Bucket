@@ -1,16 +1,16 @@
 import React from 'react'
 
 
-function Input(props) {
+function Input(props:any) {
 
-    const textInput = React.createRef();
+    const textInput = React.createRef<HTMLInputElement>();
 
-    const focusFunc = (e)=>{
+    const focusFunc = (e:any)=>{
         let parent = e.target.parentNode.parentNode;
         parent.classList.add('focus');
     }
 
-    const focusBlur = (e)=>{
+    const focusBlur = (e:any)=>{
         let parent = e.target.parentNode.parentNode;
         if(e.target.value === ""){
             parent.classList.remove('focus');
@@ -20,6 +20,7 @@ function Input(props) {
     
 
     return (
+      <div className="inputContainer">
       <div className={`input-div ${props.class}`}>
         <div className="i">{props.component}</div>
         <div>
@@ -39,7 +40,11 @@ function Input(props) {
               focusBlur(e);
             }}
           />
+
+         
         </div>
+      </div>
+      <p className="error-text">{props.error}</p>
       </div>
     );
 }

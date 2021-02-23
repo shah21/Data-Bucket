@@ -68,6 +68,7 @@
     width: 360px;
 }
 
+
 .login_page form h2{
 	margin: 15px 0;
 	color: #333;
@@ -80,7 +81,7 @@
     position: relative;
     display: grid;
     grid-template-columns: 7% 93%;
-    margin: 25px 0;
+    margin: 25px 0 5px 0;
     padding: 5px 0;
     border-bottom: 2px solid #d9d9d9;
 }
@@ -203,7 +204,14 @@
     background-position: right;
 }
 
-
+.login_page .error-text{
+    color: red;
+    font-weight: bold;
+    display: block;
+    font-size: 12px;
+    font-family: 'Poppins',sans-serif;
+    text-align: start;
+}
 
 @media screen and (max-width: 1050px){
 	
