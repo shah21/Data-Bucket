@@ -14,7 +14,7 @@ import Input from "../../../components/Input/Input";
 import Button from "../../../components/Button/Button";
 import CustomizedSnackbar from "../../../components/CustomizedSnackbar/CustomizedSnackbar";
 
-
+//register user
 const registerUser = (credentails:object,callback:(err:any,response:object)=>void)=>{
   return fetch('http://localhost:8080/auth/signup',{
     method:'POST',
@@ -30,6 +30,7 @@ const registerUser = (credentails:object,callback:(err:any,response:object)=>voi
     callback(err,null!);
   });
 };
+
 
 const addMessageToSession = (message:string,type:string) =>{
     const obj = {message:message,type:type};
@@ -48,6 +49,7 @@ interface State  {
   fields:[string],
   responseError:string,
 }
+
 
 class Signup extends React.Component<PropsInterface,State> {
 
@@ -78,9 +80,7 @@ class Signup extends React.Component<PropsInterface,State> {
   signupHandler(e:Event){
     e.preventDefault();
     if(this.handleValidation()){
-      this.setState({
-        errors:{email:'',password:'',confirm_password:''}
-      })
+      
       registerUser(this.state.formData,(err:any,response:any)=>{
         if (err || response.errors) {
           this.setState({
@@ -98,7 +98,7 @@ class Signup extends React.Component<PropsInterface,State> {
 
   handleValidation(){
     let formData = this.state.formData;
-    let errors = this.state.errors;
+    let errors = { email: '', password: '', confirm_password: '' };
     let formIsValid = true;
 
 
@@ -113,7 +113,7 @@ class Signup extends React.Component<PropsInterface,State> {
        let lastAtPos = formData.email.lastIndexOf('@');
        let lastDotPos = formData.email.lastIndexOf('.');
 
-       if (!(lastAtPos < lastDotPos && lastAtPos > 0 && formData.email.indexOf('@@') == -1 && lastDotPos > 2 && (formData.email.length - lastDotPos) > 2)) {
+       if (!(lastAtPos < lastDotPos && lastAtPos > 0 && formData.email.indexOf('@@') === -1 && lastDotPos > 2 && (formData.email.length - lastDotPos) > 2)) {
           formIsValid = false;
           errors["email"] = "Email is not valid";
         }
@@ -140,7 +140,6 @@ class Signup extends React.Component<PropsInterface,State> {
       }
     }
 
-   
 
    this.setState({errors: errors});
    return formIsValid;

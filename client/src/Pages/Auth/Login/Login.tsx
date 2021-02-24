@@ -1,4 +1,4 @@
-import React,{useReducer,useState} from 'react';
+import React,{useReducer,useState,useEffect} from 'react';
 import PersonIcon from "@material-ui/icons/Person";
 import LockIcon from "@material-ui/icons/Lock";
 import PropTypes from 'prop-types';
@@ -19,15 +19,9 @@ const formReducer = (state:object, event: any) => {
     }
 }
 
-const formInitializer = {
-  email:'',
-  password:''
-}
 
 const getMessageFromSession = () =>{
-  const message =  JSON.parse(sessionStorage.getItem('message')!);
-  console.log(message.type)
-  // sessionStorage.removeItem('message');
+  const message = JSON.parse(sessionStorage.getItem('message')!);
   return message;
 }
 
@@ -50,20 +44,27 @@ const loginUser = (credentails:object) =>{
     });
 }
 
-interface ResponseError{
-  responseError: string;
-}
-
 function Login({setToken}:any) {
     
   const [formData, setFormData] = useReducer(formReducer, {});
-  const [errors, setErrors] = useState(formInitializer);
+  const [errors, setErrors] = useState({
+    email:'',
+    password:''
+  });
   const [responseError, setResponseError] = useState<string>(undefined!);
-    
+  const [sessionMessage, setSessionMessage] = useState<{message:string,type:string}>(null!);
+  
+  useEffect(() => {
+    setSessionMessage(getMessageFromSession());
+    sessionStorage.removeItem('message');
+  },[]);
 
   const handleValidation = () => {
     let formIsValid = true;
-    const newErrors = formInitializer;
+    const newErrors = {
+      email:'',
+      password:''
+    };
 
     //Email
     if (!formData.email) {
@@ -101,8 +102,9 @@ function Login({setToken}:any) {
     const loginHandler = async (event: { preventDefault: () => void; }) =>{
         event.preventDefault();
         if(handleValidation()){
-          setErrors({
-            ...formInitializer
+          setErrors({  
+            email:'',
+            password:''
           });
           const response:any = await loginUser(formData);
           if(response.status !== 200){
@@ -174,8 +176,7 @@ function Login({setToken}:any) {
         </div>
         <Button class="btn-signup" link="/signup" label="Signup" />
 
-        {getMessageFromSession()}
-        {/* {responseError || getMessageFromSession() && (<CustomizedSnackbar openState={true} message={responseError ? responseError : getMessageFromSession().message} mode={responseError ? "error":getMessageFromSession().type}/>)} */}
+        {(responseError || sessionMessage) && (<CustomizedSnackbar openState={true} message={responseError ? responseError : sessionMessage.message} mode={responseError ? "error" : sessionMessage.type} />)}
 
       </div>
     );
