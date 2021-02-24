@@ -26,7 +26,7 @@ export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-exports.getBucket = async (req:Request,res:Response,next:NextFunction)=>{
+export const getBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     
     try{
@@ -43,7 +43,7 @@ exports.getBucket = async (req:Request,res:Response,next:NextFunction)=>{
 }
 
 
-exports.postCreateBucket = async (req:Request,res:Response,next:NextFunction)=>{
+export const postCreateBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const name = req.body.name;
     const errors = validationResult(req).array();
 
@@ -68,7 +68,7 @@ exports.postCreateBucket = async (req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-exports.updateBucket = async (req:Request,res:Response,next:NextFunction)=>{
+export const updateBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const name = req.body.name;
     const errors = validationResult(req).array();
@@ -94,7 +94,7 @@ exports.updateBucket = async (req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-exports.deleteBucket = async (req:Request,res:Response,next:NextFunction)=>{
+export const deleteBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     
     try{
@@ -123,7 +123,7 @@ exports.deleteBucket = async (req:Request,res:Response,next:NextFunction)=>{
 
 
 //bucket data
-exports.getData = async (req:Request,res:Response,next:NextFunction)=>{
+export const getData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const page = req.query.page || 1;
     
@@ -141,7 +141,7 @@ exports.getData = async (req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-exports.postCreateData = async (req:Request,res:Response,next:NextFunction)=>{
+export const postCreateData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.body.bucketId;
     const info = req.body.info;
     const file = req.file;
@@ -183,7 +183,7 @@ exports.postCreateData = async (req:Request,res:Response,next:NextFunction)=>{
 }
 
 
-exports.deleteData = async (req:Request,res:Response,next:NextFunction)=>{
+export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
     const dataId = req.query.dataId as string;
     const bucketId = req.query.bucketId;
     

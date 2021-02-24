@@ -10,7 +10,7 @@ interface MyToken {
   }
 
 
-module.exports = (req:Request,res:Response,next:NextFunction)=>{
+export default (req:Request,res:Response,next:NextFunction)=>{
     const headers = req.get('Authorization');
     if(!headers){
         console.log('No header');

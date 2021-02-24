@@ -2,16 +2,25 @@ import { Router } from "express";
 import { body } from "express-validator";
 import { ObjectId } from "mongodb";
 
-const bucketController = require('../controllers/bucket');
-const Bucket = require('../models/bucket');
-const isAuth = require('../middlewares/is-auth');
+import {
+  getBucket,
+  getBuckets,
+  getData,
+  postCreateBucket,
+  postCreateData,
+  updateBucket,
+  deleteBucket,
+  deleteData,
+} from "../controllers/bucket";
+import Bucket from '../models/bucket';
+import isAuth from '../middlewares/is-auth';
 
 const router = Router();
 
 //get
-router.get('/',isAuth,bucketController.getBuckets);
-router.get('/:bucketId',isAuth,bucketController.getBucket);
-router.get('/:bucketId/data',isAuth,bucketController.getData);
+router.get('/',isAuth,getBuckets);
+router.get('/:bucketId',isAuth,getBucket);
+router.get('/:bucketId/data',isAuth,getData);
 
 //create
 router.post('/create',isAuth,[
@@ -22,19 +31,19 @@ router.post('/create',isAuth,[
             return Promise.reject("Bucket name not available");
         }
     })
-],bucketController.postCreateBucket);
+],postCreateBucket);
 
 router.post('/add-data',isAuth,[
     body('info').trim().not().isEmpty(),
     body('deviceName').trim().not().isEmpty(),
-],bucketController.postCreateData);
+],postCreateData);
 
 //update
-router.put('/update-bucket/:bucketId',isAuth,bucketController.updateBucket);
+router.put('/update-bucket/:bucketId',isAuth,updateBucket);
 
 //delete
-router.delete('/delete-data',isAuth,bucketController.deleteData);
-router.delete('/delete-bucket/:bucketId',isAuth,bucketController.deleteBucket);
+router.delete('/delete-data',isAuth,deleteData);
+router.delete('/delete-bucket/:bucketId',isAuth,deleteBucket);
 
 
 export default router;

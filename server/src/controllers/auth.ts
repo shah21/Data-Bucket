@@ -2,13 +2,38 @@ import {Request,Response,NextFunction} from "express";
 import { validationResult } from "express-validator";
 import bcryptjs from "bcryptjs";
 import HttpException from "../utils/HttpException";
-const jwt = require('jsonwebtoken');
+import jwt from  'jsonwebtoken';
 
-const User = require("../models/user");
+import User from "../models/user";
 
 
+export const getUser = async (req:Request,res:Response,next:NextFunction)=>{
+    const userId:string = req.userId!;
+    try{
+        const user = await User.findById(userId);
+        if (!user) {
+          const error = new HttpException("User not found");
+          error.statusCode = 422;
+          throw error;
+        }
 
-const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
+        const userObj = {
+            _id:user._id,
+            email:user.email,
+            signedAt:user.signedAt,
+        }
+
+        res.status(200).json({messge:'success',user:userObj});
+    }catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+
+export const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
     const email = req.body.email;
     const password = req.body.password;
     const errors = validationResult(req).array();
@@ -33,7 +58,7 @@ const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
         const token = jwt.sign({
             email:user.email,
             userId:user._id,
-        },process.env.JWT_SECRET_KEY,{expiresIn:'1hr'});
+        },process.env.JWT_SECRET_KEY!,{expiresIn:'1hr'});
 
         res.status(200).json({messge:'login successfull.',token:token,userId:user._id});
     }catch(err){
@@ -45,7 +70,7 @@ const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
 
 }
 
-const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
+export const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 
 
     const email = req.body.email;
@@ -74,8 +99,6 @@ const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
     }
 
 }
-
-export {postLogin,postSignup};
 
 
 

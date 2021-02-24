@@ -4,8 +4,8 @@ import {ObjectID} from'mongodb';
 class User{
     email:string;
     password:string;
-    signedAt:Date;
-    constructor(email:string,password:string,signedAt:Date){
+    signedAt:number;
+    constructor(email:string,password:string,signedAt:number){
         this.email = email;
         this.password = password;
         this.signedAt = signedAt;
@@ -20,8 +20,8 @@ class User{
     }
 
     static findById(id:string){
-        return getDb().collection('users').findOne({id:new ObjectID(id)});
+        return getDb().collection('users').findOne({_id:new ObjectID(id)});
     }
 }
 
-module.exports = User;
+export default User;

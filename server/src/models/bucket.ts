@@ -55,4 +55,4 @@ class Bucket{
     }
 }
 
-module.exports = Bucket;
+export default Bucket;
