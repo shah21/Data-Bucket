@@ -1,0 +1,131 @@
+.homePage{
+    font-family: 'Poppins',sans-serif;
+}
+
+.homePage{
+    display: grid;
+    grid-template-rows: 60px 100%;
+    grid-template-columns: 300px 1fr;
+    grid-template-areas: 
+        "box1 box1"
+        "box2 box3";
+}
+
+.homePage .header{
+    background-image: linear-gradient(to right,#32be8f,#38d39f,#32be8f);
+    grid-area: box1;
+    display: inline-block;
+}
+
+
+.homePage .header .title{
+    float: left;
+}
+
+.homePage .header h4 {
+    font-size: 1.8rem;
+    padding:10px;
+    color: white;
+}
+
+.homePage .header .linkSection{
+    float: right;
+    line-height: 60px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.homePage .user{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.homePage .user span{
+    margin-left: 5px;
+    font-size: 15px;
+}
+
+.homePage .user .icon-person{
+    color: #d9d9d9;    
+    font-size: 16px;
+}
+
+
+.homePage .btn-logout{
+    width: 100px;
+    height: 35px;
+    color: #fff;
+    vertical-align: middle;
+}
+
+
+.homePage .bucketBar {
+    grid-area: box2;
+    border-right:1px solid #E5E5E6;
+    background-color: #F6F6F6;
+}
+
+.homePage .bucketBar .bucketTitle{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.homePage .bucketTitle .icon-add{
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+.homePage .bucketBar h5{
+    font-size: 1.5rem;
+    margin: 10px;
+}
+
+.homePage .searchBox{
+    width: 90%;
+    margin:0 10px 10px;
+    border-radius: 10px;
+}
+
+.sb-example-1 .search {
+    margin: 0 10px 10px;
+    width: 90%;
+    position: relative;
+    display: flex;
+  }
+  .sb-example-1 .searchTerm {
+    width: 100%;
+    border: 3px solid #E5E5E6;
+    border-right: none;
+    padding: 5px;
+    font-size: 1rem;
+    border-radius: 15px 0 0 15px;
+    outline: none;
+    color: #9DBFAF;
+  }
+  .sb-example-1 .searchTerm:focus{
+    color: #00B4CC;
+  }
+  .sb-example-1 .searchButton {
+    width: 40px;
+    height: 50px;
+    border: 1px solid #32be8f;
+    background: #32be8f;
+    text-align: center;
+    color: #fff;
+    border-radius: 0 15px 15px 0;
+    cursor: pointer;
+    font-size: 2rem;
+  }
+
+.homePage .bucketBar hr{
+    margin:0px 0px 10px 0px;
+    opacity: 0.3;
+}
+
+
+.homePage .bucketView{
+    grid-area: box3;
+}

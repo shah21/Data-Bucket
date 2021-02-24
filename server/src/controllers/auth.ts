@@ -16,7 +16,7 @@ const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
     try{
         const user = await User.findByEmail(email);
         if (!user) {
-          const error = new HttpException("Incorrect Email");
+          const error = new HttpException("User not found");
           error.statusCode = 422;
           error.data =  errors;
           throw error;

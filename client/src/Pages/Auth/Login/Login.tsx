@@ -10,6 +10,7 @@ import avatar from "../../../res/images/avatar.svg";
 import Input from "../../../components/Input/Input";
 import Button from "../../../components/Button/Button";
 import CustomizedSnackbar from '../../../components/CustomizedSnackbar/CustomizedSnackbar';
+import Api from "../../../utils/api";
 
 
 const formReducer = (state:object, event: any) => {
@@ -25,23 +26,21 @@ const getMessageFromSession = () =>{
   return message;
 }
 
-const loginUser = (credentails:object) =>{
-    let status:number;
-    return fetch('http://localhost:8080/auth/login',{
-        method:'POST',
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify(credentails)
-    }).then((data) => {
-      status = data.status;
-      return data.json();
-    }).then((body)=>{
-      return {...body,status:status}
-    })
-    .catch((err) => {
-        console.log(err);
+const loginUser = async (credentails:object) =>{
+
+  try {
+    const response = await Api.post('/auth/login', JSON.stringify(credentails), {
+      headers: {
+        "Content-Type": "application/json"
+      },
     });
+
+    const status: number = response.status;
+    return { ...response.data, status: status };
+
+  } catch (err) {
+    return { ...err.response.data, status: err.status };
+  }
 }
 
 function Login({setToken}:any) {

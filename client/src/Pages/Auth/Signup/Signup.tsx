@@ -13,22 +13,24 @@ import avatar from "../../../res/images/avatar.svg";
 import Input from "../../../components/Input/Input";
 import Button from "../../../components/Button/Button";
 import CustomizedSnackbar from "../../../components/CustomizedSnackbar/CustomizedSnackbar";
+import Api from "../../../utils/api";
 
 //register user
-const registerUser = (credentails:object,callback:(err:any,response:object)=>void)=>{
-  return fetch('http://localhost:8080/auth/signup',{
-    method:'POST',
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify(credentails)
-  }).then((data)=>{
-    return data.json();
-  }).then(body=>{
-    callback(null,body);
-  }).catch(err=>{
-    callback(err,null!);
-  });
+const registerUser = async (credentails:object)=>{
+
+  try {
+    const response = await Api.post('/auth/signup', JSON.stringify(credentails), {
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
+
+    const status: number = response.status;
+    return { ...response.data, status: status };
+  } catch (err) {
+    return { ...err.response.data, status: err.status };
+  }
+
 };
 
 
@@ -77,20 +79,20 @@ class Signup extends React.Component<PropsInterface,State> {
     }});
   }
 
-  signupHandler(e:Event){
+  async signupHandler(e:Event){
     e.preventDefault();
-    if(this.handleValidation()){
-      
-      registerUser(this.state.formData,(err:any,response:any)=>{
-        if (err || response.errors) {
-          this.setState({
-            responseError: err ? err.message : response.errors[0].msg,
-          });
-          return;
-        }
-        addMessageToSession('Account created successfully','success');
-        this.props.history.push('/login');
-      });
+    if (this.handleValidation()) {
+
+      const response = await registerUser(this.state.formData);
+      if (response.status !== 201) {
+        const errors = response.errors;
+        this.setState({
+          responseError:errors.length > 0 ? errors[0].msg :response.message,
+        });
+        return;
+      }
+      addMessageToSession('Account created successfully', 'success');
+      this.props.history.push('/login');
     }
   }
 
