@@ -2,7 +2,7 @@ import { Router } from "express";
 import { body } from "express-validator";
 import isAuth from "../middlewares/is-auth"
 
-import {getUser,postLogin,postSignup} from '../controllers/auth';
+import {getUser,postLogin,postSignup,postRefreshToken} from '../controllers/auth';
 import User from '../models/user';
 
 const router = Router();
@@ -27,6 +27,9 @@ router.post('/signup',[
         return true;
     }),
 ],postSignup);
+
+
+router.post('/refresh-token',postRefreshToken);
 
 
 export default router;

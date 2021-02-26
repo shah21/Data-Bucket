@@ -30,6 +30,7 @@ function App() {
 
   //if user logged in
   if(token){
+    console.log(token)
     routes = (
       <Router>
       <Switch>

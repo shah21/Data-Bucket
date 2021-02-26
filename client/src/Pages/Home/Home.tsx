@@ -17,7 +17,7 @@ const getUser = async (userToken:any) =>{
         const response = await Api.get('/auth/user/'+userToken.userId,{
             headers:{
                 "Content-Type":'application/json',
-                "Authorization":"Bearer "+userToken.token,
+                "Authorization":"Bearer "+userToken.accessToken,
             }
         });
         return response.data;

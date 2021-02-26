@@ -103,11 +103,13 @@ export const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 export const postRefreshToken = async (req:Request,res:Response,next:NextFunction)=>{
     try{
         const { refreshToken } = req.body;
+
         !refreshToken && new HttpException('Bad request');
-        const payload:any = await verifyRefreshToken(refreshToken);
+        const result:any = await verifyRefreshToken(refreshToken);
         
-        const refToken = generateRefreshToken(payload);
-        const accessToken = generateAccessToken(payload);
+        const payload = {userId:result.userId};
+        const refToken = await generateRefreshToken(payload);
+        const accessToken = await generateAccessToken(payload);
 
         res.status(200).json({accessToken:accessToken,refreshToken:refToken});
     }catch(err){
