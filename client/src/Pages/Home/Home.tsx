@@ -3,40 +3,67 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/AddBox';
 import SearchIcon from '@material-ui/icons/Search';
+import { IconButton } from '@material-ui/core';
+
 
 import "./Home.css";
 import Api from "../../utils/api";
+import useToken from '../../Hooks/useToken';
+import FormDialog from '../../components/FormDialog/FormDialog';
 
-const getUser = async () =>{
-    const userId = sessionStorage.getItem('userId');
-    const token = sessionStorage.getItem('token');
-    if (userId && token) {
-        const response = await Api.get('/auth/user/'+userId,{
+
+const getUser = async (userToken:any) =>{
+    if (userToken) {
+        const response = await Api.get('/auth/user/'+userToken.userId,{
             headers:{
                 "Content-Type":'application/json',
-                "Authorization":token,
+                "Authorization":"Bearer "+userToken.token,
             }
         });
         return response.data;
     } 
 }
 
+
+const addBucket = (name:string,userId:string) =>{
+    console.log(name,userId);
+}
+
+
 function Home() {
 
     const [userData,setUserData] = useState({email:'',userId:''});
+    const [open,setOpen] = useState(false);
+    const {token} = useToken();
 
     useEffect(() => {
         async function propmiseData(){
-            const user = await getUser();
-            if(user){
+            const response = await getUser(token);
+            if(response.user){
+                const user = response.user;
                 setUserData({
                     email:user.email,
                     userId:user._id
-                })
+                });
             }
         }
         propmiseData();
-    }, [])
+    }, [token]);
+
+    const handleAddButton = () =>{
+        setOpen(prev=>true);
+    } 
+
+    const handleCloseDialog = () =>{
+        setOpen(prev=>false);
+        console.log(open);
+    }
+
+    const handleSaveBucket =(name:string)=>{
+        addBucket(name,token.userId);
+        setOpen(prev=>false);
+    }
+
 
     return (
         <div className="homePage">
@@ -49,13 +76,16 @@ function Home() {
                         <PersonIcon fontSize="small" className="icon-person"/> 
                         <span>{userData.email}</span>
                     </div>
-                    <ExitToAppIcon fontSize="small" className="btn-logout"/>
+                    <ExitToAppIcon fontSize="small" className="btn-logout" />
                 </div>
             </nav>
             <div className="bucketBar">
                 <div className="bucketTitle">
                     <h5>Buckets</h5>
-                    <AddIcon fontSize="small" className="icon-add"/>
+                    <IconButton className="icon-btn-add" >
+                    <FormDialog open={open} handleClose={handleCloseDialog} getBucketName={handleSaveBucket}  body={(<h1>hello</h1>)}/>  
+                    <AddIcon fontSize="small" className="icon-add" onClick={handleAddButton}/>
+                    </IconButton>
                 </div>
                 <div className="sb-example-1">
                     <div className="search">
@@ -66,10 +96,9 @@ function Home() {
                     </div>
                 </div>
                 <hr></hr>
-
+                
             </div>
-            <div className="bucketView">
-                Bucket view    
+            <div className="bucketView">  
             </div>           
         </div>
     )

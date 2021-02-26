@@ -48,7 +48,7 @@
 }
 
 .homePage .user .icon-person{
-    color: #d9d9d9;    
+    color: #333;    
     font-size: 16px;
 }
 
@@ -74,8 +74,11 @@
 }
 
 .homePage .bucketTitle .icon-add{
-    margin-right: 10px;
     font-size: 1.5rem;
+}
+
+.homePage .bucketTitle .icon-btn-add {
+    margin-right: 10px;
 }
 
 .homePage .bucketBar h5{

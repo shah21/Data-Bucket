@@ -3,6 +3,7 @@
         "MONGO_USER":"shah",
         "MONGO_PASSWORD":"BiQM70uZIzkvF1fB",
         "MONGO_DEFAULT_DB":"databucket",
-        "JWT_SECRET_KEY":"youwillneverwalkalone"
+        "JWT_SECRET_KEY":"f85f59c4ead30d33f4646f128c3a173508d855d4f24488bb5c5432b7239bcde4aec1d24e4480a93be6d403498dcc3e034f0e6b7464bd5f0de5f68dda29f1bb7d",
+        "JWT_REFRESH_KEY":"a369f0c0262dc8ea66ab1ac026dda1c500f44eb1fc44aaba5bfbdaae51d2ef2de72d8bf1e39ce7808f4272d46effaf969b8355524216b3e8d1094cf5c332b7be"
     }
 }

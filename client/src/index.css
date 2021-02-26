@@ -11,3 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.error-text{
+  color: red;
+  font-weight: bold;
+  display: block;
+  font-size: 12px;
+  font-family: 'Poppins',sans-serif;
+  text-align: start;
+}

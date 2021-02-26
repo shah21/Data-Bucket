@@ -2,9 +2,10 @@ import {Request,Response,NextFunction} from "express";
 import { validationResult } from "express-validator";
 import bcryptjs from "bcryptjs";
 import HttpException from "../utils/HttpException";
-import jwt from  'jsonwebtoken';
+import { generateAccessToken,generateRefreshToken, verifyRefreshToken } from "../utils/jwt_helper";
 
 import User from "../models/user";
+import router from "../routes/auth";
 
 
 export const getUser = async (req:Request,res:Response,next:NextFunction)=>{
@@ -54,13 +55,12 @@ export const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
             error.data = errors;
             throw error;    
         }
+        
+        const payload = {userId:user._id};
+        const accessToken = await generateAccessToken(payload);
+        const refreshToken = await generateRefreshToken(payload);
 
-        const token = jwt.sign({
-            email:user.email,
-            userId:user._id,
-        },process.env.JWT_SECRET_KEY!,{expiresIn:'1hr'});
-
-        res.status(200).json({messge:'login successfull.',token:token,userId:user._id});
+        res.status(200).json({messge:'login successfull.',user:{accessToken:accessToken,refreshToken:refreshToken, userId:user._id}});
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;
@@ -100,6 +100,20 @@ export const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 
 }
 
+export const postRefreshToken = async (req:Request,res:Response,next:NextFunction)=>{
+    try{
+        const { refreshToken } = req.body;
+        !refreshToken && new HttpException('Bad request');
+        const payload:any = await verifyRefreshToken(refreshToken);
+        
+        const refToken = generateRefreshToken(payload);
+        const accessToken = generateAccessToken(payload);
 
-
-
+        res.status(200).json({accessToken:accessToken,refreshToken:refToken});
+    }catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};

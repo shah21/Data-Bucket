@@ -110,7 +110,7 @@ function Login({setToken}:any) {
             setResponseError(prevError=>response.message)
             return;
           }
-          setToken(response.token);
+          setToken(response.user);
         }
     }
 
