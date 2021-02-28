@@ -1,18 +1,71 @@
-import React from "react";
+import React, { useEffect,useState } from "react";
 import {BrowserRouter as Router,Switch,Route,Redirect} from "react-router-dom";
+
 
 import './App.css';
 import Login from "./Pages/Auth/Login/Login"
 import Signup from "./Pages/Auth/Signup/Signup"
 import Home from "./Pages/Home/Home"
-import useToken from "./Hooks/useToken";
+import {useToken} from "./Hooks/useToken";
+import axios from "./axios/config";
+import endpoints from "./axios/endpoints";
+import { TokenContext } from "./Contexts/TokenContext";
+import { FlashContext } from "./Contexts/FlashContext";
+import CustomizedSnackbar from './components/CustomizedSnackbar/CustomizedSnackbar';
 
 
+ 
+const refreshAccessToken = async (refreshToken:string) => {
+  const response = await axios.post(endpoints.refreshToken,{refreshToken:refreshToken},{
+      headers:{
+          "Content-Type":'application/json',
+      }
+  });
+  return response.data;
+}
+
+function PrivateRoute ({Component, authed, path}:{Component:any,authed:boolean,path:string}) {
+  return (
+    <Route
+      path={path}
+      render={(props) => authed === true
+        ? <Component {...props} />
+        : <Redirect to='/login' />}
+    />
+  )
+}
 
 
 function App() {
-
+  
+  //states
   const {token,setToken} = useToken();
+  const [open,setOpen] = useState(false);
+  const [flash, setFlash] = useState<{message:string,type:string}>(null!); 
+
+  useEffect(() => {
+    if(!token.accessToken && token.refreshToken){
+      refreshAccessToken(token.refreshToken).then(data=>{
+        setToken({
+          ...token,
+          accessToken:data.accessToken,
+        });
+      }).catch(err=>{
+
+      })
+    }
+  }, [token,setToken]);
+
+  useEffect(() => {
+    if(flash){
+      setOpen(true);
+    }
+  }, [flash])
+
+
+  const handleClose =()=>{
+    setOpen(false);
+  }
 
   let routes = (
     <Router>
@@ -29,27 +82,31 @@ function App() {
   );
 
   //if user logged in
-  if(token){
-    console.log(token)
+  if(token.accessToken){
     routes = (
       <Router>
       <Switch>
         <Route exact path="/" component={Home} />
-        <Redirect to="/" />
+      
+        <Redirect exact to="/" />
       </Switch>
     </Router>
     )
   }
 
-  
 
   return (
     <div className="app">
+      <FlashContext.Provider value={{flash,setFlash}}>
+      <TokenContext.Provider value={{token,setToken}}>
       <Router>
         <Switch>
           {routes}
         </Switch>
       </Router>
+      </TokenContext.Provider>
+      <CustomizedSnackbar key="snackbar" openState={open} handleClose={handleClose} message={flash && flash.message} mode={flash && flash.type} />
+      </FlashContext.Provider>
     </div>
   );
 }

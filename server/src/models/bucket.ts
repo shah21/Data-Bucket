@@ -7,8 +7,8 @@ class Bucket{
     constructor(
         private name:string,
         private ownedBy:ObjectID,
-        private createdAt:Date,
-        private data:string
+        private createdAt:number,
+        private access:[string]
         ){} 
 
     save(){

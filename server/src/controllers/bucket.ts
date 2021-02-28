@@ -4,7 +4,7 @@ import { ObjectID } from "mongodb";
 import HttpException from "../utils/HttpException";
 
 
-const Bucket = require("../models/bucket");
+import Bucket from "../models/bucket";
 const LIMIT_PER_PAGE = 1;
 
 type UserId = {userId:string};
@@ -15,7 +15,7 @@ export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
     
     try{
         const query = {ownedBy:new ObjectID(req.userId)};
-        const buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,page);
+        const buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,+page);
         res.status(200).json({messge:'success',buckets:buckets});
     }catch(err){
         if(!err.statusCode){
@@ -56,7 +56,7 @@ export const postCreateBucket = async (req:Request,res:Response,next:NextFunctio
             throw error;    
         }
 
-        const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),[]);
+        const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),undefined!);
         const result = await newBucket.save();
         res.status(201).json({messge:'bucket created',bucket:result.ops[0]});
     }catch(err){
@@ -129,7 +129,7 @@ export const getData = async (req:Request,res:Response,next:NextFunction)=>{
     
     try{
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
-        const bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,page);
+        const bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,+page);
         
         res.status(200).json({messge:'success',bucket:bucket[0]});
     }catch(err){
@@ -185,7 +185,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
 
 export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
     const dataId = req.query.dataId as string;
-    const bucketId = req.query.bucketId;
+    const bucketId = req.query.bucketId as string;
     
     try{
         

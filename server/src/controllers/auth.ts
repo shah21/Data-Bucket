@@ -81,6 +81,9 @@ export const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 
         if(errors.length > 0){
             const error = new HttpException("Invalid data");
+            if(errors[0] && errors[0].msg){
+                error.message = errors[0].msg;
+            }
             error.statusCode = 422;
             error.data = errors;
             throw error;    
@@ -108,12 +111,14 @@ export const postRefreshToken = async (req:Request,res:Response,next:NextFunctio
         const result:any = await verifyRefreshToken(refreshToken);
         
         const payload = {userId:result.userId};
-        const refToken = await generateRefreshToken(payload);
         const accessToken = await generateAccessToken(payload);
 
-        res.status(200).json({accessToken:accessToken,refreshToken:refToken});
+        res.status(200).json({accessToken:accessToken});
     }catch(err){
-        if(!err.statusCode){
+        console.log(err);
+        if(err.message === "Not authorized"){
+            err.statusCode = 401;
+        }else if(!err.statusCode){
             err.statusCode = 500;
         }
         next(err);

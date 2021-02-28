@@ -2,7 +2,6 @@ import React from "react";
 import { withRouter,RouteComponentProps } from "react-router-dom";
 import PersonIcon from "@material-ui/icons/Person";
 import LockIcon from "@material-ui/icons/Lock";
-import {Snackbar} from "@material-ui/core"
 
 
 import "../Login/Login.css";
@@ -12,14 +11,15 @@ import bg from "../../../res/images/bg.svg";
 import avatar from "../../../res/images/avatar.svg";
 import Input from "../../../components/Input/Input";
 import Button from "../../../components/Button/Button";
-import CustomizedSnackbar from "../../../components/CustomizedSnackbar/CustomizedSnackbar";
-import Api from "../../../utils/api";
+import axios from "../../../axios/config";
+import endpoints from "../../../axios/endpoints";
+import {FlashContext} from "../../../Contexts/FlashContext";
 
 //register user
 const registerUser = async (credentails:object)=>{
 
   try {
-    const response = await Api.post('/auth/signup', JSON.stringify(credentails), {
+    const response = await axios.post(endpoints.signup, JSON.stringify(credentails), {
       headers: {
         "Content-Type": "application/json"
       },
@@ -28,7 +28,10 @@ const registerUser = async (credentails:object)=>{
     const status: number = response.status;
     return { ...response.data, status: status };
   } catch (err) {
-    return { ...err.response.data, status: err.status };
+    if (err) {
+      return { ...err.response.data, status: err.status };
+    }
+    return err;
   }
 
 };
@@ -55,6 +58,8 @@ interface State  {
 
 class Signup extends React.Component<PropsInterface,State> {
 
+  static contextType = FlashContext;
+
   constructor(props:PropsInterface){
     super(props);
     this.state = {
@@ -65,7 +70,12 @@ class Signup extends React.Component<PropsInterface,State> {
     }
   }
 
+  
+
   handleChange(event:any){
+
+   
+
     const fields = this.state.fields;
     const contains = fields.includes(event.target.name);
     if(!contains){
@@ -80,19 +90,23 @@ class Signup extends React.Component<PropsInterface,State> {
   }
 
   async signupHandler(e:Event){
+
+    const {setFlash} = this.context;
+
     e.preventDefault();
     if (this.handleValidation()) {
-
-      const response = await registerUser(this.state.formData);
-      if (response.status !== 201) {
-        const errors = response.errors;
-        this.setState({
-          responseError:errors.length > 0 ? errors[0].msg :response.message,
-        });
-        return;
+      try {
+        const response = await registerUser(this.state.formData);
+        if (response.status !== 201) {
+          const errors = response.errors;
+          setFlash({ message: errors.length > 0 ? errors[0].msg : response.message, type: 'error' });
+          return;
+        }
+        addMessageToSession('Account created successfully', 'success');
+        this.props.history.push('/login');
+      } catch (err) {
+        setFlash({ message:'Something went wrong!', type: 'error' });
       }
-      addMessageToSession('Account created successfully', 'success');
-      this.props.history.push('/login');
     }
   }
 
@@ -144,6 +158,7 @@ class Signup extends React.Component<PropsInterface,State> {
 
 
    this.setState({errors: errors});
+    
    return formIsValid;
 }
 
@@ -217,7 +232,6 @@ return (
       </div>
     </div>
     <Button class="btn-signup" link="/login" label="Login" />
-    {this.state.responseError && (<CustomizedSnackbar openState={true} message={this.state.responseError} mode="error"/>)}
     
   </div>
 );

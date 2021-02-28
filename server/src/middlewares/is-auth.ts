@@ -24,14 +24,13 @@ export default (req:Request,res:Response,next:NextFunction)=>{
         const secret_key = process.env.JWT_SECRET_KEY;
         decodedToken = jwt.verify(token,secret_key as string) as MyToken;
     }catch(err){
-        console.log('failed to decode');
-        err.statusCode = 500;
+        err.message = "Token not valid"
+        err.statusCode = 401;
         throw err;
     }
 
     if(!decodedToken){
-        console.log('no data');
-        const error = new HttpException('Not authenticated')
+        const error = new HttpException('Not authorized')
         error.statusCode = 401;
         throw error;
     }

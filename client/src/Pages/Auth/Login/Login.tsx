@@ -1,4 +1,4 @@
-import React,{useReducer,useState,useEffect} from 'react';
+import React,{useReducer,useState,useEffect,useContext} from 'react';
 import PersonIcon from "@material-ui/icons/Person";
 import LockIcon from "@material-ui/icons/Lock";
 import PropTypes from 'prop-types';
@@ -9,8 +9,9 @@ import bg from "../../../res/images/bg.svg";
 import avatar from "../../../res/images/avatar.svg";
 import Input from "../../../components/Input/Input";
 import Button from "../../../components/Button/Button";
-import CustomizedSnackbar from '../../../components/CustomizedSnackbar/CustomizedSnackbar';
-import Api from "../../../utils/api";
+import axios from "../../../axios/config";
+import endpoints from "../../../axios/endpoints";
+import { FlashContext } from '../../../Contexts/FlashContext';
 
 
 const formReducer = (state:object, event: any) => {
@@ -29,7 +30,7 @@ const getMessageFromSession = () =>{
 const loginUser = async (credentails:object) =>{
 
   try {
-    const response = await Api.post('/auth/login', JSON.stringify(credentails), {
+    const response = await axios.post(endpoints.login, JSON.stringify(credentails), {
       headers: {
         "Content-Type": "application/json"
       },
@@ -50,13 +51,12 @@ function Login({setToken}:any) {
     email:'',
     password:''
   });
-  const [responseError, setResponseError] = useState<string>(undefined!);
-  const [sessionMessage, setSessionMessage] = useState<{message:string,type:string}>(null!);
+  const {setFlash} = useContext(FlashContext);
   
   useEffect(() => {
-    setSessionMessage(getMessageFromSession());
+    getMessageFromSession() && setFlash(getMessageFromSession());
     sessionStorage.removeItem('message');
-  },[]);
+  },[setFlash]);
 
   const handleValidation = () => {
     let formIsValid = true;
@@ -75,7 +75,7 @@ function Login({setToken}:any) {
       let lastAtPos = formData.email.lastIndexOf('@');
       let lastDotPos = formData.email.lastIndexOf('.');
 
-      if (!(lastAtPos < lastDotPos && lastAtPos > 0 && formData.email.indexOf('@@') == -1 && lastDotPos > 2 && (formData.email.length - lastDotPos) > 2)) {
+      if (!(lastAtPos < lastDotPos && lastAtPos > 0 && formData.email.indexOf('@@') === -1 && lastDotPos > 2 && (formData.email.length - lastDotPos) > 2)) {
         formIsValid = false;
         newErrors["email"] = "Email is not valid";
       }
@@ -107,7 +107,7 @@ function Login({setToken}:any) {
           });
           const response:any = await loginUser(formData);
           if(response.status !== 200){
-            setResponseError(prevError=>response.message)
+            setFlash({message:response.message,type:'error'})
             return;
           }
           setToken(response.user);
@@ -120,7 +120,7 @@ function Login({setToken}:any) {
         });
     }
 
-  
+    
 
     return (
       <div className="login_page">
@@ -173,9 +173,8 @@ function Login({setToken}:any) {
             </form>
           </div>
         </div>
-        <Button class="btn-signup" link="/signup" label="Signup" />
 
-        {(responseError || sessionMessage) && (<CustomizedSnackbar openState={true} message={responseError ? responseError : sessionMessage.message} mode={responseError ? "error" : sessionMessage.type} />)}
+        <Button class="btn-signup" link="/signup" label="Signup" />
 
       </div>
     );

@@ -1,6 +1,5 @@
 import {useState} from "react";
 import Cookie from "js-cookie";
-import axios from "../utils/api";
 
 
 interface FuncType {
@@ -8,39 +7,19 @@ interface FuncType {
     setToken:(userToken:UserToken)=>void;
 }
 
-const refreshAccessToken = async (refreshToken:string) => {
-    const response = await axios.post('/auth/refresh-token',{refreshToken:refreshToken},{
-        headers:{
-            "Content-Type":'application/json',
-        }
-    });
-    return response.data;
-}
 
-type UserToken = { accessToken: string,refreshToken:string, userId: string }
+
+export type UserToken = { accessToken: string,refreshToken:string, userId: string }
 
 //custom hook 
-export default function useToken():FuncType{
+export function useToken():FuncType{
 
     const getToken = ()=>{
         const accessToken = Cookie.get('accessToken');
-        
         const refreshToken = Cookie.get('refreshToken');
         const userId = Cookie.get('userId');
 
-        if(!accessToken || !refreshToken || !userId){
-            if(refreshToken){
-                refreshAccessToken(refreshToken!).then(data=>{
-                    console.log(data)
-                    return {accessToken:data.accessToken,refreshToken:data.refreshToken,userId:userId} as UserToken;
-                }).catch(err=>{
-                    console.log(err.message);
-                });
-            }
-            return null;
-        }
         return {accessToken:accessToken,refreshToken:refreshToken,userId:userId} as UserToken;
-
     };
 
     const [token,setToken] = useState<UserToken>(getToken()!);
