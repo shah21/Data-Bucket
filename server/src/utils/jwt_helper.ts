@@ -36,3 +36,16 @@ export const verifyRefreshToken = (token:string) =>{
         });
     })
 }
+
+
+export const verifyAccessToken = (token:string) =>{
+    return new Promise((resolve,reject)=>{
+        jwt.verify(token,process.env.JWT_SECRET_KEY!,(err,payload)=>{
+            if(err){
+                err.message = "Not authorized";
+                reject(err);
+            }
+            resolve(payload);
+        });
+    })
+}

@@ -2,7 +2,7 @@ import {Request,Response,NextFunction} from "express";
 import { validationResult } from "express-validator";
 import bcryptjs from "bcryptjs";
 import HttpException from "../utils/HttpException";
-import { generateAccessToken,generateRefreshToken, verifyRefreshToken } from "../utils/jwt_helper";
+import { generateAccessToken,generateRefreshToken, verifyRefreshToken,verifyAccessToken } from "../utils/jwt_helper";
 
 import User from "../models/user";
 import router from "../routes/auth";
@@ -119,6 +119,29 @@ export const postRefreshToken = async (req:Request,res:Response,next:NextFunctio
         if(err.message === "Not authorized"){
             err.statusCode = 401;
         }else if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+};
+
+
+export const postVerifyToken = async (req:Request,res:Response,next:NextFunction)=>{
+    try{
+        const { accessToken } = req.body;
+
+        !accessToken && new HttpException('Bad request');
+
+        const payload:any = await verifyAccessToken(accessToken);
+        
+        if(payload){
+            res.status(200).json({isVerified:true});
+        }
+    }catch(err){
+        if(err.message === "Not authorized"){
+            err.statusCode = 401;
+        }
+        else if(!err.statusCode){
             err.statusCode = 500;
         }
         next(err);

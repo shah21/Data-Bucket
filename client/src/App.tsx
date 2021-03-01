@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect,useMemo,useState } from "react";
 import {BrowserRouter as Router,Switch,Route,Redirect} from "react-router-dom";
 
 
@@ -12,6 +12,7 @@ import endpoints from "./axios/endpoints";
 import { TokenContext } from "./Contexts/TokenContext";
 import { FlashContext } from "./Contexts/FlashContext";
 import CustomizedSnackbar from './components/CustomizedSnackbar/CustomizedSnackbar';
+import isAuth from "./utils/isAuth";
 
 
  
@@ -35,33 +36,52 @@ function PrivateRoute ({Component, authed, path}:{Component:any,authed:boolean,p
   )
 }
 
+type FlashType  = {message:string,type:string};
+
 
 function App() {
   
   //states
   const {token,setToken} = useToken();
   const [open,setOpen] = useState(false);
-  const [flash, setFlash] = useState<{message:string,type:string}>(null!); 
+  const [flash, setFlash] = useState<FlashType>(null!); 
 
   useEffect(() => {
-    if(!token.accessToken && token.refreshToken){
-      refreshAccessToken(token.refreshToken).then(data=>{
-        setToken({
-          ...token,
-          accessToken:data.accessToken,
-        });
-      }).catch(err=>{
+    // if(!token.accessToken && token.refreshToken){
+    //   refreshAccessToken(token.refreshToken).then(data=>{
+    //     setToken({
+    //       ...token,
+    //       accessToken:data.accessToken,
+    //     });
+    //   }).catch(err=>{
 
-      })
+    //   })
+    // }
+
+    async function promiseFunction() {
+      try {
+        if(!token.accessToken && token.refreshToken){
+        const isAuthorized =  await isAuth(token.accessToken,token.refreshToken);
+        isAuthorized && setToken({
+                ...token,
+                accessToken:isAuthorized.accessToken,
+              });
+        }
+      } catch(err){
+        console.log(err);
+      }
     }
+
+    promiseFunction();
+
   }, [token,setToken]);
 
-  useEffect(() => {
+
+  useMemo(()=>{
     if(flash){
       setOpen(true);
     }
-  }, [flash])
-
+  },[flash])
 
   const handleClose =()=>{
     setOpen(false);
@@ -78,6 +98,7 @@ function App() {
         )}/>
         <Redirect to="/login" />
       </Switch>
+
     </Router>
   );
 
@@ -92,6 +113,7 @@ function App() {
       </Switch>
     </Router>
     )
+
   }
 
 

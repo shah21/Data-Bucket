@@ -2,7 +2,7 @@ import { Router } from "express";
 import { body } from "express-validator";
 import isAuth from "../middlewares/is-auth"
 
-import {getUser,postLogin,postSignup,postRefreshToken} from '../controllers/auth';
+import {getUser,postLogin,postSignup,postRefreshToken, postVerifyToken} from '../controllers/auth';
 import User from '../models/user';
 
 const router = Router();
@@ -11,6 +11,7 @@ const router = Router();
 
 router.get('/user/:userId',isAuth,getUser)
 router.post('/login',postLogin);
+router.post('/verifyAccessToken',postVerifyToken);
 router.post('/signup',[
     body('email').isEmail().withMessage('Invalid Email').custom(async (value,{req})=>{
         const user = await User.findByEmail(value);

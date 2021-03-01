@@ -14,18 +14,26 @@ import FormDialog from '../../components/FormDialog/FormDialog';
 import endpoints from '../../axios/endpoints';
 import { TokenContext } from "../../Contexts/TokenContext";
 import { FlashContext } from '../../Contexts/FlashContext';
+import isAuth from '../../utils/isAuth';
 
 const getUser = async (userToken:any) =>{
     if (userToken) {
         try {
-            const response = await axios.get(endpoints.getUser + userToken.userId, {
-                headers: {
-                    "Content-Type": 'application/json',
-                    "Authorization": "Bearer " + userToken.accessToken,
-                }
-            });
-            return response.data;
+            
+            const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+            if(isAuthourized && isAuthourized.isVerified){
+                const response = await axios.get(endpoints.getUser + userToken.userId, {
+                    headers: {
+                        "Content-Type": 'application/json',
+                        "Authorization": "Bearer " + isAuthourized.accessToken,
+                    }
+                });
+                return response.data;
+            }
+
+            
         } catch (err) {
+            console.log(err);
             return err;
         }
     } 
@@ -37,23 +45,23 @@ const removeCookies = () =>{
     });
 }
 
-const addBucket = async (name:string,accessToken:string) =>{
+const addBucket = async (name:string,userToken:any) =>{
     try {
-        const response = await axios.post(endpoints.createBucket, { name: name }, {
-            headers: {
-                "Content-type": "application/json",
-                "Authorization": `Bearer ${accessToken}`,
-            }
-        });
-        return response.data;
+        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            const response = await axios.post(endpoints.createBucket, { name: name }, {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                }
+            });
+            return response.data;
+        }
     } catch (err) {
-        console.log(err);
         throw err;
     }
 
 }
-
-
 
 
 function Home(props:any) {
@@ -70,17 +78,21 @@ function Home(props:any) {
     const history = useHistory();
 
     useEffect(() => {
-        async function propmiseData(){
-            const response = await getUser(token);
-            if(response.user){
+        async function promiseData() {
+            try{
+                const response = await getUser(token);
+            if (response && response.user) {
                 const user = response.user;
                 setUserData({
-                    email:user.email,
-                    userId:user._id
+                    email: user.email,
+                    userId: user._id
                 });
             }
+            }catch(err){
+                console.log(err)
+            }   
         }
-        propmiseData();
+        promiseData();
     }, [token]);
 
     const handleAddButton = () =>{
@@ -92,11 +104,13 @@ function Home(props:any) {
     }
 
     const handleSaveBucket = (name:string)=>{
-        addBucket(name,token.accessToken).then(data=>{
+        addBucket(name,token).then(data=>{
             setOpen(prev=>false);
             setFlash({message:`${name} Bucket created`,type:'success'})
         }).catch(err=>{
-            setFlash({message:err.message,type:'error'});
+            if(err.response && err.response.status !== 401){
+                setFlash({message:err.message,type:'error'});
+            }
             setOpen(prev=>false);
         })
         
