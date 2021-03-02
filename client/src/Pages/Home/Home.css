@@ -3,6 +3,7 @@
 }
 
 .homePage{
+    overflow: hidden;
     display: grid;
     grid-template-rows: 60px 100%;
     grid-template-columns: 300px 1fr;
@@ -63,7 +64,9 @@
 
 .homePage .bucketBar {
     grid-area: box2;
-    border-right:1px solid #E5E5E6;
+    height:  100vh;
+    margin-bottom: -60px;
+    border-right:1px solid #cacaca;
     background-color: #F6F6F6;
 }
 
@@ -126,11 +129,48 @@
   }
 
 .homePage .bucketBar hr{
-    margin:0px 0px 10px 0px;
     opacity: 0.3;
 }
 
 
 .homePage .bucketView{
+    margin-bottom: -60px;
     grid-area: box3;
+    height: 100vh;   
 }
+
+.bucketView .container{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.bucketView .container .placeHolder {
+    width: 300px;
+    height: 300px;
+    background-color: #ececec;
+    border-radius: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.placeHolder img {
+    width: 200px;
+    height: 200px;
+    object-fit: fill;
+}
+
+.bucketView .container .text{
+    margin-top: 1rem;
+}
+
+.bucketView .container p{
+    font-size: 1.5rem;
+    text-transform: uppercase;
+}
+

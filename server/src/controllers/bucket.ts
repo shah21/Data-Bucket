@@ -5,7 +5,7 @@ import HttpException from "../utils/HttpException";
 
 
 import Bucket from "../models/bucket";
-const LIMIT_PER_PAGE = 1;
+const LIMIT_PER_PAGE = 10;
 
 type UserId = {userId:string};
 
@@ -18,6 +18,7 @@ export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
         const buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,+page);
         res.status(200).json({messge:'success',buckets:buckets});
     }catch(err){
+        
         if(!err.statusCode){
             err.statusCode = 500;
         }

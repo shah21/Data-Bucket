@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext} from 'react'
+import React,{useState,useEffect,useContext, useRef, useMemo} from 'react'
 import {useHistory} from "react-router-dom"
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PersonIcon from '@material-ui/icons/Person';
@@ -8,6 +8,7 @@ import { IconButton } from '@material-ui/core';
 import Cookies from "js-cookie";
 
 
+
 import "./Home.css";
 import axios from "../../axios/config";
 import FormDialog from '../../components/FormDialog/FormDialog';
@@ -15,6 +16,10 @@ import endpoints from '../../axios/endpoints';
 import { TokenContext } from "../../Contexts/TokenContext";
 import { FlashContext } from '../../Contexts/FlashContext';
 import isAuth from '../../utils/isAuth';
+import Bucket from '../../Models/bucket';
+import BucketList from "../../components/BucketList/BucketList";
+import BucketRoom from "../../components/BucketRoom/BucketRoom";
+import Folder from "../../res/images/folder.jpg";
 
 const getUser = async (userToken:any) =>{
     if (userToken) {
@@ -63,19 +68,58 @@ const addBucket = async (name:string,userToken:any) =>{
 
 }
 
+const getBuckets = async (userToken:any) =>{
+    try {
+        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            const response = await axios.get(endpoints.getBuckets, {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                }
+            });
+            if(response){
+                return response.data.buckets;
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+
+}
+
+
+
 
 function Home(props:any) {
 
     //states
     const [userData,setUserData] = useState({email:'',userId:''});
     const [open,setOpen] = useState(false);
+    const [bucketId,setBucketId] = useState<string>(null!);
+    const buckets = useRef<[Bucket]>(null!);
+    
+
     
 
     //context
     const {token} = useContext(TokenContext);
     const {setFlash} = useContext(FlashContext);
+    
 
     const history = useHistory();
+
+    useEffect(()=>{
+        async function promiseList(){
+            try {
+                buckets.current = await getBuckets(token);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        promiseList();
+    },[buckets,token]);
+
 
     useEffect(() => {
         async function promiseData() {
@@ -86,6 +130,7 @@ function Home(props:any) {
                 setUserData({
                     email: user.email,
                     userId: user._id
+
                 });
             }
             }catch(err){
@@ -94,6 +139,7 @@ function Home(props:any) {
         }
         promiseData();
     }, [token]);
+
 
     const handleAddButton = () =>{
         setOpen(prev=>true);
@@ -106,7 +152,8 @@ function Home(props:any) {
     const handleSaveBucket = (name:string)=>{
         addBucket(name,token).then(data=>{
             setOpen(prev=>false);
-            setFlash({message:`${name} Bucket created`,type:'success'})
+            buckets.current.push(data.bucket as Bucket);
+            setFlash({message:`${name} Bucket created`,type:'success'});
         }).catch(err=>{
             if(err.response && err.response.status !== 401){
                 setFlash({message:err.message,type:'error'});
@@ -120,6 +167,12 @@ function Home(props:any) {
         removeCookies();
         history.push('/login');
     } 
+
+    const handleClickBucket = (id:string) =>{
+        setBucketId(id);
+    } 
+
+
 
 
     return (
@@ -153,9 +206,23 @@ function Home(props:any) {
                     </div>
                 </div>
                 <hr></hr>
+
+                <div className="bucket-list">
+                    <BucketList clickHandler={handleClickBucket} bucketArray={buckets.current}/>
+                </div>
                 
             </div>
             <div className="bucketView">  
+                {bucketId ? (<BucketRoom token={token} id={bucketId}/>) :(
+                    <div className="container">
+                        <div className="placeHolder">
+                            <img src={Folder} alt="" className="bucketImg" />
+                        </div>
+                        <div className="text">
+                            <p>Put your things here</p>
+                        </div>
+                    </div>
+                )}
             </div>   
 
             
