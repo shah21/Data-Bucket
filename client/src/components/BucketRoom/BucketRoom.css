@@ -17,6 +17,8 @@
 }
 
 .bucket .headerSection{
+    position: fixed;
+    z-index: 1;
     grid-area: headerSection;
     width: 100%;
     height: 50px;
