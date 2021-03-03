@@ -8,6 +8,7 @@ enum endpoints {
     verifyAccessToken = '/auth/verifyAccessToken',
     getBuckets = '/bucket',
     getBucket = '/bucket/',
+    addData = '/bucket/add-data',
 };
 
 export default endpoints;

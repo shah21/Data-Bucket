@@ -40,7 +40,9 @@ const loginUser = async (credentails:object) =>{
     return { ...response.data, status: status };
 
   } catch (err) {
-    return { ...err.response.data, status: err.status };
+    if (err.response) {
+      return { ...err.response.data, status: err.status };
+    }
   }
 }
 
@@ -106,11 +108,13 @@ function Login({setToken}:any) {
             password:''
           });
           const response:any = await loginUser(formData);
-          if(response.status !== 200){
+          if(response && response.status !== 200){
             setFlash({message:response.message,type:'error'})
             return;
+          }else if(response){
+            setToken(response.user);
           }
-          setToken(response.user);
+          console.log(response)
         }
     }
 

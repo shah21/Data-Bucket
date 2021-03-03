@@ -8,6 +8,7 @@
 .bucket .room {
     position: relative;
     display: grid;
+    height: 100vh;
     grid-template-rows:1fr 10fr;
     grid-template-columns: 100%;
     grid-template-areas:
@@ -19,14 +20,22 @@
     grid-area: headerSection;
     width: 100%;
     height: 50px;
+    display: flex;
+    justify-content: space-between;
     background-color: #fff;
+    align-items: center;
     box-shadow: 0 2px 4px 0 rgba(0,0,0,.2);
 }
 
+
 .bucket .headerSection h4{
-    line-height: 50px;
     margin-left: 10px;
     font-size: 1.5rem;
+}
+
+.bucket .headerSection .attachIcon{
+    font-size: 1.5rem;
+    margin-right: 10px;
 }
 
 
@@ -62,4 +71,3 @@
     height: 40px;
     margin: 10px;
 }
-

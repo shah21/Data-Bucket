@@ -57,7 +57,7 @@ export const postCreateBucket = async (req:Request,res:Response,next:NextFunctio
             throw error;    
         }
 
-        const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),undefined!);
+        const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),undefined!,[]);
         const result = await newBucket.save();
         res.status(201).json({messge:'bucket created',bucket:result.ops[0]});
     }catch(err){
@@ -144,7 +144,7 @@ export const getData = async (req:Request,res:Response,next:NextFunction)=>{
 
 export const postCreateData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.body.bucketId;
-    const info = req.body.info;
+    const text = req.body.text;
     const file = req.file;
     const deviceName = req.body.deviceName;
     const errors = validationResult(req).array();
@@ -170,9 +170,9 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         }
 
         const dataArray = bucket.data;
-        const newData = {_id:new ObjectID(Date.now()),data:info,file_path:null,deviceName,addedAt:Date.now()};
+        const newData = {_id:new ObjectID(Date.now()),data:text,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
-        const updateBucket = await Bucket.updateById(bucketId,updateValues);
+        await Bucket.updateById(bucketId,updateValues);
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){
         if(!err.statusCode){

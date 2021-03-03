@@ -1,0 +1,20 @@
+.dataList{
+    padding: 10px;
+
+}
+
+.dataList .head{
+    display: flex;
+    justify-content: space-between;
+}
+
+.dataList .head .head-text {
+    font-family: 'Poppins',sans-serif;
+}
+
+
+.dataList .timeText{
+    text-align: start;
+    font-size: 10px;
+    margin-top: -8px;
+}

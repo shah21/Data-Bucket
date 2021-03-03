@@ -34,7 +34,7 @@ router.post('/create',isAuth,[
 ],postCreateBucket);
 
 router.post('/add-data',isAuth,[
-    body('info').trim().not().isEmpty(),
+    body('text').trim().not().isEmpty(),
     body('deviceName').trim().not().isEmpty(),
 ],postCreateData);
 

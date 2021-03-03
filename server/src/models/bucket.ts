@@ -8,7 +8,8 @@ class Bucket{
         private name:string,
         private ownedBy:ObjectID,
         private createdAt:number,
-        private access:[string]
+        private access:[string],
+        private data:any[],
         ){} 
 
     save(){
