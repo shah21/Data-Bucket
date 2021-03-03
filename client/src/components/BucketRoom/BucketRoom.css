@@ -40,6 +40,7 @@
 
 
 .bucket .contents{
+    height: 100vh;
     grid-area: contents;
 }
 

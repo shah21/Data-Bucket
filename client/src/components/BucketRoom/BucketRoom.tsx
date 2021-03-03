@@ -119,31 +119,39 @@ function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
     // el.style.maxHeight = parent.offsetHeight.
     if(el!=null){
         el.style.maxHeight = (parent.offsetHeight - 60).toString()+'px';
+        console.log(el.style.maxHeight)
     }
 }
 
 function BucketRoom(props:propTypes) {
 
     const [bucket,setBucket] = useState<Bucket>(null!);
-    const [textData,setTextData] = useState<string>(null!);
+    const [textData,setTextData] = useState<string>('');
     const [dataArray,setDataArray] = useState<[Data]>(null!);
+    const [scroll,setScroll] = useState<boolean>(false);
 
     const classes = useStyle();
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
 
-    // useLayoutEffect(() => {
-    //     function updateSize() {
+    useLayoutEffect(() => {
+        function updateSize() {
+            if(scroll){
+                changeStyle(contentRef.current,parentRef.current)
+            }
+        }
+        window.addEventListener('resize', updateSize);
+        updateSize();
+        return () =>{ 
+            window.removeEventListener('resize', updateSize);
+        }
+    }, [contentRef,parentRef,scroll])
+
+    // useEffect(() => {
+    //     if(scroll){
     //         changeStyle(contentRef.current,parentRef.current)
     //     }
-    //     window.addEventListener('resize', updateSize);
-    //     updateSize();
-    //     return () => window.removeEventListener('resize', updateSize);
-    // }, [contentRef,parentRef])
-
-    useEffect(() => {
-        changeStyle(contentRef.current,parentRef.current)
-    }, [contentRef,parentRef])
+    // }, [contentRef,parentRef,scroll])
 
     useMemo(()=>{
         async function promiseList(){
@@ -210,8 +218,8 @@ function BucketRoom(props:propTypes) {
                                 <AttachFile className={classes.attachIcon}/>
                             </IconButton>
                         </div>
-                        <div className="contents" ref={el => {  parentRef.current = el!; }}>
-                            <div className="scrollBar" ref={el => { contentRef.current = el!; }}  style={{ maxHeight:'300px',overflow:'auto', }}>
+                        <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
+                            <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto', }}>
                             <DataList  dataArray={dataArray} handleDelete={handleDeleteData}/>
                             </div>
                         </div>
