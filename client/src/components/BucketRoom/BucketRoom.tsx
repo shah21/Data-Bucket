@@ -17,15 +17,15 @@ import { socket } from '../../utils/socket';
 
 
 interface propTypes{
-    id:string,
+    bucketId:string,
     token:any,
 }
 
-const getBucket = async (id:string,userToken:any) =>{
+const getBucket = async (bucketId:string,userToken:any) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
-            const response = await axios.get(endpoints.getBucket + id, {
+            const response = await axios.get(endpoints.getBucket + bucketId, {
                 headers: {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
@@ -41,11 +41,11 @@ const getBucket = async (id:string,userToken:any) =>{
 
 }
 
-const getDataArray = async (id:string,userToken:any) =>{
+const getDataArray = async (bucketId:string,userToken:any) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
-            const response = await axios.get(endpoints.getBucket + id +'/data', {
+            const response = await axios.get(endpoints.getBucket + bucketId +'/data', {
                 headers: {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
@@ -90,14 +90,14 @@ const useStyle = makeStyles({
 
 
 
-const addData = async (id:string,userToken:any,text:any,file:File) =>{
+const addData = async (bucketId:string,userToken:any,text:any,file:File) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
             const body = {
                 text:text,
                 deviceName:navigator.appName,
-                bucketId:id,
+                bucketId:bucketId,
             }
             const response = await axios.post(endpoints.addData,body, {
                 headers: {
@@ -154,19 +154,19 @@ function BucketRoom(props:propTypes) {
     useMemo(()=>{
         async function promiseList(){
             try {
-                setBucket(await getBucket(props.id,props.token));
+                setBucket(await getBucket(props.bucketId,props.token));
                 
             } catch (err) {
                 console.log(err);
             }
         }
         promiseList();
-    },[props.id,props.token]);
+    },[props.bucketId,props.token]);
 
     useMemo(()=>{
         async function promiseList(){
             try {
-                const response = await getDataArray(props.id,props.token);
+                const response = await getDataArray(props.bucketId,props.token);
                 if(response.bucket.data){
                     setDataArray(response.bucket.data);
                 }
@@ -176,7 +176,7 @@ function BucketRoom(props:propTypes) {
             }
         }
         promiseList();
-    },[props.id,props.token,setDataArray]);
+    },[props.bucketId,props.token,setDataArray]);
 
 
     useEffect(()=>{
@@ -187,21 +187,34 @@ function BucketRoom(props:propTypes) {
         })
     },[])
 
-
+    const deleteData = async (bucketId:string,token:any)=>{
+        try {
+            const response = await axios.delete(endpoints.deleteData + `dataId=${bucketId}&bucketId=${bucketId}`);
+            if(response){
+                
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
     
     const handleTextData = (e:React.ChangeEvent<HTMLInputElement>) =>{
         setTextData(e.target.value);
     }
 
-    const handleOptions = (type:string,id:string) =>{
-        console.log(type,id);
+    const handleOptions = (type:string,bucketId:string) =>{
+        if(type==="delete"){
+            deleteData(bucketId,props.token);
+        }else if(type==="favorite"){
+            //TODO
+        }
         setOpenOptions(false);
     }
 
     const handleSend = async () =>{
         if(textData){
             try {
-                const response = await addData(props.id,props.token,textData,null!);
+                const response = await addData(props.bucketId,props.token,textData,null!);
                 if(response){
                     const data:Data = response.data.data;
                     const newArray = dataArray;

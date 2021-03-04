@@ -213,7 +213,7 @@ function Home(props:any) {
                 
             </div>
             <div className="bucketView">  
-                {bucketId ? (<BucketRoom token={token} id={bucketId}/>) :(
+                {bucketId ? (<BucketRoom token={token} bucketId={bucketId}/>) :(
                     <div className="container">
                         <div className="placeHolder">
                             <img src={Folder} alt="" className="bucketImg" />

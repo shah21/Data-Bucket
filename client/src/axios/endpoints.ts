@@ -9,6 +9,7 @@ enum endpoints {
     getBuckets = '/bucket',
     getBucket = '/bucket/',
     addData = '/bucket/add-data',
+    deleteData = '/bucket/delete-data/'
 };
 
 export default endpoints;
