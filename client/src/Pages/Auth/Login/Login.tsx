@@ -35,14 +35,9 @@ const loginUser = async (credentails:object) =>{
         "Content-Type": "application/json"
       },
     });
-
-    const status: number = response.status;
-    return { ...response.data, status: status };
-
+    return response.data;
   } catch (err) {
-    if (err.response) {
-      return { ...err.response.data, status: err.status };
-    }
+    throw err
   }
 }
 
@@ -107,14 +102,22 @@ function Login({setToken}:any) {
             email:'',
             password:''
           });
-          const response:any = await loginUser(formData);
-          if(response && response.status !== 200){
-            setFlash({message:response.message,type:'error'})
+
+          try{
+            const response:any = await loginUser(formData);
+            if(response){
+              setToken(response.user);
+            }
+          }catch(err){
+            if (err.response) {
+              const errResponseData = err.response.data;
+              setFlash({ message: errResponseData.message, type: 'error' })
+              return;
+            }
+            alert(err);
             return;
-          }else if(response){
-            setToken(response.user);
           }
-          console.log(response)
+          
         }
     }
 

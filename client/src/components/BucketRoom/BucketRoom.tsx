@@ -1,4 +1,4 @@
-import React,{useMemo, useState,useEffect,useRef} from 'react'
+import React,{useMemo, useState,useRef} from 'react'
 import { Button,TextField,IconButton } from "@material-ui/core";
 import Send from "@material-ui/icons/Send";
 import AttachFile from "@material-ui/icons/AttachFile";
@@ -11,8 +11,6 @@ import isAuth from "../../utils/isAuth";
 import Bucket from '../../Models/bucket';
 import Data from '../../Models/data';
 import DataList from '../DataList/DataList';
-import SimpleBar from 'simplebar-react';
-import 'simplebar/dist/simplebar.min.css';
 import { useLayoutEffect } from 'react';
 
 
@@ -116,10 +114,8 @@ const addData = async (id:string,userToken:any,text:any,file:File) =>{
 }
 
 function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
-    // el.style.maxHeight = parent.offsetHeight.
     if(el!=null){
         el.style.maxHeight = (parent.offsetHeight - 60).toString()+'px';
-        console.log(el.style.maxHeight)
     }
 }
 
@@ -147,11 +143,6 @@ function BucketRoom(props:propTypes) {
         }
     }, [contentRef,parentRef,scroll])
 
-    // useEffect(() => {
-    //     if(scroll){
-    //         changeStyle(contentRef.current,parentRef.current)
-    //     }
-    // }, [contentRef,parentRef,scroll])
 
     useMemo(()=>{
         async function promiseList(){
