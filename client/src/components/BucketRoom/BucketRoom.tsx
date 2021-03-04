@@ -1,4 +1,4 @@
-import React,{useMemo, useState,useRef, useEffect} from 'react'
+import React,{useMemo, useContext,useState,useRef, useEffect} from 'react'
 import { Button,TextField,IconButton } from "@material-ui/core";
 import Send from "@material-ui/icons/Send";
 import AttachFile from "@material-ui/icons/AttachFile";
@@ -13,6 +13,7 @@ import Data from '../../Models/data';
 import DataList from '../DataList/DataList';
 import { useLayoutEffect } from 'react';
 import { socket } from '../../utils/socket';
+import { FlashContext } from '../../Contexts/FlashContext';
 
 
 
@@ -129,9 +130,11 @@ function BucketRoom(props:propTypes) {
 
     const [bucket,setBucket] = useState<Bucket>(null!);
     const [textData,setTextData] = useState<string>('');
-    const [dataArray,setDataArray] = useState<[Data]>(null!);
+    const [dataArray,setDataArray] = useState<Data[]>(null!);
     const [scroll,setScroll] = useState<boolean>(false);
     const [openOptions,setOpenOptions] = useState<boolean>(false);
+    
+    const {setFlash} = useContext(FlashContext);
 
     const classes = useStyle();
     const contentRef = useRef<HTMLDivElement>(null!);
@@ -187,14 +190,28 @@ function BucketRoom(props:propTypes) {
         })
     },[])
 
-    const deleteData = async (bucketId:string,token:any)=>{
+    const deleteData = async (dataId:string,bucketId:string,token:any)=>{
         try {
-            const response = await axios.delete(endpoints.deleteData + `dataId=${bucketId}&bucketId=${bucketId}`);
-            if(response){
-                
+            const isAuthourized = await isAuth(token.accessToken, token.refreshToken);
+            if (isAuthourized && isAuthourized.isVerified) {
+                const response = await axios.delete(endpoints.deleteData + `dataId=${dataId}&bucketId=${bucketId}`,{
+                    headers: {
+                        "Content-type": "application/json",
+                        "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                    }
+                });
+                if (response) {
+                    setDataArray(prev => {
+                        return dataArray.filter(data => {
+                            return data._id !== dataId
+                        });
+                    });
+                    setFlash({ message: `Data deleted successfully !`, type: 'success' });
+                }
             }
         } catch (err) {
             console.log(err);
+            setFlash({message:`Something error occured!`,type:'error'});
         }
     }
     
@@ -202,9 +219,10 @@ function BucketRoom(props:propTypes) {
         setTextData(e.target.value);
     }
 
-    const handleOptions = (type:string,bucketId:string) =>{
+    const handleOptions = (type:string,dataId:string) =>{
+        console.log('dataId',dataId);
         if(type==="delete"){
-            deleteData(bucketId,props.token);
+            deleteData(dataId,props.bucketId,props.token);
         }else if(type==="favorite"){
             //TODO
         }

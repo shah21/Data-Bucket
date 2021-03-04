@@ -99,7 +99,7 @@ export const updateBucket = async (req:Request,res:Response,next:NextFunction)=>
 
 export const deleteBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
-    
+
     try{
         
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
@@ -175,7 +175,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         const newData = {_id:new ObjectID(Date.now()),data:text,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
-        socket.getIO().emit('data',{action:'created',data:newData});
+        // socket.getIO().emit('data',{action:'created',data:newData});
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){
         if(!err.statusCode){
@@ -191,8 +191,8 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
     const dataId = req.query.dataId as string;
     const bucketId = req.query.bucketId as string;
     
+
     try{
-        
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId as string)};
         const bucket = await Bucket.findByQuery(query);
 
@@ -207,6 +207,7 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
         const updateBucket = await Bucket.updateById(bucketId,updateValues);
         res.status(200).json({messge:'deleted successfully'});
     }catch(err){
+        console.log(err);
         if(!err.statusCode){
             err.statusCode = 500;
         }

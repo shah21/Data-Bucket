@@ -16,7 +16,7 @@ import OptionsDialog from "../../components/OptionsDialog/OptionsDialog";
 
 
 interface propTypes{
-    dataArray:[Data],
+    dataArray:Data[],
     handleOptions:(type:string,id:string)=>void,
     open:boolean,
     setOpen:any,
@@ -48,14 +48,16 @@ const useStyles = makeStyles({
 function DataList(props:propTypes) {
 
     const classes = useStyles();
-    let id:string;
+    const [selectedItemId,setItemId] = useState<string>(null!)
 
 
-    const handleOpen = () =>{
+    const handleOpen = (id:string) =>{
+        setItemId(id);
         props.setOpen(true);
     } 
 
     const handleClose = () =>{
+        setItemId(null!);
         props.setOpen(false);
     }
 
@@ -64,41 +66,41 @@ function DataList(props:propTypes) {
         <div className="dataList">
             
             <List >
-                {props.dataArray && props.dataArray.map(data =>{ 
-                    id=data._id
+                {props.dataArray && props.dataArray.map(data => {
                     return (
-                    <Card key={data.addedAt} className={classes.root} variant="outlined">
-                        <CardContent>
-                            <div className="head">
-                                <div>
-                                    <Typography className={classes.title} gutterBottom>
-                                        {data.deviceName}
+                        <div key={data.addedAt}>
+                            {props.open && (
+                            <OptionsDialog id={selectedItemId} open={props.open} handleClose={handleClose} handleOptions={props.handleOptions} />
+                            )}
+                            <Card  className={classes.root} variant="outlined">
+                                <CardContent>
+                                    <div className="head">
+                                        <div>
+                                            <Typography className={classes.title} gutterBottom>
+                                                {data.deviceName}
+                                            </Typography>
+                                            <Typography variant="h5" className="timeText" color="textSecondary" gutterBottom>
+                                                {moment(data.addedAt).fromNow()}
+                                            </Typography>
+                                        </div>
+                                        <IconButton onClick={(e)=>handleOpen(data._id)}>
+                                            <DeleteIcon className={classes.deleteIcon} />
+                                        </IconButton>
+                                    </div>
+
+                                    <Typography variant="body1" className="" component="p">
+                                        {data.data}
                                     </Typography>
-                                    <Typography variant="h5" className="timeText" color="textSecondary" gutterBottom>
-                                        {moment(data.addedAt).fromNow()}
-                                    </Typography>
-                                </div>
-                                <IconButton onClick={handleOpen}>
-                                    <DeleteIcon className={classes.deleteIcon} />
-                                </IconButton>
-                            </div>
-
-                            
 
 
+                                </CardContent>
 
-                            <Typography variant="body1" className="" component="p">
-                                {data.data}
-                            </Typography>
-
-
-                        </CardContent>
-                        
-                    </Card>
-                    
-                )})}
+                            </Card>
+                        </div>
+                    )
+                })}
             </List>
-            <OptionsDialog id={id!} open={props.open} handleClose={handleClose} handleOptions={props.handleOptions} />
+            
         </div>
     )
 }

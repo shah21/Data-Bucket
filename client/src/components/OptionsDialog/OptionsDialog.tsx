@@ -27,7 +27,6 @@ export default function OptionsDialog(props:Proptypes) {
   const classes = useStyle();
 
 
-
   return (
     <div className="optionsDialog">
       

@@ -1,10 +1,17 @@
 import {createContext} from "react";
 
+type StateType = {
+  flash: {
+    message: string;
+    type: string;
+  };
+  setFlash: any;
+};
 
-const initialState = {
+const initialState:StateType = {
     flash:{
-    message:undefined! as string,
-    type:undefined! as string,
+    message:undefined!,
+    type:undefined!,
     },
     setFlash:null as any,
 };
