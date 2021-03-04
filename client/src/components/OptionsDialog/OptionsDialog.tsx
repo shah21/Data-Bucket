@@ -1,6 +1,7 @@
 import React from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import {
+  makeStyles,
   createMuiTheme,
   MuiThemeProvider
 } from "@material-ui/core/styles";
@@ -15,63 +16,32 @@ type Proptypes = {
   id:string,
 }
 
+const useStyle = makeStyles({
+  listItem:{
+    width:250,
+  },
+});
+
 export default function OptionsDialog(props:Proptypes) {
   
+  const classes = useStyle();
 
-// const defaultTheme = createMuiTheme();
-// const theme = createMuiTheme({
-//   overrides:{
-//     MuiButton:{
-//       label:{
-//         color:'#32be8f',
-//         fontWeight:600,
-//       }
-//     }
-//   }
-// });
 
-// const themeTextField = createMuiTheme({
-//   overrides: {
-//     MuiInput: {
-//       underline: {
-//         '&:before': { //underline color when textfield is inactive
-//           borderBottom: `1px solid #32be8f`,
-//         },
-//         '&:hover:not($disabled):before': { //underline color when hovered 
-//           borderBottom: `2px solid #32be8f`,
-//         },
-//         '&:after': { //underline color when textfield is inactive
-//           borderBottom: `1px solid #32be8f`,
-//         },
-//       },
-//     },
-//     MuiFormLabel: {
-//       root: {
-//         "&$focused": {
-//           color: "#333",
-//           fontWeight:500,
-//         }
-//       }, 
-      
-//       focused: {}
-//     }
-//   }
-// });
 
   return (
     <div className="optionsDialog">
       
-      <Dialog onClose={props.handleClose} aria-labelledby="simple-dialog-title" open={props.open}>
+      <Dialog  onClose={props.handleClose} aria-labelledby="simple-dialog-title" open={props.open}>
       <List component="nav" aria-label="main mailbox folders">
-        <ListItem onClick={(e)=>{props.handleOptions('favorite',props.id)}} button>
+        <ListItem className={classes.listItem} onClick={(e)=>{props.handleOptions('favorite',props.id)}} button>
           <ListItemIcon>
-            <FavoriteIcon />
+            <FavoriteIcon style={{color:'#32be8f',}} />
           </ListItemIcon>
           <ListItemText primary="Favorite" />
         </ListItem>
-        <ListItem onClick={(e)=>{props.handleOptions('delete',props.id)}} button>
+        <ListItem className={classes.listItem} onClick={(e)=>{props.handleOptions('delete',props.id)}} button>
           <ListItemIcon>
-            <DeleteIcon />
+            <DeleteIcon color="secondary"/>
           </ListItemIcon>
           <ListItemText primary="Delete" />
         </ListItem>
