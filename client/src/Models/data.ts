@@ -1,4 +1,5 @@
 export default class Data{
+    _id:string;
     data:string;
     file:string;
     addedAt:number;
@@ -6,7 +7,8 @@ export default class Data{
     addedTo:string;
     deviceName:string;
     accessGroup:Array<string>
-    constructor(data:string,file:string,addedAt:number,addedTo:string,addedBy:string,accessGroup:[string],deviceName:string){
+    constructor(id:string,data:string,file:string,addedAt:number,addedTo:string,addedBy:string,accessGroup:[string],deviceName:string){
+        this._id = id;
         this.data = data;
         this.file = file;
         this.deviceName = deviceName;

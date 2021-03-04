@@ -13,6 +13,7 @@ import { TokenContext } from "./Contexts/TokenContext";
 import { FlashContext } from "./Contexts/FlashContext";
 import CustomizedSnackbar from './components/CustomizedSnackbar/CustomizedSnackbar';
 import isAuth from "./utils/isAuth";
+import { socket } from "./utils/socket";
 
 
  
@@ -67,6 +68,9 @@ function App() {
                 accessToken:isAuthorized.accessToken,
               });
         }
+        socket.on('connect',()=>{
+          socket.emit('joins',{userId:token.userId});
+        });
       } catch(err){
         console.log(err);
       }
@@ -75,6 +79,8 @@ function App() {
     promiseFunction();
 
   }, [token,setToken]);
+
+
 
 
   useMemo(()=>{

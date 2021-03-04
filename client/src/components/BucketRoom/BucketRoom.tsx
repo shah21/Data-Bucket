@@ -1,4 +1,4 @@
-import React,{useMemo, useState,useRef} from 'react'
+import React,{useMemo, useState,useRef, useEffect} from 'react'
 import { Button,TextField,IconButton } from "@material-ui/core";
 import Send from "@material-ui/icons/Send";
 import AttachFile from "@material-ui/icons/AttachFile";
@@ -12,6 +12,7 @@ import Bucket from '../../Models/bucket';
 import Data from '../../Models/data';
 import DataList from '../DataList/DataList';
 import { useLayoutEffect } from 'react';
+import { socket } from '../../utils/socket';
 
 
 
@@ -119,12 +120,18 @@ function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
     }
 }
 
+
+function updateScroll(el:HTMLDivElement){
+    el.scrollTop = el.scrollHeight;
+}
+
 function BucketRoom(props:propTypes) {
 
     const [bucket,setBucket] = useState<Bucket>(null!);
     const [textData,setTextData] = useState<string>('');
     const [dataArray,setDataArray] = useState<[Data]>(null!);
     const [scroll,setScroll] = useState<boolean>(false);
+    const [openOptions,setOpenOptions] = useState<boolean>(false);
 
     const classes = useStyle();
     const contentRef = useRef<HTMLDivElement>(null!);
@@ -172,13 +179,23 @@ function BucketRoom(props:propTypes) {
     },[props.id,props.token,setDataArray]);
 
 
+    useEffect(()=>{
+        socket.on('data',(data:{action:string,data:Data})=>{
+            if(data.action === 'created'){
+
+            }
+        })
+    },[])
+
+
     
     const handleTextData = (e:React.ChangeEvent<HTMLInputElement>) =>{
         setTextData(e.target.value);
     }
 
-    const handleDeleteData = (id:string) =>{
-        //TODO
+    const handleOptions = (type:string,id:string) =>{
+        console.log(type,id);
+        setOpenOptions(false);
     }
 
     const handleSend = async () =>{
@@ -191,6 +208,7 @@ function BucketRoom(props:propTypes) {
                     newArray.push(data); 
                     setDataArray(newArray);
                     setTextData('');
+                    updateScroll(contentRef.current);
                 }
             } catch (err) {
                 console.log(err.response);
@@ -210,8 +228,8 @@ function BucketRoom(props:propTypes) {
                             </IconButton>
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
-                            <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto', }}>
-                            <DataList  dataArray={dataArray} handleDelete={handleDeleteData}/>
+                            <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
+                            <DataList setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
                             </div>
                         </div>
                     </div>

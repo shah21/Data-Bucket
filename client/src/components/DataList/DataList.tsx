@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useState} from 'react'
 import {List} from "@material-ui/core"
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -9,15 +9,17 @@ import DeleteIcon from "@material-ui/icons/MoreVert";
 
 import './DataList.css'
 import Data from '../../Models/data';
-
 import moment from 'moment';
+import OptionsDialog from "../../components/OptionsDialog/OptionsDialog";
 
 
 
 
 interface propTypes{
     dataArray:[Data],
-    handleDelete:(id:string)=>void
+    handleOptions:(type:string,id:string)=>void,
+    open:boolean,
+    setOpen:any,
 }
 
 const useStyles = makeStyles({
@@ -46,15 +48,27 @@ const useStyles = makeStyles({
 function DataList(props:propTypes) {
 
     const classes = useStyles();
+    let id:string;
+
+
+    const handleOpen = () =>{
+        props.setOpen(true);
+    } 
+
+    const handleClose = () =>{
+        props.setOpen(false);
+    }
+
 
     return (
         <div className="dataList">
             
             <List >
-                {props.dataArray && props.dataArray.map(data => (
+                {props.dataArray && props.dataArray.map(data =>{ 
+                    id=data._id
+                    return (
                     <Card key={data.addedAt} className={classes.root} variant="outlined">
                         <CardContent>
-
                             <div className="head">
                                 <div>
                                     <Typography className={classes.title} gutterBottom>
@@ -64,10 +78,12 @@ function DataList(props:propTypes) {
                                         {moment(data.addedAt).fromNow()}
                                     </Typography>
                                 </div>
-                                <IconButton>
+                                <IconButton onClick={handleOpen}>
                                     <DeleteIcon className={classes.deleteIcon} />
                                 </IconButton>
                             </div>
+
+                            
 
 
 
@@ -77,11 +93,12 @@ function DataList(props:propTypes) {
 
 
                         </CardContent>
+                        
                     </Card>
-                ))}
-
+                    
+                )})}
             </List>
-            
+            <OptionsDialog id={id!} open={props.open} handleClose={handleClose} handleOptions={props.handleOptions} />
         </div>
     )
 }

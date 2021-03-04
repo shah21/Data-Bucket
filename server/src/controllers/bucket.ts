@@ -5,6 +5,7 @@ import HttpException from "../utils/HttpException";
 
 
 import Bucket from "../models/bucket";
+import socket from "../utils/socket";
 const LIMIT_PER_PAGE = 10;
 
 type UserId = {userId:string};
@@ -13,6 +14,7 @@ type UserId = {userId:string};
 export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
     const page = req.query.page || 1; 
     
+
     try{
         const query = {ownedBy:new ObjectID(req.userId)};
         const buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,+page);
@@ -173,6 +175,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         const newData = {_id:new ObjectID(Date.now()),data:text,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
+        socket.getIO().emit('data',{action:'created',data:newData});
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){
         if(!err.statusCode){
