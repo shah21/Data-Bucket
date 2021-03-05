@@ -12,13 +12,14 @@ class WebSockets {
       });
       // add identity of user mapped to the socket id
       client.on("identity", (data:{userId:string}) => {
-        this.users.push({
-          socketId: client.id,
-          userId: data.userId,
-        });
+        !this.users.includes({ socketId: client.id, userId: data.userId }) &&
+          this.users.push({
+            socketId: client.id,
+            userId: data.userId,
+          });
       });
       // subscribe person to chat & other user as well
-      client.on("subscribe", (room:string, otherUserId:string = "") => {
+      client.on("subscribe", (room: string, otherUserId: string = "") => {
         this.subscribeOtherUser(room, otherUserId);
         client.join(room);
       });
@@ -37,7 +38,6 @@ class WebSockets {
         const socketConn = global.io.sockets.sockets.get(userInfo.socketId);
         if(socketConn){
           socketConn.join(room);
-          console.log('subscribed')
         }
       });
     }

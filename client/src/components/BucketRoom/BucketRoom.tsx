@@ -167,6 +167,7 @@ function BucketRoom(props:propTypes) {
     },[props.bucketId,props.token]);
 
     useMemo(()=>{
+        setDataArray([]);
         async function promiseList(){
             try {
                 const response = await getDataArray(props.bucketId,props.token);
@@ -183,27 +184,32 @@ function BucketRoom(props:propTypes) {
 
 
     useEffect(()=>{
+        console.log('running');
         socket.emit('subscribe',props.bucketId,props.token.userId);
-        socket.on('data',(data:{action:string,data:Data,id:string})=>{
-            switch(data.action){
-                case 'created':{
-                    setDataArray(prev=>[...prev,data.data]);
-                    setTextData('');
-                    updateScroll(contentRef.current);
-                    break;
-                }
-                case 'deleted':{
-                    setDataArray(prev => {
-                        return prev.filter(item => {
-                            return item._id !== data.id;
+        socket.on('data',(data:{action:string,data:Data,bId:string,id:string})=>{
+            //check if it is correct bucket/room
+            console.log(data);
+            if (data.bId === props.bucketId) {
+                switch (data.action) {
+                    case 'created': {
+                        setDataArray(prev => [...prev, data.data]);
+                        setTextData('');
+                        contentRef && updateScroll(contentRef.current);
+                        break;
+                    }
+                    case 'deleted': {
+                        setDataArray(prev => {
+                            return prev.filter(item => {
+                                return item._id !== data.id;
+                            });
                         });
-                    });
-                    setFlash({ message: `Data deleted successfully !`, type: 'success' });
-                    break;
+                        setFlash({ message: `Data deleted successfully !`, type: 'success' });
+                        break;
+                    }
                 }
             }
         });
-    },[])
+    },[props.bucketId]);
 
     const deleteData = async (dataId:string,bucketId:string,token:any)=>{
         try {
