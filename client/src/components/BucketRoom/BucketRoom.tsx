@@ -22,7 +22,7 @@ interface propTypes{
     token:any,
 }
 
-const getBucket = async (bucketId:string,userToken:any) =>{
+const getBucket = async (bucketId:string,userToken:any) =>{    
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
@@ -164,7 +164,7 @@ function BucketRoom(props:propTypes) {
             }
         }
         promiseList();
-    },[props.bucketId,props.token]);
+    },[props.bucketId, props.token]);
 
     useMemo(()=>{
         setDataArray([]);
@@ -180,16 +180,16 @@ function BucketRoom(props:propTypes) {
             }
         }
         promiseList();
-    },[props.bucketId,props.token,setDataArray]);
+    },[props.bucketId, props.token]);
 
 
     useEffect(()=>{
-        console.log('running');
+        console.log(props.bucketId)
         socket.emit('subscribe',props.bucketId,props.token.userId);
         socket.on('data',(data:{action:string,data:Data,bId:string,id:string})=>{
             //check if it is correct bucket/room
-            console.log(data);
             if (data.bId === props.bucketId) {
+                console.log(props.bucketId,data.bId);
                 switch (data.action) {
                     case 'created': {
                         setDataArray(prev => [...prev, data.data]);

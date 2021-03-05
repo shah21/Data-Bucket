@@ -13,7 +13,7 @@ type UserId = {userId:string};
 //buckets
 export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
     const page = req.query.page || 1; 
-    
+
 
     try{
         const query = {ownedBy:new ObjectID(req.userId)};
@@ -175,6 +175,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         const newData = {_id:new ObjectID(Date.now()),data:text,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
+
         global.io.to(bucketId).emit('data',{action:'created',data:newData,bId:bucketId});
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){

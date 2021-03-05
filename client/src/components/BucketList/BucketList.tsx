@@ -21,6 +21,9 @@ const useStyle = makeStyles({
     secondaryText:{fontSize:'12px'},
     buttonBase:{
         width:'100%',
+    },
+    root:{
+        padding:'0px 0px 120px',
     }
 });
 
@@ -31,6 +34,7 @@ function BucketList(props:PropTypes){
     const {bucketArray} = props;
     const classes = useStyle();
     return(
+        <div className={classes.root}>
         <List>
             {bucketArray && bucketArray.map(bucket => (
                 <div key={bucket._id} onClick={(e)=>{props.clickHandler(bucket._id)}}>
@@ -51,6 +55,7 @@ function BucketList(props:PropTypes){
             ))} 
 
         </List>
+        </div>
     );
 }
 

@@ -12,11 +12,14 @@ class WebSockets {
       });
       // add identity of user mapped to the socket id
       client.on("identity", (data:{userId:string}) => {
-        !this.users.includes({ socketId: client.id, userId: data.userId }) &&
+        const isAvailable = this.users.includes({ socketId: client.id, userId: data.userId }); 
+        if (!isAvailable) {
           this.users.push({
             socketId: client.id,
             userId: data.userId,
           });
+        }
+        console.log(this.users)  
       });
       // subscribe person to chat & other user as well
       client.on("subscribe", (room: string, otherUserId: string = "") => {

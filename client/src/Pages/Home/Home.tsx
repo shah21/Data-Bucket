@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext, useRef, useMemo} from 'react'
+import React,{useState,useEffect,useContext, useRef, useMemo, useLayoutEffect} from 'react'
 import {useHistory} from "react-router-dom"
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PersonIcon from '@material-ui/icons/Person';
@@ -88,7 +88,11 @@ const getBuckets = async (userToken:any) =>{
 
 }
 
-
+function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
+    if(el!=null){
+        el.style.maxHeight = (parent.offsetHeight).toString()+'px';
+    }
+}
 
 
 function Home(props:any) {
@@ -97,9 +101,11 @@ function Home(props:any) {
     const [userData,setUserData] = useState({email:'',userId:''});
     const [open,setOpen] = useState(false);
     const [bucketId,setBucketId] = useState<string>(null!);
-    const buckets = useRef<[Bucket]>(null!);
+    const [scroll,setScroll] = useState<boolean>(false);
     
-
+    const buckets = useRef<[Bucket]>(null!);
+    const contentRef = useRef<HTMLDivElement>(null!);
+    const parentRef = useRef<HTMLDivElement>(null!);
     
 
     //context
@@ -108,6 +114,20 @@ function Home(props:any) {
     
 
     const history = useHistory();
+
+    useLayoutEffect(() => {
+        function updateSize() {
+            if(scroll){
+                changeStyle(contentRef.current,parentRef.current)
+            }
+        }
+        window.addEventListener('resize', updateSize);
+        updateSize();
+        return () =>{ 
+            window.removeEventListener('resize', updateSize);
+        }
+    }, [contentRef,parentRef,scroll])
+
 
     useEffect(()=>{
         async function promiseList(){
@@ -207,8 +227,10 @@ function Home(props:any) {
                 </div>
                 <hr></hr>
 
-                <div className="bucket-list">
+                <div className="bucket-list" ref={el => {  parentRef.current = el!; setScroll(true) }}>
+                    <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
                     <BucketList clickHandler={handleClickBucket} bucketArray={buckets.current}/>
+                    </div>
                 </div>
                 
             </div>

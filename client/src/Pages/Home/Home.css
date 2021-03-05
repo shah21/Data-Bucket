@@ -5,6 +5,8 @@
 .homePage{
     overflow: hidden;
     display: grid;
+    width: 100%;
+    height: 100%;
     grid-template-rows: 60px 100%;
     grid-template-columns: 300px 1fr;
     grid-template-areas: 
@@ -65,12 +67,20 @@
 .homePage .bucketBar {
     grid-area: box2;
     height:  100vh;
+    display: grid;
+    grid-template-rows:1fr 1fr 10fr;
+    grid-template-columns: 100%;
+    grid-template-areas:
+    "box1" 
+    "box2"
+    "box3";
     margin-bottom: -60px;
     border-right:1px solid #cacaca;
     background-color: #F6F6F6;
 }
 
 .homePage .bucketBar .bucketTitle{
+    grid-area: box1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -91,6 +101,7 @@
 }
 
 .homePage .searchBox{
+    grid-area: box2;
     width: 90%;
     margin:0 10px 10px;
     border-radius: 10px;
@@ -130,6 +141,11 @@
 
 .homePage .bucketBar hr{
     opacity: 0.3;
+}
+
+.homePage .bucket-list{
+    grid-area: box3;
+    height: 100vh;
 }
 
 
