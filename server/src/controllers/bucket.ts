@@ -175,7 +175,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         const newData = {_id:new ObjectID(Date.now()),data:text,file_path:null,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
-        // socket.getIO().emit('data',{action:'created',data:newData});
+        global.io.to(bucketId).emit('data',{action:'created',data:newData});
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){
         if(!err.statusCode){
@@ -205,6 +205,7 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
         const dataArray = bucket.data.filter((x: { _id: { toString: () => string; }; })=>x._id.toString()!==dataId.toString());
         const updateValues = {data:dataArray};
         const updateBucket = await Bucket.updateById(bucketId,updateValues);
+        global.io.to(bucketId).emit('data',{action:'deleted',id:dataId});
         res.status(200).json({messge:'deleted successfully'});
     }catch(err){
         console.log(err);

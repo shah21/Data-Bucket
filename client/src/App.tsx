@@ -69,7 +69,7 @@ function App() {
               });
         }
         socket.on('connect',()=>{
-          socket.emit('joins',{userId:token.userId});
+          socket.emit('identity',{userId:token.userId});
         });
       } catch(err){
         console.log(err);

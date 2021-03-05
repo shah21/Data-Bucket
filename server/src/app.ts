@@ -8,13 +8,23 @@ import HttpException, {  } from "./utils/HttpException";
 import  authRouter from "./routes/auth";
 import  bucketRouter from "./routes/bucket";
 import socket from "./utils/socket";
+import * as socketio from "socket.io";
+import WebSockets from "./utils/WebSockets";
 
+declare global {
+    namespace NodeJS {
+      interface Global {
+         document: Document;
+         window: Window;
+         navigator: Navigator;
+         io:socketio.Server,
+      } 
+    }
+  }
 
 const app = express();
 const users:[string] = [null!];
 
-const server = app.listen(8080);
-const io = socket.init(server);
 
 
 //sessions
@@ -30,7 +40,6 @@ app.use(cors());
 app.use(express.json());
 app.use(sessionMiddleware);
 
-io.use(sharedsession(sessionMiddleware,{autoSave:true}));
 
 //add a general middleware for set cors free requests
 app.use((req,res,next)=>{
@@ -54,14 +63,13 @@ app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
 
 connectDb(()=>{
     console.log('Databse connection successfull...');
- 
+    const server = app.listen(8080);
+    global.io = require('socket.io')(server,{
+        cors: {
+          origin: "http://localhost:3000",
+          credentials: true
+        }});
+    global.io.on('connection',WebSockets.connection);
     
-    io.sockets.on('connection',sk=>{
-        console.log('socket conected');
-        sk.on('joins',(data:any)=>{
-            sk.handshake.session.socketId = sk.id;
-            sk.handshake.session.save();
-        }); 
-    });
 })
 

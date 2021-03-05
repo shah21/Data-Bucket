@@ -130,7 +130,7 @@ function BucketRoom(props:propTypes) {
 
     const [bucket,setBucket] = useState<Bucket>(null!);
     const [textData,setTextData] = useState<string>('');
-    const [dataArray,setDataArray] = useState<Data[]>(null!);
+    const [dataArray,setDataArray] = useState<Data[]>([]);
     const [scroll,setScroll] = useState<boolean>(false);
     const [openOptions,setOpenOptions] = useState<boolean>(false);
     
@@ -170,7 +170,7 @@ function BucketRoom(props:propTypes) {
         async function promiseList(){
             try {
                 const response = await getDataArray(props.bucketId,props.token);
-                if(response.bucket.data){
+                if(response && response.bucket){
                     setDataArray(response.bucket.data);
                 }
                 
@@ -183,11 +183,26 @@ function BucketRoom(props:propTypes) {
 
 
     useEffect(()=>{
-        socket.on('data',(data:{action:string,data:Data})=>{
-            if(data.action === 'created'){
-
+        socket.emit('subscribe',props.bucketId,props.token.userId);
+        socket.on('data',(data:{action:string,data:Data,id:string})=>{
+            switch(data.action){
+                case 'created':{
+                    setDataArray(prev=>[...prev,data.data]);
+                    setTextData('');
+                    updateScroll(contentRef.current);
+                    break;
+                }
+                case 'deleted':{
+                    setDataArray(prev => {
+                        return prev.filter(item => {
+                            return item._id !== data.id;
+                        });
+                    });
+                    setFlash({ message: `Data deleted successfully !`, type: 'success' });
+                    break;
+                }
             }
-        })
+        });
     },[])
 
     const deleteData = async (dataId:string,bucketId:string,token:any)=>{
@@ -201,12 +216,6 @@ function BucketRoom(props:propTypes) {
                     }
                 });
                 if (response) {
-                    setDataArray(prev => {
-                        return dataArray.filter(data => {
-                            return data._id !== dataId
-                        });
-                    });
-                    setFlash({ message: `Data deleted successfully !`, type: 'success' });
                 }
             }
         } catch (err) {
@@ -220,7 +229,6 @@ function BucketRoom(props:propTypes) {
     }
 
     const handleOptions = (type:string,dataId:string) =>{
-        console.log('dataId',dataId);
         if(type==="delete"){
             deleteData(dataId,props.bucketId,props.token);
         }else if(type==="favorite"){
@@ -234,15 +242,10 @@ function BucketRoom(props:propTypes) {
             try {
                 const response = await addData(props.bucketId,props.token,textData,null!);
                 if(response){
-                    const data:Data = response.data.data;
-                    const newArray = dataArray;
-                    newArray.push(data); 
-                    setDataArray(newArray);
-                    setTextData('');
-                    updateScroll(contentRef.current);
+                    
                 }
             } catch (err) {
-                console.log(err.response);
+                console.log(err);
             }
         }
     }
