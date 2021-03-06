@@ -23,7 +23,7 @@ const useStyle = makeStyles({
         width:'100%',
     },
     root:{
-        padding:'0px 0px 120px',
+        padding:'0px 0px 160px',
     }
 });
 
