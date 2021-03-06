@@ -2,7 +2,11 @@ import React,{useMemo, useContext,useState,useRef, useEffect} from 'react'
 import { Button,TextField,IconButton } from "@material-ui/core";
 import Send from "@material-ui/icons/Send";
 import AttachFile from "@material-ui/icons/AttachFile";
+import OptionsIcon from "@material-ui/icons/MoreVert";
 import {makeStyles} from "@material-ui/core/styles"
+import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/DeleteForever';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 import './BucketRoom.css'
 import axios from "../../axios/config";
@@ -14,12 +18,14 @@ import DataList from '../DataList/DataList';
 import { useLayoutEffect } from 'react';
 import { socket } from '../../utils/socket';
 import { FlashContext } from '../../Contexts/FlashContext';
+import OptionsDialog from '../OptionsDialog/OptionsDialog';
 
 
 
 interface propTypes{
     bucketId:string,
     token:any,
+    deleteBucketHandler:(id:string)=>void,
 }
 
 const getBucket = async (bucketId:string,userToken:any) =>{    
@@ -86,8 +92,31 @@ const useStyle = makeStyles({
     },
     attachIcon:{
         color:'#333',
-    }
+    },
+    listItem:{
+        width:250,
+      },
 });
+
+
+/* Custom list items for Options dialog */  
+const DataOptions = (props:ListTypes) =>  (
+    <div>
+        <ListItem className={props.classes.listItem} onClick={(e)=>{props.handleOptions('manage',props.dataId)}} button>
+      <ListItemIcon>
+        <SettingsIcon style={{color:'#32be8f',}} />
+      </ListItemIcon>
+      <ListItemText primary="Manage Bucket" />
+    </ListItem>
+    <ListItem className={props.classes.listItem} onClick={(e)=>{props.handleOptions('delete',props.dataId)}} button>
+      <ListItemIcon>
+        <DeleteIcon color="secondary"/>
+      </ListItemIcon>
+      <ListItemText primary="Delete" />
+    </ListItem>
+    </div>
+);
+
 
 
 
@@ -133,6 +162,7 @@ function BucketRoom(props:propTypes) {
     const [dataArray,setDataArray] = useState<Data[]>([]);
     const [scroll,setScroll] = useState<boolean>(false);
     const [openOptions,setOpenOptions] = useState<boolean>(false);
+    const [openBucketOptions,setOpenBucketOptions] = useState<boolean>(false);
     
     const {setFlash} = useContext(FlashContext);
 
@@ -185,7 +215,6 @@ function BucketRoom(props:propTypes) {
 
 
     useEffect(()=>{
-        console.log(props.bucketId)
         socket.emit('subscribe',props.bucketId,props.token.userId);
         socket.on('data',(data:{action:string,data:Data,bId:string,id:string})=>{
             console.log(data.bId,props.bucketId);
@@ -261,18 +290,70 @@ function BucketRoom(props:propTypes) {
                 console.log(err);
             }
         }
+    } 
+    
+    
+    const handleOpen = () =>{
+        setOpenBucketOptions(true);
     }
+
+    const handleClose = () =>{  
+        setOpenBucketOptions(false);
+    }
+
+    const deleteBucket = async (bucketId:string,token:any)=>{
+        try {
+            const isAuthourized = await isAuth(token.accessToken, token.refreshToken);
+            if (isAuthourized && isAuthourized.isVerified) {
+                const response = await axios.delete(endpoints.deleteBucket + bucketId,{
+                    headers: {
+                        "Content-type": "application/json",
+                        "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                    }
+                });
+                if (response) {
+                    return response;
+                }
+            }
+        } catch (err) {
+            console.log(err);
+            setFlash({message:`Something error occured!`,type:'error'});
+        }
+    }
+
+    const handleBucketOptions = (type:string,id:string) =>{
+        if(type==="delete"){
+            const response = deleteBucket(id,props.token);
+            if(response){
+                setOpenBucketOptions(false);
+                props.deleteBucketHandler(id);
+            }
+        }else if(type==="manage"){
+            //TODO
+        }
+    }
+
+    
+
 
     return (
         <div className="bucket">
+            {openBucketOptions && (<OptionsDialog listElements={<DataOptions classes={classes} dataId={props.bucketId}
+             handleOptions={handleBucketOptions} />} open={openBucketOptions}
+              handleClose={handleClose} /> )}
             {bucket &&(
                 <div>
                     <div className="room">
                         <div className="headerSection">
                             <h4>{bucket.name}</h4>
-                            <IconButton className="attachIcon">
+                            <div>
+                            <IconButton  className="attachIcon">
                                 <AttachFile className={classes.attachIcon}/>
                             </IconButton>
+                            <IconButton onClick={handleOpen} className="attachIcon">
+                                <OptionsIcon className={classes.attachIcon}/>
+                            </IconButton>
+                            </div>
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                             <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>

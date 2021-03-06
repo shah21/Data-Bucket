@@ -103,7 +103,7 @@ function Home(props:any) {
     const [bucketId,setBucketId] = useState<string>(null!);
     const [scroll,setScroll] = useState<boolean>(false);
     
-    const buckets = useRef<[Bucket]>(null!);
+    const buckets = useRef<Bucket[]>(null!);
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
     
@@ -192,7 +192,10 @@ function Home(props:any) {
         setBucketId(id);
     } 
 
-
+    const handleDeleteBucket = (id:string) =>{
+        setBucketId(null!);
+        buckets.current = buckets.current.filter(bucket=>bucket._id !== id);
+    }
 
 
     return (
@@ -235,7 +238,7 @@ function Home(props:any) {
                 
             </div>
             <div className="bucketView">  
-                {bucketId ? (<BucketRoom token={token} bucketId={bucketId}/>) :(
+                {bucketId ? (<BucketRoom deleteBucketHandler={handleDeleteBucket}  token={token} bucketId={bucketId}/>) :(
                     <div className="container">
                         <div className="placeHolder">
                             <img src={Folder} alt="" className="bucketImg" />

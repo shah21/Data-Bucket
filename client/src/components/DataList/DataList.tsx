@@ -5,12 +5,19 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import DeleteIcon from "@material-ui/icons/MoreVert";
+import OptionsIcon from "@material-ui/icons/MoreVert";
+import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/DeleteForever';
+import FavoriteIcon from '@material-ui/icons/FavoriteOutlined';
 
 import './DataList.css'
 import Data from '../../Models/data';
 import moment from 'moment';
 import OptionsDialog from "../../components/OptionsDialog/OptionsDialog";
+
+
+
+
 
 
 
@@ -42,8 +49,32 @@ const useStyles = makeStyles({
   deleteIcon:{
       color:'#333',
       fontSize:'1.2rem',
-  }
+  },
+  listItem:{
+    width:250,
+  },
 });
+
+
+
+/* Custom list items for Options dialog */  
+const DataOptions = (props:ListTypes) =>  (
+    <div>
+        <ListItem className={props.classes.listItem} onClick={(e)=>{props.handleOptions('favorite',props.dataId)}} button>
+      <ListItemIcon>
+        <FavoriteIcon style={{color:'#32be8f',}} />
+      </ListItemIcon>
+      <ListItemText primary="Favorite" />
+    </ListItem>
+    <ListItem className={props.classes.listItem} onClick={(e)=>{props.handleOptions('delete',props.dataId)}} button>
+      <ListItemIcon>
+        <DeleteIcon color="secondary"/>
+      </ListItemIcon>
+      <ListItemText primary="Delete" />
+    </ListItem>
+    </div>
+);
+
 
 function DataList(props:propTypes) {
 
@@ -61,18 +92,20 @@ function DataList(props:propTypes) {
         props.setOpen(false);
     }
 
+    
+
 
     return (
         <div className="dataList">
-            
+
             <List >
                 {props.dataArray && props.dataArray.map(data => {
                     return (
                         <div key={data.addedAt}>
                             {props.open && (
-                            <OptionsDialog id={selectedItemId} open={props.open} handleClose={handleClose} handleOptions={props.handleOptions} />
+                                <OptionsDialog listElements={<DataOptions classes={classes} dataId={selectedItemId} handleOptions={props.handleOptions} />} open={props.open} handleClose={handleClose} />
                             )}
-                            <Card  className={classes.root} variant="outlined">
+                            <Card className={classes.root} variant="outlined">
                                 <CardContent>
                                     <div className="head">
                                         <div>
@@ -83,8 +116,8 @@ function DataList(props:propTypes) {
                                                 {moment(data.addedAt).fromNow()}
                                             </Typography>
                                         </div>
-                                        <IconButton onClick={(e)=>handleOpen(data._id)}>
-                                            <DeleteIcon className={classes.deleteIcon} />
+                                        <IconButton onClick={(e) => handleOpen(data._id)}>
+                                            <OptionsIcon className={classes.deleteIcon} />
                                         </IconButton>
                                     </div>
 
@@ -100,7 +133,7 @@ function DataList(props:propTypes) {
                     )
                 })}
             </List>
-            
+
         </div>
     )
 }

@@ -11,7 +11,7 @@ import Bucket from "../../Models/bucket";
 import { Typography,makeStyles } from "@material-ui/core";
 
 interface PropTypes{
-    bucketArray:[Bucket],
+    bucketArray:Bucket[],
     clickHandler:(id:string)=>void
 }
 
