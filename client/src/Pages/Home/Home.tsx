@@ -224,8 +224,8 @@ function Home(props:any) {
                         <SearchIcon fontSize="small" className="icon-add"/>
                         </button>
                     </div>
+                    <hr></hr>
                 </div>
-                <hr></hr>
 
                 <div className="bucket-list" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                     <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>

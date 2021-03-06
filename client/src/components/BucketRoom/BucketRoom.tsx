@@ -181,12 +181,14 @@ function BucketRoom(props:propTypes) {
         }
         promiseList();
     },[props.bucketId, props.token]);
+    
 
 
     useEffect(()=>{
         console.log(props.bucketId)
         socket.emit('subscribe',props.bucketId,props.token.userId);
         socket.on('data',(data:{action:string,data:Data,bId:string,id:string})=>{
+            console.log(data.bId,props.bucketId);
             //check if it is correct bucket/room
             if (data.bId === props.bucketId) {
                 console.log(props.bucketId,data.bId);
@@ -208,7 +210,12 @@ function BucketRoom(props:propTypes) {
                     }
                 }
             }
+
         });
+        return ()=>{
+            socket.off('subscribe');
+            socket.off('data');
+        }
     },[props.bucketId]);
 
     const deleteData = async (dataId:string,bucketId:string,token:any)=>{
