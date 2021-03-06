@@ -28,7 +28,7 @@ router.post('/create',isAuth,[
         const query = {name:value,ownedBy:new ObjectId(req.userId)}
         const bucket = await Bucket.findByQuery(query);
         if (bucket) {
-            return Promise.reject("Bucket name not available");
+            return Promise.reject("Bucket name is not available");
         }
     })
 ],postCreateBucket);

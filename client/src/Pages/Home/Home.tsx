@@ -147,6 +147,7 @@ function Home(props:any) {
     useEffect(()=>{
         socket.emit('subscribe',token.userId);
         socket.on('bucket', (data: { action: string, bId: string,bucket:Bucket }) => {
+            console.log(data);
             switch (data.action) {
                 case 'bucket-created': {
                     setOpen(prev=>false);
@@ -156,6 +157,7 @@ function Home(props:any) {
                     break;
                 }
                 case 'bucket-deleted': {
+                    socket.emit('unsubscribe',data.bId);
                     setBucketId(null!);
                     setBuckets(prev=>prev.filter(bucket=>bucket._id !== data.bId));
                     bucketsBackup.current = bucketsBackup.current.filter(bucket=>bucket._id !== data.bId);
@@ -163,7 +165,11 @@ function Home(props:any) {
                     break;
                 }
             }
-
+        
+        return ()=>{
+            socket.off('subscribe');
+            socket.off('bucket');
+        }
 
         });
     },[token]);
@@ -199,9 +205,16 @@ function Home(props:any) {
     }
 
     const handleSaveBucket = (name:string)=>{
-        addBucket(name,token).catch(err=>{
+        addBucket(name,token).then(data=>{
+            console.log(data);
+        }).catch(err=>{
             if(err.response && err.response.status !== 401){
-                setFlash({message:err.message,type:'error'});
+                const error = err.response.data.errors[0];
+                if(error){
+                    setFlash({message:error.msg,type:'error'});
+                }else{
+                    setFlash({message:err.message,type:'error'});
+                }
             }
             setOpen(prev=>false);
         })
