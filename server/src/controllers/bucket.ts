@@ -61,6 +61,7 @@ export const postCreateBucket = async (req:Request,res:Response,next:NextFunctio
 
         const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),undefined!,[]);
         const result = await newBucket.save();
+        global.io.to(req.userId!).emit('bucket',{action:'bucket-created',bucket:newBucket});
         res.status(201).json({messge:'bucket created',bucket:result.ops[0]});
     }catch(err){
         if(!err.statusCode){
@@ -111,6 +112,7 @@ export const deleteBucket = async (req:Request,res:Response,next:NextFunction)=>
             throw error;    
         }
 
+        global.io.to(req.userId!).emit('bucket',{action:'bucket-deleted',bId:bucketId});
         res.status(200).json({messge:'deleted successfully'});
     }catch(err){
         if(!err.statusCode){

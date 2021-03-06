@@ -215,12 +215,12 @@ function BucketRoom(props:propTypes) {
 
 
     useEffect(()=>{
-        socket.emit('subscribe',props.bucketId,props.token.userId);
+        socket.emit('subscribe',props.bucketId);
         socket.on('data',(data:{action:string,data:Data,bId:string,id:string})=>{
             console.log(data.bId,props.bucketId);
             //check if it is correct bucket/room
             if (data.bId === props.bucketId) {
-                console.log(props.bucketId,data.bId);
+                console.log(data);
                 switch (data.action) {
                     case 'created': {
                         setDataArray(prev => [...prev, data.data]);
@@ -323,11 +323,8 @@ function BucketRoom(props:propTypes) {
 
     const handleBucketOptions = (type:string,id:string) =>{
         if(type==="delete"){
-            const response = deleteBucket(id,props.token);
-            if(response){
-                setOpenBucketOptions(false);
-                props.deleteBucketHandler(id);
-            }
+            deleteBucket(id,props.token);
+            setOpenBucketOptions(false);
         }else if(type==="manage"){
             //TODO
         }

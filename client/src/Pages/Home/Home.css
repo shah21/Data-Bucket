@@ -139,6 +139,12 @@
     font-size: 2rem;
   }
 
+.homePage .bucketBar .no_result_text {
+    text-align: center;
+    margin-top: 30px;
+    font-size: medium;
+}
+
 .homePage .bucketBar hr{
     opacity: 0.3;
 }

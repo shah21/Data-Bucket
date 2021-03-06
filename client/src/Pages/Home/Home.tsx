@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext, useRef, useMemo, useLayoutEffect} from 'react'
+import React,{useState,useEffect,useContext, useRef, useLayoutEffect} from 'react'
 import {useHistory} from "react-router-dom"
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PersonIcon from '@material-ui/icons/Person';
@@ -20,6 +20,7 @@ import Bucket from '../../Models/bucket';
 import BucketList from "../../components/BucketList/BucketList";
 import BucketRoom from "../../components/BucketRoom/BucketRoom";
 import Folder from "../../res/images/folder.jpg";
+import { socket } from '../../utils/socket';
 
 const getUser = async (userToken:any) =>{
     if (userToken) {
@@ -103,9 +104,10 @@ function Home(props:any) {
     const [bucketId,setBucketId] = useState<string>(null!);
     const [scroll,setScroll] = useState<boolean>(false);
     
-    const buckets = useRef<Bucket[]>(null!);
+    const [buckets,setBuckets] = useState<Bucket[]>([]);
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
+    const bucketsBackup = useRef<Bucket[]>([]);
     
 
     //context
@@ -132,13 +134,40 @@ function Home(props:any) {
     useEffect(()=>{
         async function promiseList(){
             try {
-                buckets.current = await getBuckets(token);
+                const array = await getBuckets(token);
+                setBuckets(array);
+                bucketsBackup.current = array;
             } catch (err) {
                 console.log(err);
             }
         }
         promiseList();
-    },[buckets,token]);
+    },[token]);
+
+    useEffect(()=>{
+        socket.emit('subscribe',token.userId);
+        socket.on('bucket', (data: { action: string, bId: string,bucket:Bucket }) => {
+            switch (data.action) {
+                case 'bucket-created': {
+                    setOpen(prev=>false);
+                    setBuckets(prev=>[...prev,data.bucket as Bucket])
+                    bucketsBackup.current = [...bucketsBackup.current,data.bucket as Bucket];
+                    setFlash({message:`${data.bucket.name} Bucket created`,type:'success'});
+                    break;
+                }
+                case 'bucket-deleted': {
+                    setBucketId(null!);
+                    setBuckets(prev=>prev.filter(bucket=>bucket._id !== data.bId));
+                    bucketsBackup.current = bucketsBackup.current.filter(bucket=>bucket._id !== data.bId);
+                    setFlash({message:`Bucket deleted successfully`,type:'success'});
+                    break;
+                }
+            }
+
+
+        });
+    },[token]);
+
 
 
     useEffect(() => {
@@ -170,11 +199,7 @@ function Home(props:any) {
     }
 
     const handleSaveBucket = (name:string)=>{
-        addBucket(name,token).then(data=>{
-            setOpen(prev=>false);
-            buckets.current.push(data.bucket as Bucket);
-            setFlash({message:`${name} Bucket created`,type:'success'});
-        }).catch(err=>{
+        addBucket(name,token).catch(err=>{
             if(err.response && err.response.status !== 401){
                 setFlash({message:err.message,type:'error'});
             }
@@ -194,8 +219,20 @@ function Home(props:any) {
 
     const handleDeleteBucket = (id:string) =>{
         setBucketId(null!);
-        buckets.current = buckets.current.filter(bucket=>bucket._id !== id);
+        setBuckets(prev=>prev.filter(bucket=>bucket._id !== id))
     }
+
+    const handleSearch = async (e:React.ChangeEvent<HTMLInputElement>)=>{
+        const text = e.target.value;
+        setBuckets(bucketsBackup.current);
+        if(text){
+            // console.log(buckets.filter(x=>x.name.toLowerCase().includes(text)))
+            setBuckets(prev=>prev.filter(x=>x.name.toLowerCase().includes(text.toLowerCase())));
+            if(buckets.length === 0){
+                console.log('No buckets found');
+            }
+        }
+    } 
 
 
     return (
@@ -222,7 +259,7 @@ function Home(props:any) {
                 </div>
                 <div className="sb-example-1">
                     <div className="search">
-                        <input type="text" className="searchTerm" placeholder="Search bucket"/>
+                        <input type="text" onChange={handleSearch} className="searchTerm" placeholder="Search bucket"/>
                         <button type="submit" className="searchButton">
                         <SearchIcon fontSize="small" className="icon-add"/>
                         </button>
@@ -231,8 +268,9 @@ function Home(props:any) {
                 </div>
 
                 <div className="bucket-list" ref={el => {  parentRef.current = el!; setScroll(true) }}>
+                    {buckets.length === 0 && ( <h5 className="no_result_text">No buckets found</h5> )}
                     <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                    <BucketList clickHandler={handleClickBucket} bucketArray={buckets.current}/>
+                    <BucketList clickHandler={handleClickBucket} bucketArray={buckets}/>
                     </div>
                 </div>
                 
