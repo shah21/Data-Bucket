@@ -12,6 +12,7 @@ import Button from "../../../components/Button/Button";
 import axios from "../../../axios/config";
 import endpoints from "../../../axios/endpoints";
 import { FlashContext } from '../../../Contexts/FlashContext';
+import { useHistory } from 'react-router-dom';
 
 
 const formReducer = (state:object, event: any) => {
@@ -49,6 +50,8 @@ function Login({setToken}:any) {
     password:''
   });
   const {setFlash} = useContext(FlashContext);
+
+  const history = useHistory();
   
   useEffect(() => {
     getMessageFromSession() && setFlash(getMessageFromSession());
@@ -107,6 +110,7 @@ function Login({setToken}:any) {
             const response:any = await loginUser(formData);
             if(response){
               setToken(response.user);
+              history.push('/');
             }
           }catch(err){
             if (err.response) {

@@ -1,5 +1,5 @@
 import React, { useEffect,useMemo,useState } from "react";
-import {BrowserRouter as Router,Switch,Route,Redirect} from "react-router-dom";
+import {BrowserRouter as Router,Switch,Route, Redirect} from "react-router-dom";
 
 
 import './App.css';
@@ -12,29 +12,34 @@ import { FlashContext } from "./Contexts/FlashContext";
 import CustomizedSnackbar from './components/CustomizedSnackbar/CustomizedSnackbar';
 import isAuth from "./utils/isAuth";
 import { socket } from "./utils/socket";
+import NotFound from "./Pages/Error/NotFound";
 
 
- 
-/* function PrivateRoute ({Component, authed, path}:{Component:any,authed:boolean,path:string}) {
-  return (
-    <Route
-      path={path}
-      render={(props) => authed === true
-        ? <Component {...props} />
-        : <Redirect to='/login' />}
-    />
-  )
-} */
 
 type FlashType  = {message:string,type:string};
 
 
+
+
 function App() {
   
-  //states
+  /* states */
   const {token,setToken} = useToken();
   const [open,setOpen] = useState(false);
   const [flash, setFlash] = useState<FlashType>(null!); 
+
+
+
+  const protectedRoute = (props:any) => {
+    if (token.accessToken || token.refreshToken) {
+      return <Home />
+    } else {
+      return (
+        <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
+      );
+    }
+  };
+
 
   /* check if user authorized or not and 
   establish socket connection */
@@ -81,42 +86,24 @@ function App() {
   let routes = (
     <Router>
       <Switch>
-        <Route exact path="/login" render={() => (
-          <Login setToken={setToken} />
-        )} />
-        <Route exact path="/signup" render={() => (
-          <Signup />
-        )} />
-        <Redirect to="/login" />
-      </Switch>
+        <Route exact path="/login" render={()=>(<Login setToken={setToken} />)}/>
+        <Route exact path="/signup" render={()=>(<Signup/>)}/>
+        {/* <ProtectedRoute path="/" token={token} component={Home}/> */}
 
+        <Route exact path='/' render={protectedRoute} />
+
+        <Route path='*' component={NotFound} />
+      </Switch>
     </Router>
   );
 
-  /*   if user logged in*/
-  if (token.accessToken) {
-    routes = (
-      <Router>
-        <Switch>
-          <Route exact path="/" component={Home} />
-
-          <Redirect exact to="/" />
-        </Switch>
-      </Router>
-    )
-
-  }
 
 
   return (
     <div className="app">
       <FlashContext.Provider value={{ flash, setFlash }}>
         <TokenContext.Provider value={{ token, setToken }}>
-          <Router>
-            <Switch>
-              {routes}
-            </Switch>
-          </Router>
+            {routes}
         </TokenContext.Provider>
         <CustomizedSnackbar key="snackbar" openState={open} handleClose={handleClose} message={flash && flash.message} mode={flash && flash.type} />
       </FlashContext.Provider>
