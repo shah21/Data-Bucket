@@ -28,6 +28,7 @@ function App() {
   const {token,setToken} = useToken();
   const [open,setOpen] = useState(false);
   const [flash, setFlash] = useState<FlashType>(null!); 
+  const [flashBackup, setFlashBackup] = useState<FlashType>(null!); 
 
 
   /* check if user authorized or not and 
@@ -65,10 +66,13 @@ function App() {
   /* open and close flash messages */
   useMemo(() => {
     if (flash) {
+      setFlashBackup(flash);
+      setFlash(null!);
       setOpen(true);
     }
   }, [flash])
 
+  
   const handleClose = () => {
     setOpen(false);
   }
@@ -93,7 +97,7 @@ function App() {
         <TokenContext.Provider value={{ token, setToken }}>
             {routes}
         </TokenContext.Provider>
-        <CustomizedSnackbar key="snackbar" openState={open} handleClose={handleClose} message={flash && flash.message} mode={flash && flash.type} />
+        <CustomizedSnackbar key="snackbar" openState={open} handleClose={handleClose} message={flashBackup && flashBackup.message} mode={flashBackup && flashBackup.type} />
       </FlashContext.Provider>
     </div>
   );
