@@ -1,6 +1,6 @@
 import axios from "axios";
-import Cookie from "js-cookie";
-import endpoints from "./endpoints";
+// import Cookie from "js-cookie";
+// import endpoints from "./endpoints";
 
 
 
@@ -13,7 +13,10 @@ const axiosInstance =  axios.create({
 
 
 // axiosInstance.interceptors.response.use(
-//   (response) =>response,
+//   (response) =>{
+//     console.log(response);
+//     return response;
+//   },
 //   (error) => {
 
 //     const originalRequest = error.config;
@@ -55,7 +58,9 @@ const axiosInstance =  axios.create({
 //           .post(endpoints.refreshToken, { refreshToken: refreshToken })
 //           .then((response) => {
 //             const accessToken = response.data.accessToken
-//             Cookie.set("accessToken", accessToken);
+//             Cookie.set("accessToken", accessToken,{
+//                 expires: new Date(new Date().getTime() + 1 * 60 * 1000)
+//             });
 //             // axiosInstance.defaults.headers['Authorization'] = "Bearer " + response.data.accessToken;
 //             originalRequest.headers["Authorization"] =
 //               "Bearer " + accessToken;

@@ -29,7 +29,7 @@ function App() {
   const [open,setOpen] = useState(false);
   const [flash, setFlash] = useState<FlashType>(null!); 
 
-  
+
   /* check if user authorized or not and 
   establish socket connection */
   useEffect(() => {
@@ -42,15 +42,17 @@ function App() {
             accessToken: isAuthorized.accessToken,
           });
         }
-        socket.on('connect', () => {
-          socket.emit('identity', { userId: token.userId });
-        });
+       
       } catch (err) {
         console.log(err);
       }
     }
 
     promiseFunction();
+
+    socket.on('connect', () => {
+      socket.emit('identity', { userId: token.userId });
+    });
 
     return () => {
       socket.off('connect');

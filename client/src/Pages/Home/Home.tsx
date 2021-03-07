@@ -31,15 +31,14 @@ const getUser = async (userToken:any) =>{
                 const response = await axios.get(endpoints.getUser + userToken.userId, {
                     headers: {
                         "Content-Type": 'application/json',
-                        "Authorization": "Bearer " + isAuthourized.accessToken,
+                        "Authorizati    on": "Bearer " + isAuthourized.accessToken,
                     }
                 });
                 return response.data;
             }
-
             
         } catch (err) {
-            console.log(err);
+            // console.log(err);
             return err;
         }
     } 
@@ -80,7 +79,8 @@ const getBuckets = async (userToken:any) =>{
                 }
             });
             if(response){
-                return response.data.buckets;
+                console.log(response.data);
+                return response.data;
             }
         }
     } catch (err) {
@@ -108,7 +108,7 @@ function Home(props:any) {
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
     const bucketsBackup = useRef<Bucket[]>([]);
-    
+    const totalCount = useRef<number>(0);
 
     //context
     const {token} = useContext(TokenContext);
@@ -134,7 +134,9 @@ function Home(props:any) {
     useEffect(()=>{
         async function promiseList(){
             try {
-                const array = await getBuckets(token);
+                const responseData = await getBuckets(token);
+                const array = responseData.buckets;
+                totalCount.current = responseData.totalCount;
                 setBuckets(array);
                 bucketsBackup.current = array;
             } catch (err) {
@@ -206,7 +208,7 @@ function Home(props:any) {
 
     const handleSaveBucket = (name:string)=>{
         addBucket(name,token).then(data=>{
-            console.log(data);
+            
         }).catch(err=>{
             if(err.response && err.response.status !== 401){
                 const error = err.response.data.errors[0];

@@ -19,7 +19,9 @@ const isAuth = async (accessToken:string,refreshToken:string):Promise<{isVerifie
           });
           if (response && response.data.accessToken) {
             const newToken = response.data.accessToken;
-            Cookie.set("accessToken", newToken);
+            Cookie.set("accessToken", newToken,{
+              expires: new Date(new Date().getTime() + 1 * 60 * 1000)
+          });
             return { isVerified: true, accessToken: newToken };
           }
         }

@@ -35,6 +35,10 @@ class Bucket{
         ]).toArray();
     }
 
+    static getDocumentCount(query:object){
+        return getDb().collection('buckets').countDocuments(query);
+    }
+
     static findByName(name:string){
         return getDb().collection('buckets').findOne({name:name});
     }
