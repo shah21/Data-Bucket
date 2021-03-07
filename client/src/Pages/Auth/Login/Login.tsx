@@ -58,11 +58,13 @@ function Login({setToken}:any) {
     sessionStorage.removeItem('message');
   },[setFlash]);
 
+
+  /* Handle validation of form */
   const handleValidation = () => {
     let formIsValid = true;
     const newErrors = {
-      email:'',
-      password:''
+      email: '',
+      password: ''
     };
 
     //Email
@@ -97,7 +99,7 @@ function Login({setToken}:any) {
     return formIsValid;
   }
  
-
+    /* Handle login */
     const loginHandler = async (event: { preventDefault: () => void; }) =>{
         event.preventDefault();
         if(handleValidation()){
@@ -125,6 +127,7 @@ function Login({setToken}:any) {
         }
     }
 
+    /* Handle user inputs */
     const handleChange = (event: { target: { name: any; value: any; }; }) =>{
         setFormData({
             [event.target.name]:event.target.value,

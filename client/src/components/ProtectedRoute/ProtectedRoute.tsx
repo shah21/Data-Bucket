@@ -1,31 +1,28 @@
 import React from "react";
-import { Route, Redirect} from "react-router-dom";
+import { Route, Redirect, RouteProps} from "react-router-dom";
 
-interface PropTypes{
-    component:React.ComponentType,
-    path:string,
-    token:any,
-}
 
-function ProtectedRoute({component:Component,path,token}:PropTypes) {
-
-  return (
-    <Route
-    exact
-    path={path}
-      render={(props) => {
-        if (token.accessToken || token.refreshToken) {
-          return <Component />
-        } else {
-            console.log('render');
-          return (
-              
-            <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
-          );
-        }
-      }}
-    />
-  );
-}
+export interface ProtectedRouteProps extends RouteProps {
+    token: any;
+    path: string;
+    authenticationPath: string;
+  }
+  
+  export const ProtectedRoute: React.FC<ProtectedRouteProps> = props => {
+    let redirectPath = '';
+    if (!props.token.accessToken && !props.token.refreshToken) {
+      redirectPath = props.authenticationPath;
+    }
+    // if (props.isAuthenticated && !props.isAllowed) {
+    //   redirectPath = props.restrictedPath;
+    // }
+  
+    if (redirectPath) {
+      const renderComponent = () => <Redirect to={{ pathname: redirectPath }} />;
+      return <Route {...props} component={renderComponent} render={undefined} />;
+    } else {
+      return <Route {...props} />;
+    }
+  };
 
 export default ProtectedRoute;

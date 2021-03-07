@@ -217,10 +217,8 @@ function BucketRoom(props:propTypes) {
     useEffect(()=>{
         socket.emit('subscribe',props.bucketId);
         socket.on('data',(data:{action:string,data:Data,bId:string,id:string})=>{
-            console.log(data.bId,props.bucketId);
             //check if it is correct bucket/room
             if (data.bId === props.bucketId) {
-                console.log(data);
                 switch (data.action) {
                     case 'created': {
                         setDataArray(prev => [...prev, data.data]);
@@ -316,7 +314,6 @@ function BucketRoom(props:propTypes) {
                 }
             }
         } catch (err) {
-            console.log(err);
             setFlash({message:`Something error occured!`,type:'error'});
         }
     }

@@ -12,6 +12,7 @@ import { FlashContext } from "./Contexts/FlashContext";
 import CustomizedSnackbar from './components/CustomizedSnackbar/CustomizedSnackbar';
 import isAuth from "./utils/isAuth";
 import { socket } from "./utils/socket";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import NotFound from "./Pages/Error/NotFound";
 
 
@@ -28,19 +29,7 @@ function App() {
   const [open,setOpen] = useState(false);
   const [flash, setFlash] = useState<FlashType>(null!); 
 
-
-
-  const protectedRoute = (props:any) => {
-    if (token.accessToken || token.refreshToken) {
-      return <Home />
-    } else {
-      return (
-        <Redirect to={{ pathname: "/login", state: { from: props.location } }} />
-      );
-    }
-  };
-
-
+  
   /* check if user authorized or not and 
   establish socket connection */
   useEffect(() => {
@@ -88,10 +77,7 @@ function App() {
       <Switch>
         <Route exact path="/login" render={()=>(<Login setToken={setToken} />)}/>
         <Route exact path="/signup" render={()=>(<Signup/>)}/>
-        {/* <ProtectedRoute path="/" token={token} component={Home}/> */}
-
-        <Route exact path='/' render={protectedRoute} />
-
+        <ProtectedRoute exact path="/" token={token} component={Home} authenticationPath="/login"/>
         <Route path='*' component={NotFound} />
       </Switch>
     </Router>
