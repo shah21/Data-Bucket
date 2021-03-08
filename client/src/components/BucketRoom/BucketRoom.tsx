@@ -48,11 +48,11 @@ const getBucket = async (bucketId:string,userToken:any) =>{
 
 }
 
-const getDataArray = async (bucketId:string,userToken:any) =>{
+const getDataArray = async (bucketId:string,userToken:any,page:number) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
-            const response = await axios.get(endpoints.getBucket + bucketId +'/data', {
+            const response = await axios.get(endpoints.getBucket + bucketId +`/data?page=${page}`, {
                 headers: {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
@@ -163,12 +163,17 @@ function BucketRoom(props:propTypes) {
     const [scroll,setScroll] = useState<boolean>(false);
     const [openOptions,setOpenOptions] = useState<boolean>(false);
     const [openBucketOptions,setOpenBucketOptions] = useState<boolean>(false);
+    const [scrolling,setScrolling] = useState<boolean>(false);
     
     const {setFlash} = useContext(FlashContext);
 
     const classes = useStyle();
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
+    const totalCount = useRef<number>(0);
+    const currentPage = useRef<number>(1);
+
+    const LIMIT_PER_PAGE = 5;
 
     useLayoutEffect(() => {
         function updateSize() {
@@ -200,11 +205,16 @@ function BucketRoom(props:propTypes) {
         setDataArray([]);
         async function promiseList(){
             try {
-                const response = await getDataArray(props.bucketId,props.token);
-                if(response && response.bucket){
-                    setDataArray(response.bucket.data);
-                }
-                
+                // if (currentPage.current === 1) {
+                    currentPage.current = 1;
+                    const response = await getDataArray(props.bucketId, props.token, currentPage.current);
+                    if (response && response.bucket) {
+                        console.log(response);
+                        setDataArray(response.bucket.data);
+                        setScrolling(false);
+                        totalCount.current = response.totalCount;
+                    }
+                // }
             } catch (err) {
                 console.log(err);
             }
@@ -259,7 +269,6 @@ function BucketRoom(props:propTypes) {
                 }
             }
         } catch (err) {
-            console.log(err);
             setFlash({message:`Something error occured!`,type:'error'});
         }
     }
@@ -273,6 +282,7 @@ function BucketRoom(props:propTypes) {
             deleteData(dataId,props.bucketId,props.token);
         }else if(type==="favorite"){
             //TODO
+           
         }
         setOpenOptions(false);
     }
@@ -327,6 +337,35 @@ function BucketRoom(props:propTypes) {
         }
     }
 
+
+    const paginateData = async () =>{
+        if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
+            currentPage.current = ++currentPage.current; 
+            const responseData = await getDataArray(props.bucketId,props.token,currentPage.current);
+            totalCount.current = responseData.totalCount;
+            
+            const array = [...dataArray, ...responseData.bucket.data];
+            setDataArray(array);
+        }
+        setScrolling(false);
+    }
+
+
+    const handleScroll = (e: any) => {
+        const lastItem:HTMLDivElement = document.querySelector(".bucketView ul.MuiList-root > div:last-child") as HTMLDivElement;
+        const scrollBarContainer = document.querySelector(".room div.scrollBar") as HTMLDivElement;
+        if(lastItem){
+        const lastItemOffset = lastItem.offsetTop + lastItem.clientHeight;
+        // const pageOffset = window.pageYOffset + window.innerHeight;
+
+        if (!scrolling && scrollBarContainer.scrollHeight > lastItemOffset) {            
+            setScrolling(true);
+            paginateData();
+        }
+        }
+    }
+
+
     
 
 
@@ -350,7 +389,7 @@ function BucketRoom(props:propTypes) {
                             </div>
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
-                            <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
+                            <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
                             <DataList setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
                             </div>
                         </div>

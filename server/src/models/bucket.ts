@@ -35,6 +35,16 @@ class Bucket{
         ]).toArray();
     }
 
+
+    static getDataCount(query:object){
+        return getDb().collection('buckets').aggregate([
+            {$match: query},
+            {$unwind:"$data"},
+            {$group:{_id:"$_id",size:{$sum:1}}}
+        ]).toArray();
+    }
+
+
     static getDocumentCount(query:object){
         return getDb().collection('buckets').countDocuments(query);
     }

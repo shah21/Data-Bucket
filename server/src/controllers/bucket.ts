@@ -6,7 +6,7 @@ import HttpException from "../utils/HttpException";
 
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
-const LIMIT_PER_PAGE = 10;
+const LIMIT_PER_PAGE = 5;
 
 type UserId = {userId:string};
 
@@ -142,13 +142,20 @@ export const deleteBucket = async (req:Request,res:Response,next:NextFunction)=>
 export const getData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const page = req.query.page || 1;
-    
+    let bucket;
+
     try{
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
-        const bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,+page);
+        const count = await Bucket.getDataCount(query);
+        if(count[0].size > 0){
+            bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,+page);
+        }else{
+            bucket = [[]]
+        }
         
-        res.status(200).json({messge:'success',bucket:bucket[0]});
+        res.status(200).json({messge:'success',bucket:bucket[0],totalCount:count[0].size});
     }catch(err){
+        console.log(err);
         if(!err.statusCode){
             err.statusCode = 500;
         }
