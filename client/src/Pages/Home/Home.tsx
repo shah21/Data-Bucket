@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 
 
 
+
 import "./Home.css";
 import axios from "../../axios/config";
 import FormDialog from '../../components/FormDialog/FormDialog';
@@ -31,14 +32,14 @@ const getUser = async (userToken:any) =>{
                 const response = await axios.get(endpoints.getUser + userToken.userId, {
                     headers: {
                         "Content-Type": 'application/json',
-                        "Authorizati    on": "Bearer " + isAuthourized.accessToken,
+                        "Authorization": "Bearer " + isAuthourized.accessToken,
                     }
                 });
                 return response.data;
             }
             
         } catch (err) {
-            // console.log(err);
+            console.log(err);
             return err;
         }
     } 
@@ -68,18 +69,17 @@ const addBucket = async (name:string,userToken:any) =>{
 
 }
 
-const getBuckets = async (userToken:any) =>{
+const getBuckets = async (userToken:any,page:number) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
-            const response = await axios.get(endpoints.getBuckets, {
+            const response = await axios.get(endpoints.getBuckets + `/?page=${page}`, {
                 headers: {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 }
             });
             if(response){
-                console.log(response.data);
                 return response.data;
             }
         }
@@ -103,12 +103,14 @@ function Home(props:any) {
     const [open,setOpen] = useState(false);
     const [bucketId,setBucketId] = useState<string>(null!);
     const [scroll,setScroll] = useState<boolean>(false);
-    
     const [buckets,setBuckets] = useState<Bucket[]>([]);
+    const [scrolling,setScrolling] = useState<boolean>(false);
+
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
     const bucketsBackup = useRef<Bucket[]>([]);
     const totalCount = useRef<number>(0);
+    const currentPage = useRef<number>(1);
 
     //context
     const {token} = useContext(TokenContext);
@@ -116,6 +118,7 @@ function Home(props:any) {
     
 
     const history = useHistory();
+    const LIMIT_PER_PAGE = 10;
 
     useLayoutEffect(() => {
         function updateSize() {
@@ -134,16 +137,19 @@ function Home(props:any) {
     useEffect(()=>{
         async function promiseList(){
             try {
-                const responseData = await getBuckets(token);
-                const array = responseData.buckets;
-                totalCount.current = responseData.totalCount;
-                setBuckets(array);
-                bucketsBackup.current = array;
+                if(currentPage.current === 1){
+                    const responseData = await getBuckets(token,currentPage.current);
+                    totalCount.current = responseData.totalCount;
+                    const array = [...responseData.buckets];
+                    setBuckets(array);
+                    bucketsBackup.current = array;
+                }
             } catch (err) {
                 console.log(err);
             }
         }
         promiseList();
+
     },[token]);
 
     useEffect(()=>{
@@ -180,19 +186,20 @@ function Home(props:any) {
 
     useEffect(() => {
         async function promiseData() {
-            try{
+            try {
                 const response = await getUser(token);
-            if (response && response.user) {
-                const user = response.user;
-                setUserData({
-                    email: user.email,
-                    userId: user._id
+                if (response && response.user) {
+                    const user = response.user;
+                
+                    setUserData({
+                        email: user.email,
+                        userId: user._id
 
-                });
-            }
-            }catch(err){
+                    });
+                }
+            } catch (err) {
                 console.log(err)
-            }   
+            }
         }
         promiseData();
     }, [token]);
@@ -250,6 +257,33 @@ function Home(props:any) {
     } 
 
 
+    const paginateData = async () =>{
+        if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
+            currentPage.current = ++currentPage.current; 
+            const responseData = await getBuckets(token,currentPage.current);
+            totalCount.current = responseData.totalCount;
+            setScrolling(false);
+            const array = [...buckets, ...responseData.buckets];
+            setBuckets(array);
+            bucketsBackup.current = array;       
+        }
+    }
+
+
+    const handleScroll = (e: any) => {
+        const lastItem:HTMLDivElement = document.querySelector(".bucket-list ul.MuiList-root > div:last-child") as HTMLDivElement;
+        const lastItemOffset = lastItem.offsetTop + lastItem.clientHeight;
+        const scrollBarContainer = document.querySelector(".bucket-list div.scrollBar") as HTMLDivElement;
+        // const pageOffset = window.pageYOffset + window.innerHeight;
+
+    
+        if (!scrolling && scrollBarContainer.scrollHeight > lastItemOffset) {
+            setScrolling(true);
+            paginateData();
+        }
+    }
+
+
     return (
         <div className="homePage">
             <nav className="header">
@@ -284,8 +318,9 @@ function Home(props:any) {
 
                 <div className="bucket-list" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                     {buckets.length === 0 && ( <h5 className="no_result_text">No buckets found</h5> )}
-                    <div className="scrollBar" ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                    <BucketList clickHandler={handleClickBucket} bucketArray={buckets}/>
+                    <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
+                    <BucketList reloadHandler={paginateData} clickHandler={handleClickBucket} bucketArray={buckets}/>
+                        
                     </div>
                 </div>
                 

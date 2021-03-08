@@ -15,15 +15,20 @@ export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
     const page = req.query.page || 1; 
     let buckets:any;
 
+
     try{
         const query = {ownedBy:new ObjectID(req.userId)};
         const count:number = await Bucket.getDocumentCount(query);
         
+        
+
         if(count > 0){
             buckets = await Bucket.getBucketsWithPagination(query,LIMIT_PER_PAGE,+page);
         }else{
             buckets = [];
         }
+
+        
         res.status(200).json({messge:'success',buckets:buckets,totalCount:count});
     }catch(err){
         

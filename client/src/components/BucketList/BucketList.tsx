@@ -6,13 +6,15 @@ import ListItemText from '@material-ui/core/ListItemText';
 import FolderIcon from '@material-ui/icons/Folder';
 import Divider from '@material-ui/core/Divider';
 import ButtonBase from '@material-ui/core/ButtonBase'
+import Reload from "@material-ui/icons/ReplayOutlined";
 
 import Bucket from "../../Models/bucket";
-import { Typography,makeStyles } from "@material-ui/core";
+import { Typography,makeStyles,IconButton } from "@material-ui/core";
 
 interface PropTypes{
     bucketArray:Bucket[],
-    clickHandler:(id:string)=>void
+    clickHandler:(id:string)=>void,
+    reloadHandler:()=>void,
 }
 
 const useStyle = makeStyles({
@@ -24,6 +26,15 @@ const useStyle = makeStyles({
     },
     root:{
         padding:'0px 0px 160px',
+    },
+    reloadContainer:{
+        width: '100%',
+        padding:'10px',
+        display: 'flex',
+        justifyContent: 'center',
+    },
+    reloadIcon:{
+        color:'#6C6C6C',
     }
 });
 
@@ -53,7 +64,13 @@ function BucketList(props:PropTypes){
                  <Divider variant="inset" component="li" />
                  </div> 
             ))} 
-
+                <div>
+                    <div className={classes.reloadContainer}>
+                        <IconButton onClick={props.reloadHandler}>
+                            <Reload  className={classes.reloadIcon} />
+                        </IconButton>
+                    </div>
+                </div>
         </List>
         </div>
     );
