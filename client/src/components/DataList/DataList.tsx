@@ -9,6 +9,8 @@ import OptionsIcon from "@material-ui/icons/MoreVert";
 import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
 import FavoriteIcon from '@material-ui/icons/FavoriteOutlined';
+import Reload from "@material-ui/icons/ReplayOutlined";
+
 
 import './DataList.css'
 import Data from '../../Models/data';
@@ -27,6 +29,8 @@ interface propTypes{
     handleOptions:(type:string,id:string)=>void,
     open:boolean,
     setOpen:any,
+    reloadHandler:()=>void,
+    totalCount:number,
 }
 
 const useStyles = makeStyles({
@@ -53,6 +57,15 @@ const useStyles = makeStyles({
   listItem:{
     width:250,
   },
+  reloadContainer:{
+    width: '100%',
+    padding:'10px',
+    display: 'flex',
+    justifyContent: 'center',
+},
+reloadIcon:{
+    color:'#6C6C6C',
+}
 });
 
 
@@ -132,6 +145,13 @@ function DataList(props:propTypes) {
                         </div>
                     )
                 })}
+                {props.dataArray && props.totalCount > props.dataArray.length && (
+                <div className={classes.reloadContainer}>
+                        <IconButton onClick={props.reloadHandler}>
+                            <Reload  className={classes.reloadIcon} />
+                        </IconButton>
+                </div>
+                )}
             </List>
 
         </div>

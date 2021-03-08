@@ -164,6 +164,7 @@ function BucketRoom(props:propTypes) {
     const [openOptions,setOpenOptions] = useState<boolean>(false);
     const [openBucketOptions,setOpenBucketOptions] = useState<boolean>(false);
     const [scrolling,setScrolling] = useState<boolean>(false);
+
     
     const {setFlash} = useContext(FlashContext);
 
@@ -210,9 +211,11 @@ function BucketRoom(props:propTypes) {
                     const response = await getDataArray(props.bucketId, props.token, currentPage.current);
                     if (response && response.bucket) {
                         console.log(response);
+                        totalCount.current = response.totalCount;
                         setDataArray(response.bucket.data);
                         setScrolling(false);
-                        totalCount.current = response.totalCount;
+                        // totalCount.current = response.totalCount;
+                        // setCountState(totalCount.current);
                     }
                 // }
             } catch (err) {
@@ -281,7 +284,7 @@ function BucketRoom(props:propTypes) {
         if(type==="delete"){
             deleteData(dataId,props.bucketId,props.token);
         }else if(type==="favorite"){
-            //TODO
+            //TOD
            
         }
         setOpenOptions(false);
@@ -339,13 +342,14 @@ function BucketRoom(props:propTypes) {
 
 
     const paginateData = async () =>{
+        console.log(totalCount.current);
         if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
             currentPage.current = ++currentPage.current; 
             const responseData = await getDataArray(props.bucketId,props.token,currentPage.current);
-            totalCount.current = responseData.totalCount;
-            
             const array = [...dataArray, ...responseData.bucket.data];
+            totalCount.current = responseData.totalCount;
             setDataArray(array);
+            // setCountState(responseData.totalCount);
         }
         setScrolling(false);
     }
@@ -358,7 +362,7 @@ function BucketRoom(props:propTypes) {
         const lastItemOffset = lastItem.offsetTop + lastItem.clientHeight;
         // const pageOffset = window.pageYOffset + window.innerHeight;
 
-        if (!scrolling && scrollBarContainer.scrollHeight > lastItemOffset) {            
+        if (!scrolling && scrollBarContainer.scrollHeight > lastItemOffset) {       
             setScrolling(true);
             paginateData();
         }
@@ -390,7 +394,7 @@ function BucketRoom(props:propTypes) {
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                             <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                            <DataList setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
+                            <DataList totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
                             </div>
                         </div>
                     </div>

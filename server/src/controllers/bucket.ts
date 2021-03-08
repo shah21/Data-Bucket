@@ -147,13 +147,13 @@ export const getData = async (req:Request,res:Response,next:NextFunction)=>{
     try{
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const count = await Bucket.getDataCount(query);
-        if(count[0].size > 0){
+        if(count[0] && count[0].size > 0){
             bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,+page);
         }else{
             bucket = [[]]
         }
         
-        res.status(200).json({messge:'success',bucket:bucket[0],totalCount:count[0].size});
+        res.status(200).json({messge:'success',bucket:bucket[0],totalCount:count[0] ? count[0].size:0});
     }catch(err){
         console.log(err);
         if(!err.statusCode){
