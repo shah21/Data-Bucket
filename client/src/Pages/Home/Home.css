@@ -149,7 +149,7 @@
     opacity: 0.3;
 }
 
-.homePage .bucketBar .reload-container{
+/* .homePage .bucketBar .reload-container{
     width: 100%;
     position:absolute;
     display: flex;
@@ -158,7 +158,7 @@
 
 .homePage .bucketBar .reload-icon{
 
-}
+} */
 
 .homePage .bucket-list{
     grid-area: box3;

@@ -15,6 +15,7 @@ interface PropTypes{
     bucketArray:Bucket[],
     clickHandler:(id:string)=>void,
     reloadHandler:()=>void,
+    totalCount:number,
 }
 
 const useStyle = makeStyles({
@@ -65,11 +66,13 @@ function BucketList(props:PropTypes){
                  </div> 
             ))} 
                 <div>
+                {props.totalCount > props.bucketArray.length && (
                     <div className={classes.reloadContainer}>
                         <IconButton onClick={props.reloadHandler}>
                             <Reload  className={classes.reloadIcon} />
                         </IconButton>
                     </div>
+                     )}
                 </div>
         </List>
         </div>

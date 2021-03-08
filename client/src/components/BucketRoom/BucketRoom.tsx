@@ -174,7 +174,7 @@ function BucketRoom(props:propTypes) {
     const totalCount = useRef<number>(0);
     const currentPage = useRef<number>(1);
 
-    const LIMIT_PER_PAGE = 5;
+    const LIMIT_PER_PAGE = 10;
 
     useLayoutEffect(() => {
         function updateSize() {
@@ -206,20 +206,21 @@ function BucketRoom(props:propTypes) {
         setDataArray([]);
         async function promiseList(){
             try {
-                // if (currentPage.current === 1) {
-                    currentPage.current = 1;
-                    const response = await getDataArray(props.bucketId, props.token, currentPage.current);
+                if(dataArray.length === 0){
+                    const response = await getDataArray(props.bucketId, props.token,currentPage.current);
                     if (response && response.bucket) {
                         console.log(response);
                         totalCount.current = response.totalCount;
                         setDataArray(response.bucket.data);
                         setScrolling(false);
-                        // totalCount.current = response.totalCount;
-                        // setCountState(totalCount.current);
                     }
-                // }
+                }else{
+                    setDataArray(dataArray);        
+                }
+                   
+               
             } catch (err) {
-                console.log(err);
+               console.log(err);
             }
         }
         promiseList();
@@ -342,7 +343,6 @@ function BucketRoom(props:propTypes) {
 
 
     const paginateData = async () =>{
-        console.log(totalCount.current);
         if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
             currentPage.current = ++currentPage.current; 
             const responseData = await getDataArray(props.bucketId,props.token,currentPage.current);

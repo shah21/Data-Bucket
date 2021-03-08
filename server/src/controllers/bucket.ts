@@ -6,7 +6,7 @@ import HttpException from "../utils/HttpException";
 
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
-const LIMIT_PER_PAGE = 5;
+const LIMIT_PER_PAGE = 10;
 
 type UserId = {userId:string};
 

@@ -137,13 +137,15 @@ function Home(props:any) {
     useEffect(()=>{
         async function promiseList(){
             try {
-                if(currentPage.current === 1){
+                if(buckets.length === 0){
                     const responseData = await getBuckets(token,currentPage.current);
                     totalCount.current = responseData.totalCount;
                     const array = [...responseData.buckets];
                     setBuckets(array);
                     bucketsBackup.current = array;
-                }
+                }else{
+                    setBuckets(buckets);
+                } 
             } catch (err) {
                 console.log(err);
             }
@@ -319,7 +321,7 @@ function Home(props:any) {
                 <div className="bucket-list" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                     {buckets.length === 0 && ( <h5 className="no_result_text">No buckets found</h5> )}
                     <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                    <BucketList reloadHandler={paginateData} clickHandler={handleClickBucket} bucketArray={buckets}/>
+                    <BucketList totalCount={totalCount.current} reloadHandler={paginateData} clickHandler={handleClickBucket} bucketArray={buckets}/>
                         
                     </div>
                 </div>
