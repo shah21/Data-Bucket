@@ -16,6 +16,7 @@ export interface ProtectedRouteProps extends RouteProps {
     // if (props.isAuthenticated && !props.isAllowed) {
     //   redirectPath = props.restrictedPath;
     // }
+
   
     if (redirectPath) {
       const renderComponent = () => <Redirect to={{ pathname: redirectPath }} />;

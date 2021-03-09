@@ -117,6 +117,27 @@ const DataOptions = (props:ListTypes) =>  (
     </div>
 );
 
+const getUA = () => {
+    let device = "Unknown";
+    const ua:{[key:string]:RegExp} = {
+        "Generic Linux": /Linux/i,
+        "Android": /Android/i,
+        "BlackBerry": /BlackBerry/i,
+        "Bluebird": /EF500/i,
+        "Chrome OS": /CrOS/i,
+        "Datalogic": /DL-AXIS/i,
+        "Honeywell": /CT50/i,
+        "iPad": /iPad/i,
+        "iPhone": /iPhone/i,
+        "iPod": /iPod/i,
+        "macOS": /Macintosh/i,
+        "Windows": /IEMobile|Windows/i,
+        "Zebra": /TC70|TC55/i,
+    }
+    Object.keys(ua).map(v => navigator.userAgent.match(ua[v]) && (device = v));
+    return device;
+  }
+  
 
 
 
@@ -126,7 +147,7 @@ const addData = async (bucketId:string,userToken:any,text:any,file:File) =>{
         if (isAuthourized && isAuthourized.isVerified) {
             const body = {
                 text:text,
-                deviceName:navigator.appName,
+                deviceName:getUA(),
                 bucketId:bucketId,
             }
             const response = await axios.post(endpoints.addData,body, {
@@ -203,19 +224,20 @@ function BucketRoom(props:propTypes) {
     },[props.bucketId, props.token]);
 
     useMemo(()=>{
-        setDataArray([]);
+        
         async function promiseList(){
             try {
-                if(dataArray.length === 0){
+                //run only dataArray is empty or bucket id changed
+                if(dataArray.length === 0 || props.bucketId){
                     const response = await getDataArray(props.bucketId, props.token,currentPage.current);
-                    if (response && response.bucket) {
+                    if (response) {
                         console.log(response);
                         totalCount.current = response.totalCount;
-                        setDataArray(response.bucket.data);
+                        setDataArray(response.bucket.data ? response.bucket.data : []);
                         setScrolling(false);
                     }
                 }else{
-                    setDataArray(dataArray);        
+                    setDataArray(dataArray);   
                 }
                    
                

@@ -72,7 +72,7 @@ export const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
 
 export const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 
-
+    
     const email = req.body.email;
     const password = req.body.password;
     const errors = validationResult(req).array();
@@ -81,9 +81,7 @@ export const postSignup = async (req:Request,res:Response,next:NextFunction)=>{
 
         if(errors.length > 0){
             const error = new HttpException("Invalid data");
-            if(errors[0] && errors[0].msg){
-                error.message = errors[0].msg;
-            }
+            error.message = errors[0].msg;
             error.statusCode = 422;
             error.data = errors;
             throw error;    

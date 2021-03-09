@@ -46,9 +46,15 @@ const getUser = async (userToken:any) =>{
 }
 
 const removeCookies = () =>{
-    Object.keys(Cookies.get()).forEach(function (cookie) {
-        Cookies.remove(cookie);
-    });
+    return new Promise((resolve,reject)=>{
+        Object.keys(Cookies.get()).forEach(function (cookie) {
+            Cookies.remove(cookie);
+            if(Object.keys(Cookies.get()).length === 0){
+                resolve(true);
+            }
+        });
+    })
+    
 }
 
 const addBucket = async (name:string,userToken:any) =>{
@@ -113,7 +119,7 @@ function Home(props:any) {
     const currentPage = useRef<number>(1);
 
     //context
-    const {token} = useContext(TokenContext);
+    const {token,setToken} = useContext(TokenContext);
     const {setFlash} = useContext(FlashContext);
     
 
@@ -233,8 +239,14 @@ function Home(props:any) {
     }
 
     const handleLogout = () =>{
-        removeCookies();
-        history.push('/login');
+        removeCookies().then((result) => {
+            if(result){
+                setToken({accessToken:undefined!,refreshToken:undefined!,userId:undefined!});
+                history.push('/login');
+            }
+        }).catch((err) => {
+            console.log(err);
+        });
     } 
 
     const handleClickBucket = (id:string) =>{

@@ -150,7 +150,7 @@ export const getData = async (req:Request,res:Response,next:NextFunction)=>{
         if(count[0] && count[0].size > 0){
             bucket = await Bucket.getDataPerPage(query,LIMIT_PER_PAGE,+page);
         }else{
-            bucket = [[]]
+            bucket = [{}]
         }
         
         res.status(200).json({messge:'success',bucket:bucket[0],totalCount:count[0] ? count[0].size:0});

@@ -12,7 +12,7 @@ import Button from "../../../components/Button/Button";
 import axios from "../../../axios/config";
 import endpoints from "../../../axios/endpoints";
 import { FlashContext } from '../../../Contexts/FlashContext';
-import { useHistory } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 
 
 const formReducer = (state:object, event: any) => {
@@ -42,7 +42,12 @@ const loginUser = async (credentails:object) =>{
   }
 }
 
-function Login({setToken}:any) {
+type types = {
+  setToken:any,
+  isLoggedIn:boolean,
+}
+
+function Login({setToken,isLoggedIn}:types) {
     
   const [formData, setFormData] = useReducer(formReducer, {});
   const [errors, setErrors] = useState({
@@ -134,7 +139,10 @@ function Login({setToken}:any) {
         });
     }
 
-    
+    if(isLoggedIn){
+      return (<Redirect to="/"/>)
+    }
+
 
     return (
       <div className="login_page">

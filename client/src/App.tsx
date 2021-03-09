@@ -1,5 +1,5 @@
 import React, { useEffect,useMemo,useState } from "react";
-import {BrowserRouter as Router,Switch,Route, Redirect} from "react-router-dom";
+import {BrowserRouter as Router,Switch,Route} from "react-router-dom";
 
 
 import './App.css';
@@ -21,7 +21,6 @@ type FlashType  = {message:string,type:string};
 
 
 
-
 function App() {
   
   /* states */
@@ -34,6 +33,8 @@ function App() {
   /* check if user authorized or not and 
   establish socket connection */
   useEffect(() => {
+
+    
     async function promiseFunction() {
       try {
         if (!token.accessToken && token.refreshToken) {
@@ -81,8 +82,8 @@ function App() {
   let routes = (
     <Router>
       <Switch>
-        <Route exact path="/login" render={()=>(<Login setToken={setToken} />)}/>
-        <Route exact path="/signup" render={()=>(<Signup/>)}/>
+        <Route exact path="/login"  render={()=>(<Login setToken={setToken} isLoggedIn={token.accessToken ? true : false} /> )} />
+        <Route exact path="/signup"  render={()=>(<Signup isLoggedIn={token.accessToken ? true : false}/>)}/>
         <ProtectedRoute exact path="/" token={token} component={Home} authenticationPath="/login"/>
         <Route path='*' component={NotFound} />
       </Switch>

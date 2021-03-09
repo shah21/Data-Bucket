@@ -26,17 +26,19 @@ export function useToken():FuncType{
 
 
     const saveToken = (userToken:UserToken)=>{
-       
-        Cookie.set('accessToken',userToken.accessToken,{
-            expires: new Date(new Date().getTime() + 1 * 60 * 1000)
-        });
-        Cookie.set('refreshToken',userToken.refreshToken,{
-            expires: new Date().setDate(new Date().getDate() + 7)
-        });
-        Cookie.set('userId',userToken.userId,{
-            expires: new Date().setDate(new Date().getDate() + 7)
-        });
 
+        if(userToken.accessToken && userToken.refreshToken && userToken.userId){
+            Cookie.set('accessToken',userToken.accessToken,{
+                expires: new Date(new Date().getTime() + 1 * 60 * 1000)
+            });
+            Cookie.set('refreshToken',userToken.refreshToken,{
+                expires: new Date().setDate(new Date().getDate() + 7)
+            });
+            Cookie.set('userId',userToken.userId,{
+                expires: new Date().setDate(new Date().getDate() + 7)
+            });    
+        }
+       
         setToken(userToken);
     };
 
