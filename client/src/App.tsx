@@ -14,6 +14,7 @@ import isAuth from "./utils/isAuth";
 import { socket } from "./utils/socket";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import NotFound from "./Pages/Error/NotFound";
+import ForgetPassword from "./Pages/Auth/ForgetPassword/ForgetPassword";
 
 
 
@@ -85,6 +86,7 @@ function App() {
         <Route exact path="/login"  render={()=>(<Login setToken={setToken} isLoggedIn={token.accessToken ? true : false} /> )} />
         <Route exact path="/signup"  render={()=>(<Signup isLoggedIn={token.accessToken ? true : false}/>)}/>
         <ProtectedRoute exact path="/" token={token} component={Home} authenticationPath="/login"/>
+        <Route exact path="/forgot-password" component={ForgetPassword} />
         <Route path='*' component={NotFound} />
       </Switch>
     </Router>

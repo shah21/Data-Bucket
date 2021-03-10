@@ -125,7 +125,7 @@
     color: #9DBFAF;
   }
   .sb-example-1 .searchTerm:focus{
-    color: #00B4CC;
+    color: #333;
   }
   .sb-example-1 .searchButton {
     width: 40px;

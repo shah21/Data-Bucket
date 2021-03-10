@@ -1,6 +1,7 @@
 import {Request,Response,NextFunction} from "express";
 import { validationResult } from "express-validator";
 import bcryptjs from "bcryptjs";
+import crypto from 'crypto';
 import HttpException from "../utils/HttpException";
 import { generateAccessToken,generateRefreshToken, verifyRefreshToken,verifyAccessToken } from "../utils/jwt_helper";
 
@@ -145,3 +146,40 @@ export const postVerifyToken = async (req:Request,res:Response,next:NextFunction
         next(err);
     }
 };
+
+
+export const postSentResetMail = (req:Request,res:Response,next:NextFunction) =>{
+    const email = req.body.email;
+
+    crypto.randomBytes(32,(err,buffer)=>{
+        if(err){
+            return res.redirect('/forgot-password');
+        }
+        const token = buffer.toString('hex');
+        User.findByEmail(email).then(user=>{
+            if(!user){
+                const error = new HttpException("Email has not an account in Databucket!");
+                error.statusCode = 404;
+                throw error;    
+            }
+            const updateValues = {
+                resetToken:token,
+                tokenExpiring:Date.now() + 3600000,
+            }
+            return User.updateById(user._id,updateValues);
+        }).then(result=>{
+            console.log(result);
+            // transporter.sendMail({
+            //     from:'muhsinshah21@gmail.com',
+            //     to:email,
+            //     subject:'Password reset',
+            //     html:`
+            //         <p>You are requested for a password reset</p>
+            //         <p>click this link to <a href="http://localhost:3000/reset/${token}">Link</a> set a new password</p>
+            //     `
+            // });
+        }).catch(err=>{
+            console.log(err);
+        });
+    });
+}

@@ -1,5 +1,5 @@
 import  {getDb} from '../utils/database';
-import {ObjectID} from'mongodb';
+import {ObjectId, ObjectID} from'mongodb';
 
 class User{
     email:string;
@@ -22,6 +22,11 @@ class User{
     static findById(id:string){
         return getDb().collection('users').findOne({_id:new ObjectID(id)});
     }
+
+    static updateById(id:string,values:object){
+        return getDb().collection('users').updateOne({_id:new ObjectId(id)},{$set:values});
+    }
+    
 }
 
 export default User;

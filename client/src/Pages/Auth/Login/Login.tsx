@@ -182,7 +182,7 @@ function Login({setToken,isLoggedIn}:types) {
                 }
               />
 
-              <a href="/">Forgot Password</a>
+              <a href="/forgot-password">Forgot Password</a>
               <Button
                 class="btn"
                 link="/"

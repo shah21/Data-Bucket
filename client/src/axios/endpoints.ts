@@ -4,6 +4,7 @@ enum endpoints {
     refreshToken = '/auth/refresh-token',
     getUser = '/auth/user/',
     signup = '/auth/signup',
+    sendResetMail = '/auth/send-reset-mail',
     createBucket = '/bucket/create',
     verifyAccessToken = '/auth/verifyAccessToken',
     getBuckets = '/bucket',
