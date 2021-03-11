@@ -31,8 +31,19 @@ router.post('/signup',[
 
 
 router.post('/refresh-token',postRefreshToken);
-router.post('/send-reset-mail',postSentResetMail)
-router.post('/reset-password',postResetPassword)
+router.post('/send-reset-mail',[
+    body('email').isEmail().withMessage('Invalid Email').normalizeEmail(),
+],postSentResetMail)
+router.post('/reset-password',[
+    body('password').isLength({min:6}).withMessage('Password must have atleast 6 character long'),
+    body('conf_password').isLength({min:6}).withMessage('Password must have atleast 6 character long').custom((value,{req})=>{
+        
+        if(value !== req.body.password){
+            return Promise.reject('Passwords must be same');
+        }
+        return true;
+    }),
+],postResetPassword)
 
 
 export default router;
