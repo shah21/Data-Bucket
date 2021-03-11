@@ -2,7 +2,7 @@ import { Router } from "express";
 import { body } from "express-validator";
 import isAuth from "../middlewares/is-auth"
 
-import {getUser,postLogin,postSignup,postRefreshToken, postVerifyToken,postSentResetMail} from '../controllers/auth';
+import {getUser,postLogin,postSignup,postRefreshToken,postResetPassword, postVerifyToken,postSentResetMail} from '../controllers/auth';
 import User from '../models/user';
 
 const router = Router();
@@ -32,6 +32,7 @@ router.post('/signup',[
 
 router.post('/refresh-token',postRefreshToken);
 router.post('/send-reset-mail',postSentResetMail)
+router.post('/reset-password',postResetPassword)
 
 
 export default router;

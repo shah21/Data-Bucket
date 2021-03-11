@@ -28,6 +28,8 @@ const useStyle = makeStyles({
     },
     input:{
         width:'300px',
+    },
+    inputArea:{
         margin:'50px 0 30px',
     },
     cssLabel: {
@@ -44,7 +46,7 @@ const useStyle = makeStyles({
     buttonSend:{
         width:'300px',
         backgroundColor: "#32be8f",
-
+        textTransform:'capitalize',
         "&:hover": {
             backgroundColor: "#32be8f"
           }
@@ -77,25 +79,75 @@ function ForgetPassword() {
 
     const {setFlash} = useContext(FlashContext);
 
-    useMemo(() =>{
-        if(email){
-            console.log(email);
-            sentMail(email).then(result=>{
-                if(result){
-                    //change form
-                    
-                }
-            }).catch(err=>{
-                setFlash({message:err.message,type:'error'});
-            });
-            
+    const [errorText,setErrorText] = useState<string>(undefined!);
+
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) =>{
+        const value = e.target.value;
+        if(value.length < 1){
+            setErrorText('Field must not be empty!');
+        }else{
+            setErrorText(null!);
         }
-    } , [email])
+        setEmail(value);
+    }
+
+    const handleSubmit = () =>{
+        if (!email) {
+            return;
+        }
+        if (typeof email !== "undefined") {
+            let lastAtPos = email.lastIndexOf('@');
+            let lastDotPos = email.lastIndexOf('.');
+
+            if (!(lastAtPos < lastDotPos && lastAtPos > 0 && email.indexOf('@@') === -1 && lastDotPos > 2 && (email.length - lastDotPos) > 2)) {
+                setErrorText('Please enter valid email address!');
+                return;
+            }
+        }
+        sentMail(email).then(result=>{
+            if(result){
+                setFlash({message:'Email sent successfully.Check your mail box',type:'success'});   
+            }
+        }).catch(err=>{
+            setFlash({message:err.message,type:'error'});
+        });
+    }
 
     return (
         <div className={classes.forgetPage}>
-            {!email && (<SendMailCard setUserEmail={setEmail}/>)}
-            
+             <Card raised={true} className={classes.container}>
+                <h3 className={classes.forgetHeading}>Forget Password</h3>
+                <div className={classes.inputArea}>
+                <TextField
+                    type="email"
+                    className={classes.input}
+                    InputLabelProps={{
+                        shrink: true,
+                        classes: {
+                            root: classes.cssLabel,
+                            focused: classes.cssLabel,
+                          },
+                    }}
+
+                    InputProps={{
+                        classes: {
+                          root: classes.notchedOutline,
+                          focused: classes.notchedOutline,
+                          notchedOutline: classes.notchedOutline,
+                        },
+                        
+                     }}
+
+                    label='Email Address'
+                    variant="outlined"
+                    onChange={handleChange}
+                />
+                <p className="error-text">{errorText}</p>
+                </div>
+                <Button onClick={handleSubmit}  className={classes.buttonSend} variant="contained"  color="primary" component="span">
+                    Sent reset email
+                </Button>
+            </Card>
         </div>
     )
 }

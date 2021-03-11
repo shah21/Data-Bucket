@@ -19,12 +19,20 @@ class User{
         return getDb().collection('users').findOne({email:email});
     }
 
+    static findByQuery(query:object){
+        return getDb().collection('users').findOne(query);
+    }
+
     static findById(id:string){
         return getDb().collection('users').findOne({_id:new ObjectID(id)});
     }
 
     static updateById(id:string,values:object){
         return getDb().collection('users').updateOne({_id:new ObjectId(id)},{$set:values});
+    }
+
+    static updateByQuery(query:object,values:object){
+        return getDb().collection('users').updateOne(query,{$set:values});
     }
     
 }

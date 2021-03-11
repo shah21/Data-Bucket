@@ -15,3 +15,6 @@ declare module "*.png" {
     dataId:string,
     classes:Record<string,string>
   }
+
+
+ type ErrorType = {msg:string,field:string}

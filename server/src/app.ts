@@ -1,7 +1,6 @@
 import express,{Request,Response,NextFunction} from "express";
 import cors from "cors";
 import session from "express-session";
-import sharedsession from "express-socket.io-session";
 
 import {connectDb} from "./utils/database";
 import HttpException, {  } from "./utils/HttpException";

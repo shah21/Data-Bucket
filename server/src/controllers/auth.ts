@@ -6,7 +6,7 @@ import HttpException from "../utils/HttpException";
 import { generateAccessToken,generateRefreshToken, verifyRefreshToken,verifyAccessToken } from "../utils/jwt_helper";
 
 import User from "../models/user";
-import router from "../routes/auth";
+import { sendMail } from "../utils/sendMail";
 
 
 export const getUser = async (req:Request,res:Response,next:NextFunction)=>{
@@ -168,18 +168,63 @@ export const postSentResetMail = (req:Request,res:Response,next:NextFunction) =>
             }
             return User.updateById(user._id,updateValues);
         }).then(result=>{
-            console.log(result);
-            // transporter.sendMail({
-            //     from:'muhsinshah21@gmail.com',
-            //     to:email,
-            //     subject:'Password reset',
-            //     html:`
-            //         <p>You are requested for a password reset</p>
-            //         <p>click this link to <a href="http://localhost:3000/reset/${token}">Link</a> set a new password</p>
-            //     `
-            // });
+           const body = `
+           <p>You are requested for a password reset</p>
+           <p>click this <a href="http://localhost:3000/reset-password/?token=${token}&email=${email}">Link</a> to
+            set a new password</p>
+            `;
+            
+           sendMail(email,'Reset your password',body).then(sendResult=>{
+                if(sendResult){
+                    res.json({message:'Reset mail sended !',mailId:sendResult.MessageId});
+                }
+           });
         }).catch(err=>{
-            console.log(err);
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
         });
     });
 }
+
+export const postResetPassword =(req:Request,res:Response,next:NextFunction)=>{
+    const email = req.body.email;
+    const password = req.body.password;
+    const confirm_password = req.body.conf_password;
+    const token = req.body.token;
+    const errors = validationResult(req).array();
+
+    if(errors.length > 0){
+        const error = new HttpException("Unauthorized request");
+        error.message = errors[0].msg;
+        error.statusCode = 422;
+        error.data = errors;
+        throw error;    
+    }
+
+
+    User.findByQuery({email:email,resetToken:token}).then((user) => {
+        if(!user|| (user && user.tokenExpiring < Date.now())){
+            const error = new HttpException("Token expired");
+            error.statusCode = 401;
+            throw error;    
+        }
+        
+        bcryptjs.hash(password,12).then(hash=>{
+            const updateValues = {password:hash,resetToken:undefined,tokenExpiring:undefined};
+            User.updateByQuery({email:email},updateValues).then((result) => {
+                res.json({message:'succesffully updated'});
+            });
+        })
+    }).catch((err) => {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);   
+    });
+
+  
+    
+    
+};
