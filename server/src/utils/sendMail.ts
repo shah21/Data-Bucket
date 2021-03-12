@@ -1,11 +1,6 @@
 // Load the AWS SDK for Node.js
-import AWS from 'aws-sdk';
+import AWS from './aws_config';
 
-
-
-// Set the region 
-AWS.config.loadFromPath('./config.json');
-// AWS.config.update({region: 'REGION'});
 
 
 export const sendMail = (email: string,subject:string,body:string) => {

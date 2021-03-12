@@ -6,6 +6,7 @@ import HttpException from "../utils/HttpException";
 
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
+import uploadFile from "../utils/uploadFile";
 const LIMIT_PER_PAGE = 10;
 
 type UserId = {userId:string};
@@ -167,14 +168,17 @@ export const getData = async (req:Request,res:Response,next:NextFunction)=>{
 export const postCreateData = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.body.bucketId;
     const text = req.body.text;
-    const file = req.file;
     const deviceName = req.body.deviceName;
     const errors = validationResult(req).array();
+    const file = req.file;
 
+    
 
     try{
 
-        if(errors.length > 0){
+        let imgUri:string = null!;
+
+        if(!file && errors.length > 0){
             const error = new HttpException('Invalid data');
             error.statusCode = 422;
             error.data = errors;
@@ -191,8 +195,15 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
             throw error;    
         }
 
+        if(req.file){
+            const uri = await uploadFile(req.file);
+            if(uri){
+                imgUri = uri as string;
+            }
+        }
+
         const dataArray = bucket.data;
-        const newData = {_id:new ObjectID(Date.now()),data:text,file_path:null,deviceName,addedAt:Date.now()};
+        const newData = {_id:new ObjectID(Date.now()),data:text,file_path:imgUri,deviceName,addedAt:Date.now()};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
 
@@ -206,6 +217,8 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
     }
 
 }
+
+
 
 
 export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{

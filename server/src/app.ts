@@ -1,14 +1,16 @@
 import express,{Request,Response,NextFunction} from "express";
 import cors from "cors";
 import session from "express-session";
+import multer from "multer";
+import 'dotenv/config'
 
 import {connectDb} from "./utils/database";
 import HttpException, {  } from "./utils/HttpException";
 import  authRouter from "./routes/auth";
 import  bucketRouter from "./routes/bucket";
-import socket from "./utils/socket";
 import * as socketio from "socket.io";
 import WebSockets from "./utils/WebSockets";
+import aws from "./utils/aws_config";
 
 declare global {
     namespace NodeJS {
@@ -22,8 +24,8 @@ declare global {
   }
 
 const app = express();
-const users:[string] = [null!];
-
+const storage = multer.memoryStorage();
+const upload = multer({storage}).single('file');
 
 
 //sessions
@@ -37,7 +39,9 @@ const sessionMiddleware = session({
 //middlewares
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({extended:false})); 
 app.use(sessionMiddleware);
+app.use(upload);
 
 
 //add a general middleware for set cors free requests

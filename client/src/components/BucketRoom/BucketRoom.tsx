@@ -194,6 +194,7 @@ function BucketRoom(props:propTypes) {
     const parentRef = useRef<HTMLDivElement>(null!);
     const totalCount = useRef<number>(0);
     const currentPage = useRef<number>(1);
+    const fileChoose = useRef<HTMLInputElement>(null!);
 
     const LIMIT_PER_PAGE = 10;
 
@@ -391,6 +392,14 @@ function BucketRoom(props:propTypes) {
         }
     }
 
+    const handleFileChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        if(e.target.files){
+            const file = e.target.files[0];
+            //upload file
+
+        }
+    }
+
 
     
 
@@ -406,7 +415,7 @@ function BucketRoom(props:propTypes) {
                         <div className="headerSection">
                             <h4>{bucket.name}</h4>
                             <div>
-                            <IconButton  className="attachIcon">
+                            <IconButton onClick={(e)=>{fileChoose.current.click()}} className="attachIcon">
                                 <AttachFile className={classes.attachIcon}/>
                             </IconButton>
                             <IconButton onClick={handleOpen} className="attachIcon">
@@ -452,7 +461,7 @@ function BucketRoom(props:propTypes) {
                     </div>
                 </div>
             )}
-            
+             <input ref={fileChoose} name="file" onChange={handleFileChange} type="file" style={{visibility:'hidden'}}/>
         </div>
     )
 }
