@@ -10,12 +10,15 @@ import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
 import FavoriteIcon from '@material-ui/icons/FavoriteOutlined';
 import Reload from "@material-ui/icons/ReplayOutlined";
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 
 import './DataList.css'
 import Data from '../../Models/data';
 import moment from 'moment';
 import OptionsDialog from "../../components/OptionsDialog/OptionsDialog";
+import { Link } from 'react-router-dom';
 
 
 
@@ -31,6 +34,7 @@ interface propTypes{
     setOpen:any,
     reloadHandler:()=>void,
     totalCount:number,
+    handleDownloadFile:(e:any,uri:string)=>void,
 }
 
 const useStyles = makeStyles({
@@ -65,7 +69,32 @@ const useStyles = makeStyles({
 },
 reloadIcon:{
     color:'#6C6C6C',
+},
+file:{
+    fontSize:'50px',
+    color:'#6C6C6C',
+},
+download_file:{
+    position:'relative',
+    width:'50px',
+    height:'50px',
+},
+
+download:{
+    fontSize:'20px',
+    position:'absolute',
+    bottom:'5px',
+    right:'10px',
+    color:'#E3E9E7',
+},
+download_link:{
+    fontSize:'10px',
+    position:'absolute',
+    bottom:'0',
+    textDecoration:'underline',
+    color:'blue',
 }
+
 });
 
 
@@ -134,9 +163,21 @@ function DataList(props:propTypes) {
                                         </IconButton>
                                     </div>
 
-                                    <Typography variant="body1" className="" component="p">
+                                    {data.file_path && (
+                                        <div className={classes.download_file}>
+                                            <InsertDriveFileIcon className={classes.file}/>
+                                            <GetAppIcon className={classes.download}/>
+                                            <Link to="/" onClick={(e)=>props.handleDownloadFile(e,data.file_path)}>
+                                                <span className={classes.download_link}>Download</span>
+                                            </Link>
+                                        </div>
+                                    )}
+
+                                    {data.data.length > 0 && (<Typography variant="body2" className="" component="p">
                                         {data.data}
-                                    </Typography>
+                                    </Typography> )}
+
+                                  
 
 
                                 </CardContent>

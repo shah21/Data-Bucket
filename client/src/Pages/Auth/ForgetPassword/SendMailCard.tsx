@@ -70,39 +70,7 @@ function SendMailCard({setUserEmail}:PropTypes) {
           
             
 
-            <Card raised={true} className={classes.container}>
-                <h3 className={classes.forgetHeading}>Forget Password</h3>
-                <div className={classes.inputArea}>
-                <TextField
-                    type="email"
-                    className={classes.input}
-                    InputLabelProps={{
-                        shrink: true,
-                        classes: {
-                            root: classes.cssLabel,
-                            focused: classes.cssLabel,
-                          },
-                    }}
-
-                    InputProps={{
-                        classes: {
-                          root: classes.notchedOutline,
-                          focused: classes.notchedOutline,
-                          notchedOutline: classes.notchedOutline,
-                        },
-                        
-                     }}
-
-                    label='Email Address'
-                    variant="outlined"
-                    onChange={handleChange}
-                />
-                <p className="error-text">{errorText}</p>
-                </div>
-                <Button onClick={handleSubmit}  className={classes.buttonSend} variant="contained"  color="primary" component="span">
-                    Sent reset email
-                </Button>
-            </Card>
+           
         </div>
     )
 }

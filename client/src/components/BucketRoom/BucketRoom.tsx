@@ -8,6 +8,7 @@ import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
 import SettingsIcon from '@material-ui/icons/Settings';
 
+
 import './BucketRoom.css'
 import axios from "../../axios/config";
 import endpoints from "../../axios/endpoints";
@@ -141,18 +142,22 @@ const getUA = () => {
 
 
 
-const addData = async (bucketId:string,userToken:any,text:any,file:File) =>{
+const addData = async (bucketId:string,userToken:any,text:string,file:File) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
-            const body = {
-                text:text,
-                deviceName:getUA(),
-                bucketId:bucketId,
-            }
-            const response = await axios.post(endpoints.addData,body, {
+           
+            //setting form data for multipart/form 
+            const formData = new FormData();
+            formData.append('text',text);
+            formData.append('deviceName',getUA());
+            formData.append('bucketId',bucketId);
+            formData.append('file',file);
+
+
+            const response = await axios.post(endpoints.addData,formData, {
                 headers: {
-                    "Content-type": "application/json",
+                    "Content-type": "multipart/form-data",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 }
             });
@@ -218,7 +223,7 @@ function BucketRoom(props:propTypes) {
                 setBucket(await getBucket(props.bucketId,props.token));
                 
             } catch (err) {
-                console.log(err);
+                setFlash({message:err.message,type:'error'});
             }
         }
         promiseList();
@@ -322,7 +327,7 @@ function BucketRoom(props:propTypes) {
                     
                 }
             } catch (err) {
-                console.log(err);
+                setFlash({message:err.message,type:'error'});
             }
         }
     } 
@@ -392,15 +397,28 @@ function BucketRoom(props:propTypes) {
         }
     }
 
-    const handleFileChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e:React.ChangeEvent<HTMLInputElement>) => {
         if(e.target.files){
             const file = e.target.files[0];
-            //upload file
+            console.log(file);
+            try {
+                const response = await addData(props.bucketId,props.token,'',file);
 
+                if(response){
+                    
+                }
+            } catch (err) {
+                console.log(err.response);
+                setFlash({message:err.message,type:'error'});
+            }
         }
     }
 
 
+    const handleDownloadFile = (e:any,uri:string) => {
+        e.preventDefault();
+        console.log('downloading',uri);
+    }
     
 
 
@@ -425,7 +443,7 @@ function BucketRoom(props:propTypes) {
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                             <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                            <DataList totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
+                            <DataList handleDownloadFile={handleDownloadFile} totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
                             </div>
                         </div>
                     </div>

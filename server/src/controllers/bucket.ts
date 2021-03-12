@@ -196,6 +196,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         }
 
         if(req.file){
+            /* Upload file to s3 bucket */
             const uri = await uploadFile(req.file);
             if(uri){
                 imgUri = uri as string;

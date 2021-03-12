@@ -38,8 +38,8 @@ const sessionMiddleware = session({
 
 //middlewares
 app.use(cors());
-app.use(express.json());
 app.use(express.urlencoded({extended:false})); 
+app.use(express.json());
 app.use(sessionMiddleware);
 app.use(upload);
 
