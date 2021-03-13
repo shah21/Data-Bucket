@@ -6,7 +6,8 @@ import HttpException from "../utils/HttpException";
 
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
-import uploadFile from "../utils/uploadFile";
+import { uploadFile,downloadFile} from "../utils/AwsHelpers";
+import aws from "../utils/aws_config";
 const LIMIT_PER_PAGE = 10;
 
 type UserId = {userId:string};
@@ -204,7 +205,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         }
 
         const dataArray = bucket.data;
-        const newData = {_id:new ObjectID(Date.now()),data:text,file_path:imgUri,deviceName,addedAt:Date.now()};
+        const newData = {_id:new ObjectID(Date.now()),data:text,file_path:imgUri,deviceName,addedAt:Date.now(),addedBy:new ObjectID(req.userId)};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
 
@@ -251,6 +252,51 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
     }
 
 }
+
+export const getDownloadFile = async (req:Request,res:Response,next:NextFunction)=>{
+    const bucketId = req.params.bucketId;
+    const dataId = req.params.dataId;
+
+
+    try {
+        const data = await Bucket.findDataByQuery({
+            "_id":new ObjectID(bucketId),
+            "data._id":new ObjectID(dataId),
+            "data.addedBy":new ObjectID(req.userId)
+        },dataId);
+
+        if(!data[0]){
+            const error = new HttpException('Unauthorized access');
+            error.statusCode = 402;
+            throw error;    
+        }
+
+
+        //download file
+        const downloadUri = data[0].file_path;
+        const urlparts = downloadUri.split('/');
+        const key = urlparts[urlparts.length -1];
+        res.attachment(downloadUri);
+
+        const params = {
+            Bucket:process.env.AWS_BUCKET_NAME!,
+            Key:key,
+        }
+        
+        const s3 = new aws.S3({apiVersion: '2006-03-01'});
+        const stream = s3.getObject(params).createReadStream().on('error',(err)=>{
+            throw err;    
+        });
+        stream.pipe(res);
+    } catch (err) {
+        console.log(err);
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
 
 
 

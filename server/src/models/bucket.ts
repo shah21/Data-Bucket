@@ -61,6 +61,31 @@ class Bucket{
         return getDb().collection('buckets').findOne(query);
     }
 
+    static findDataByQuery(query:object,id:string){
+        return getDb().collection('buckets').aggregate([
+            { "$unwind": "$data" },
+            {
+                $match:query,
+            },{
+                $group:{
+                    _id:"$data._id",
+                    data:{"$first":"$data.data"},
+                    file_path:{"$first":"$data.file_path"},
+                    deviceName:{"$first":"$data.deviceName"},
+                    addedAt:{"$first":"$data.addedAt"},
+                    addedBy:{"$first":"$data.addedBy"},
+                }
+            },
+        ]).toArray();
+
+        // return getDb().collection('buckets').findOne(query,{
+        //     "projection":{
+        //         _id:0,
+        //         'data.$':1,
+        //     }
+        // });
+    }
+
     static updateById(id:string,values:object){
         return getDb().collection('buckets').findOneAndUpdate({_id:new ObjectID(id)},{$set:values},{returnOriginal:false});
     }

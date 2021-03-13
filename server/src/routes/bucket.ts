@@ -6,6 +6,7 @@ import {
   getBucket,
   getBuckets,
   getData,
+  getDownloadFile,
   postCreateBucket,
   postCreateData,
   updateBucket,
@@ -21,6 +22,7 @@ const router = Router();
 router.get('/',isAuth,getBuckets);
 router.get('/:bucketId',isAuth,getBucket);
 router.get('/:bucketId/data',isAuth,getData);
+router.get('/:bucketId/data/:dataId',isAuth,getDownloadFile);
 
 //create
 router.post('/create',isAuth,[
