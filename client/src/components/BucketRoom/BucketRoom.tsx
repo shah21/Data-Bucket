@@ -7,6 +7,7 @@ import {makeStyles} from "@material-ui/core/styles"
 import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
 import SettingsIcon from '@material-ui/icons/Settings';
+import download from 'js-file-download'
 
 
 import './BucketRoom.css'
@@ -162,6 +163,7 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File) =>{
                 }
             });
             if(response){
+                console.log(response);
                 return response;
             }
         }
@@ -169,6 +171,31 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File) =>{
         throw err;
     }
 }
+
+const downloadFile = async (bucketId:string,userToken:any,dataId:string) =>{
+    try {
+        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+           const response = await axios.get(endpoints.getBucket + `${bucketId}/data/${dataId}`,{
+            headers: {
+                "Content-type": "multipart/form-data",
+                "Authorization": `Bearer ${isAuthourized.accessToken}`,
+            },
+            responseType:'blob',
+           });
+           if(response){
+               const type = response.data.type.split('/')[1];
+            //    console.log(response.data);
+               download(response.data,`${Date.now()}.${type}`);
+               return response;
+           }
+        }
+    } catch (err) {
+        throw err;
+    }
+}
+
+
 
 function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
     if(el!=null){
@@ -415,9 +442,9 @@ function BucketRoom(props:propTypes) {
     }
 
 
-    const handleDownloadFile = (e:any,uri:string) => {
+    const handleDownloadFile = (e:any,id:string) => {
         e.preventDefault();
-        console.log('downloading',uri);
+        downloadFile(props.bucketId,props.token,id);
     }
     
 

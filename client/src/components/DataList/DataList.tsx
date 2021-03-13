@@ -70,31 +70,44 @@ const useStyles = makeStyles({
 reloadIcon:{
     color:'#6C6C6C',
 },
+imageSection:{
+    position:'relative',
+    height:'50px',
+},
 file:{
     fontSize:'50px',
     color:'#6C6C6C',
 },
 download_file:{
+    background:'#E3E9E7',
+    alignItems:'center',
+    borderRadius:'5px',
     position:'relative',
-    width:'50px',
-    height:'50px',
+    padding:'5px 0',
+    display:'flex',
 },
 
 download:{
     fontSize:'20px',
     position:'absolute',
     bottom:'5px',
-    right:'10px',
+    right:'8px',
     color:'#E3E9E7',
+},
+sideText:{
+    display:'flex',
+    flexDirection:'column',
 },
 download_link:{
     fontSize:'10px',
-    position:'absolute',
-    bottom:'0',
     textDecoration:'underline',
     color:'blue',
+},
+typeText:{
+    fontFamily:'sans-serif',
+    fontSize:'14px',
+    textTransform:'capitalize'
 }
-
 });
 
 
@@ -116,6 +129,18 @@ const DataOptions = (props:ListTypes) =>  (
     </ListItem>
     </div>
 );
+
+const getType = (uri:string):string => {
+    const urlParts = uri.split('/');
+    const fileName = urlParts[urlParts.length -1];
+    const nameParts = fileName.split('.');
+    const imageTypes = ['jpg','jpeg','png','svg'];
+    let type = nameParts[nameParts.length -1];;
+    imageTypes.forEach(imgType=>{
+        type  = imgType === type ? 'Image' : type;
+    })
+    return type;
+}
 
 
 function DataList(props:propTypes) {
@@ -165,11 +190,19 @@ function DataList(props:propTypes) {
 
                                     {data.file_path && (
                                         <div className={classes.download_file}>
+                                            <div className={classes.imageSection}>
                                             <InsertDriveFileIcon className={classes.file}/>
                                             <GetAppIcon className={classes.download}/>
-                                            <Link to="/" onClick={(e)=>props.handleDownloadFile(e,data.file_path)}>
-                                                <span className={classes.download_link}>Download</span>
-                                            </Link>
+                                            </div>
+                                            <div className={classes.sideText}>
+                                                <Typography  variant="body2" className={classes.typeText} component="p">
+                                                    {` ${getType(data.file_path)} file`}
+                                                </Typography>
+                                                <Link to="/" onClick={(e) => props.handleDownloadFile(e, data._id)}>
+                                                    <span className={classes.download_link}>Download</span>
+                                                </Link>
+                                            </div>
+                                           
                                         </div>
                                     )}
 

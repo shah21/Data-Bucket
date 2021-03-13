@@ -1,10 +1,13 @@
 
 enum endpoints {
+    //auth
     login = '/auth/login',
     refreshToken = '/auth/refresh-token',
     getUser = '/auth/user/',
     signup = '/auth/signup',
     sendResetMail = '/auth/send-reset-mail',
+    resetPassword = '/auth/reset-password',
+    //bucket
     createBucket = '/bucket/create',
     verifyAccessToken = '/auth/verifyAccessToken',
     getBuckets = '/bucket',
@@ -12,7 +15,7 @@ enum endpoints {
     addData = '/bucket/add-data',
     deleteData = '/bucket/delete-data/?',
     deleteBucket = '/bucket/delete-bucket/',
-    resetPassword = '/auth/reset-password'
+   
 };
 
 export default endpoints;
