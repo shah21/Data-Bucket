@@ -6,7 +6,7 @@ import HttpException from "../utils/HttpException";
 
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
-import { uploadFile,downloadFile} from "../utils/AwsHelpers";
+import { uploadFile,downloadFile, deleteFile} from "../utils/AwsHelpers";
 import aws from "../utils/aws_config";
 const LIMIT_PER_PAGE = 10;
 
@@ -238,7 +238,17 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
             throw error;    
         }
 
-        const dataArray = bucket.data.filter((x: { _id: { toString: () => string; }; })=>x._id.toString()!==dataId.toString());
+
+        let file_path;
+
+        const dataArray = bucket.data.filter((item:any)=>{
+            file_path = item.file_path;
+            return item._id.toString()!==dataId.toString()
+            
+        });
+        if(file_path){
+            deleteFile(file_path);
+        }
         const updateValues = {data:dataArray};
         const updateBucket = await Bucket.updateById(bucketId,updateValues);
         global.io.to(bucketId).emit('data',{action:'deleted',id:dataId,bId:bucketId});
