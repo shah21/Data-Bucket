@@ -65,6 +65,7 @@
 
 
 .homePage .bucketBar {
+  
     grid-area: box2;
     height:  100vh;
     display: grid;
@@ -163,6 +164,7 @@
 .homePage .bucket-list{
     grid-area: box3;
     height: 100vh;
+    position:relative;
 }
 
 
@@ -208,3 +210,17 @@
 }
 
 
+
+
+.progress-section {
+    width: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.MuiCircularProgress-colorPrimary {
+    color: green !important;
+}

@@ -4,7 +4,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/AddBox';
 import SearchIcon from '@material-ui/icons/Search';
-import { IconButton } from '@material-ui/core';
+import { CircularProgress, createStyles, IconButton, makeStyles, Theme } from '@material-ui/core';
 import Cookies from "js-cookie";
 
 
@@ -101,6 +101,27 @@ function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
     }
 }
 
+// Inspired by the former Facebook spinners.
+const useStylesFacebook = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      position: 'relative',
+    },
+    bottom: {
+      color: theme.palette.grey[theme.palette.type === 'light' ? 200 : 700],
+    },
+    top: {
+      color: '#1a90ff',
+      animationDuration: '550ms',
+      position: 'absolute',
+      left: 0,
+    },
+    circle: {
+      strokeLinecap: 'round',
+    },
+  }),
+);
+
 
 function Home(props:any) {
 
@@ -111,6 +132,7 @@ function Home(props:any) {
     const [scroll,setScroll] = useState<boolean>(false);
     const [buckets,setBuckets] = useState<Bucket[]>([]);
     const [scrolling,setScrolling] = useState<boolean>(false);
+    const [isLoading,setLoading] = useState<boolean>(false);
 
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
@@ -144,11 +166,13 @@ function Home(props:any) {
         async function promiseList(){
             try {
                 if(buckets.length === 0){
+                    setLoading(true);
                     const responseData = await getBuckets(token,currentPage.current);
                     totalCount.current = responseData.totalCount;
                     const array = [...responseData.buckets];
                     setBuckets(array);
                     bucketsBackup.current = array;
+                    setLoading(false);
                 }else{
                     setBuckets(buckets);
                 } 
@@ -313,6 +337,7 @@ function Home(props:any) {
                 </div>
             </nav>
             <div className="bucketBar">
+              
                 <div className="bucketTitle">
                     <h5>Buckets</h5>
                     <IconButton className="icon-btn-add" disableFocusRipple={true} onClick={handleAddButton} >
@@ -334,7 +359,9 @@ function Home(props:any) {
                     {buckets.length === 0 && ( <h5 className="no_result_text">No buckets found</h5> )}
                     <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
                     <BucketList totalCount={totalCount.current} reloadHandler={paginateData} clickHandler={handleClickBucket} bucketArray={buckets}/>
-                        
+                    </div>
+                    <div className="progress-section">
+                        {isLoading && (<CircularProgress className="loading-circle" />)}
                     </div>
                 </div>
                 

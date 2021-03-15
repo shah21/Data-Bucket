@@ -1,5 +1,5 @@
 import React,{useMemo, useContext,useState,useRef, useEffect} from 'react'
-import { Button,TextField,IconButton } from "@material-ui/core";
+import { Button,TextField,IconButton, CircularProgress } from "@material-ui/core";
 import Send from "@material-ui/icons/Send";
 import AttachFile from "@material-ui/icons/AttachFile";
 import OptionsIcon from "@material-ui/icons/MoreVert";
@@ -227,6 +227,7 @@ function BucketRoom(props:propTypes) {
     const [scrolling,setScrolling] = useState<boolean>(false);
     const [uploadProgress,setUploadProgress] = useState<number>(0);
     const [uploadState,setUploadState] = useState<boolean>(false);
+    const [isLoading,setLoading] = useState<boolean>(false);
 
     
     const {setFlash} = useContext(FlashContext);
@@ -273,6 +274,7 @@ function BucketRoom(props:propTypes) {
             try {
                 //run only dataArray is empty or bucket id changed
                 if(dataArray.length === 0 || props.bucketId){
+                    setLoading(true);
                     const response = await getDataArray(props.bucketId, props.token,currentPage.current);
                     if (response) {
                         console.log(response);
@@ -280,8 +282,10 @@ function BucketRoom(props:propTypes) {
                         setDataArray(response.bucket.data ? response.bucket.data : []);
                         setScrolling(false);
                     }
+                    setLoading(false);
                 }else{
-                    setDataArray(dataArray);   
+                    setDataArray(dataArray);  
+                    setLoading(false); 
                 }
                    
                
@@ -420,6 +424,7 @@ function BucketRoom(props:propTypes) {
 
     const paginateData = async () =>{
         if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
+            setLoading(true);
             currentPage.current = ++currentPage.current; 
             const responseData = await getDataArray(props.bucketId,props.token,currentPage.current);
             const array = [...dataArray, ...responseData.bucket.data];
@@ -428,6 +433,7 @@ function BucketRoom(props:propTypes) {
             // setCountState(responseData.totalCount);
         }
         setScrolling(false);
+        setLoading(true);
     }
 
 
@@ -452,7 +458,7 @@ function BucketRoom(props:propTypes) {
             currentFile.current = file;
             try {
                 setUploadState(true);
-              
+                setUploadProgress(0);
                 const response = await addData(props.bucketId,props.token,'',file,(progress:number)=>{
                     setUploadProgress(progress);
                 });
@@ -485,6 +491,7 @@ function BucketRoom(props:propTypes) {
             {openBucketOptions && (<OptionsDialog listElements={<DataOptions classes={classes} dataId={props.bucketId}
              handleOptions={handleBucketOptions} />} open={openBucketOptions}
               handleClose={handleClose} /> )}
+
             {bucket &&(
                 <div>
                     <div className="room">
@@ -502,6 +509,9 @@ function BucketRoom(props:propTypes) {
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                             <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
                             <DataList handleDownloadFile={handleDownloadFile} totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
+                            </div>
+                            <div className="progress-section">
+                                {isLoading && (<CircularProgress className="loading-circle" />)}
                             </div>
                         </div>
                     </div>
