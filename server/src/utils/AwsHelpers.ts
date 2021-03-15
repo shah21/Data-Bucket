@@ -6,14 +6,24 @@ import { Stream } from "stream";
 
 
 const s3 = new aws.S3({apiVersion: '2006-03-01'});
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
-const getKey = (uri:string) => {
+export const getKey = (uri:string) => {
     const urlparts = uri.split('/');
-    return urlparts[urlparts.length -1];
+    const length = urlparts.length;
+    const startingPoint = length - 3;
+    let key:string = '';
+    for(let i=startingPoint;i<=length-1;i++){
+        key +=urlparts[i];
+        if(i !== length-1){
+            key +='/';
+        }
+    }
+    return key;
 }
 
 
-export const uploadFile =  (file:File)=>{
+export const uploadFile =  (file:File,userId:string,bucketId:string)=>{
     const fileKeys = Object.values(file);
     const splitName = fileKeys[1].split('.');
     const fileType = splitName[splitName.length -1];
@@ -24,8 +34,8 @@ export const uploadFile =  (file:File)=>{
 
     return new Promise((resolve,reject)=>{
         s3.upload({
-            Bucket:process.env.AWS_BUCKET_NAME!,
-            Key:fileName,
+            Bucket:BUCKET_NAME,
+            Key:`${userId}/${bucketId}/${fileName}`,
             Body:buffer,
         },(err:any,data:any)=>{
             if(err){
@@ -42,7 +52,7 @@ export const downloadFile = async (uri:string) => {
     const key = getKey(uri);
    
     const params = {
-        Bucket:process.env.AWS_BUCKET_NAME!,
+        Bucket:BUCKET_NAME,
         Key:key,
     }
 
@@ -66,9 +76,9 @@ export const downloadFile = async (uri:string) => {
 
 export const deleteFile = (uri:string) => {
     const key = getKey(uri);
-
+    console.log(key);
       const params = {
-        Bucket:process.env.AWS_BUCKET_NAME!,
+        Bucket:BUCKET_NAME,
         Key: key,
       };
     
@@ -78,4 +88,37 @@ export const deleteFile = (uri:string) => {
           throw err;
       });
 }
+
+export const deleteFolder = (userId:string,bucketId:string) => {
+      const params = {
+        Bucket:BUCKET_NAME,
+        Prefix:`${userId}/${bucketId}/`,
+      };
+    
+
+      s3.listObjectsV2(params).promise().then((data) => {
+        if (data.Contents && data.Contents?.length == 0){
+            return null;
+        }
+        interface Type{
+            Key:string,
+        }
+        const newParams = {Bucket:BUCKET_NAME,Delete:{Objects:[] as Type[] }};
+        data.Contents?.forEach((content)=>{
+            newParams.Delete.Objects.push({Key:content.Key!});
+        });
+
+        return newParams;
+      }).then(newParam=>{
+        return s3.deleteObjects(newParam!).promise().then((result) => {
+            return result;
+          });
+      }).catch((err) => {
+        throw err;
+    });
+
+     
+}
+
+
 

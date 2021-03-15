@@ -6,7 +6,7 @@ import HttpException from "../utils/HttpException";
 
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
-import { uploadFile,downloadFile, deleteFile} from "../utils/AwsHelpers";
+import { uploadFile,getKey, deleteFile, deleteFolder} from "../utils/AwsHelpers";
 import aws from "../utils/aws_config";
 const LIMIT_PER_PAGE = 10;
 
@@ -125,6 +125,8 @@ export const deleteBucket = async (req:Request,res:Response,next:NextFunction)=>
             throw error;    
         }
 
+        deleteFolder(req.userId!,bucketId);
+
         global.io.to(req.userId!).emit('bucket',{action:'bucket-deleted',bId:bucketId});
         res.status(200).json({messge:'deleted successfully'});
     }catch(err){
@@ -198,7 +200,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
 
         if(req.file){
             /* Upload file to s3 bucket */
-            const uri = await uploadFile(req.file);
+            const uri = await uploadFile(req.file,req.userId!,bucketId);
             if(uri){
                 imgUri = uri as string;
             }
@@ -282,10 +284,10 @@ export const getDownloadFile = async (req:Request,res:Response,next:NextFunction
         }
 
 
-        //download file
+        // //download file
         const downloadUri = data[0].file_path;
-        const urlparts = downloadUri.split('/');
-        const key = urlparts[urlparts.length -1];
+        // const urlparts = downloadUri.split('/');
+        const key = getKey(downloadUri);
         res.attachment(downloadUri);
 
         const params = {
