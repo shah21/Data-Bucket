@@ -28,7 +28,7 @@ export const uploadFile =  (file:File,userId:string,bucketId:string)=>{
     const splitName = fileKeys[1].split('.');
     const fileType = splitName[splitName.length -1];
     const buffer = fileKeys[4];
-    console.log(buffer);
+    
 
     const fileName = `${uuidv4()}.${fileType}`;
 

@@ -115,7 +115,7 @@ export const deleteBucket = async (req:Request,res:Response,next:NextFunction)=>
     const bucketId = req.params.bucketId;
 
     try{
-        
+       
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const bucket = await Bucket.deleteByQuery(query);
 
@@ -244,8 +244,11 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
         let file_path;
 
         const dataArray = bucket.data.filter((item:any)=>{
-            file_path = item.file_path;
-            return item._id.toString()!==dataId.toString()
+            if(item._id.toString() === dataId.toString()){
+                file_path = item.file_path;
+                return false;
+            }
+            return true;
             
         });
         if(file_path){
