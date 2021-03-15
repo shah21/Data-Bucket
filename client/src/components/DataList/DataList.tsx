@@ -115,18 +115,18 @@ typeText:{
 /* Custom list items for Options dialog */  
 const DataOptions = (props:ListTypes) =>  (
     <div>
-        <ListItem className={props.classes.listItem} onClick={(e)=>{props.handleOptions('favorite',props.dataId)}} button>
-      <ListItemIcon>
-        <FavoriteIcon style={{color:'#32be8f',}} />
-      </ListItemIcon>
-      <ListItemText primary="Favorite" />
-    </ListItem>
-    <ListItem className={props.classes.listItem} onClick={(e)=>{props.handleOptions('delete',props.dataId)}} button>
-      <ListItemIcon>
-        <DeleteIcon color="secondary"/>
-      </ListItemIcon>
-      <ListItemText primary="Delete" />
-    </ListItem>
+        <ListItem className={props.classes.listItem} onClick={(e) => { props.handleOptions('favorite', props.dataId) }} button>
+            <ListItemIcon>
+                <FavoriteIcon style={{ color: '#32be8f', }} />
+            </ListItemIcon>
+            <ListItemText primary="Favorite" />
+        </ListItem>
+        <ListItem className={props.classes.listItem} onClick={(e) => { props.handleOptions('delete', props.dataId) }} button>
+            <ListItemIcon>
+                <DeleteIcon color="secondary" />
+            </ListItemIcon>
+            <ListItemText primary="Delete" />
+        </ListItem>
     </div>
 );
 

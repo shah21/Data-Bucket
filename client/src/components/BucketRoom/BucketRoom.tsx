@@ -21,6 +21,7 @@ import { useLayoutEffect } from 'react';
 import { socket } from '../../utils/socket';
 import { FlashContext } from '../../Contexts/FlashContext';
 import OptionsDialog from '../OptionsDialog/OptionsDialog';
+import UploadDialog from '../UploadDialog/UploadDialog';
 
 
 
@@ -143,7 +144,7 @@ const getUA = () => {
 
 
 
-const addData = async (bucketId:string,userToken:any,text:string,file:File) =>{
+const addData = async (bucketId:string,userToken:any,text:string,file:File,progressListener:(progress:number)=>void) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
@@ -160,6 +161,10 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File) =>{
                 headers: {
                     "Content-type": "multipart/form-data",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                },
+                onUploadProgress:(progressEvent:ProgressEvent)=>{
+                    const percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+                    progressListener(percentCompleted);
                 }
             });
             if(response){
@@ -173,6 +178,8 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File) =>{
 }
 
 const downloadFile = async (bucketId:string,userToken:any,dataId:string) =>{
+    
+    
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
@@ -197,6 +204,7 @@ const downloadFile = async (bucketId:string,userToken:any,dataId:string) =>{
 
 
 
+
 function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
     if(el!=null){
         el.style.maxHeight = (parent.offsetHeight - 60).toString()+'px';
@@ -217,6 +225,8 @@ function BucketRoom(props:propTypes) {
     const [openOptions,setOpenOptions] = useState<boolean>(false);
     const [openBucketOptions,setOpenBucketOptions] = useState<boolean>(false);
     const [scrolling,setScrolling] = useState<boolean>(false);
+    const [uploadProgress,setUploadProgress] = useState<number>(0);
+    const [uploadState,setUploadState] = useState<boolean>(false);
 
     
     const {setFlash} = useContext(FlashContext);
@@ -227,6 +237,7 @@ function BucketRoom(props:propTypes) {
     const totalCount = useRef<number>(0);
     const currentPage = useRef<number>(1);
     const fileChoose = useRef<HTMLInputElement>(null!);
+    const currentFile = useRef<File>(null!);
 
     const LIMIT_PER_PAGE = 10;
 
@@ -314,6 +325,14 @@ function BucketRoom(props:propTypes) {
         }
     },[props.bucketId]);
 
+
+
+    
+
+    
+    
+
+
     const deleteData = async (dataId:string,bucketId:string,token:any)=>{
         try {
             const isAuthourized = await isAuth(token.accessToken, token.refreshToken);
@@ -349,7 +368,9 @@ function BucketRoom(props:propTypes) {
     const handleSend = async () =>{
         if(textData){
             try {
-                const response = await addData(props.bucketId,props.token,textData,null!);
+                const response = await addData(props.bucketId,props.token,textData,null!,(progress:number)=>{
+
+                });
                 if(response){
                     
                 }
@@ -413,26 +434,31 @@ function BucketRoom(props:propTypes) {
     const handleScroll = (e: any) => {
         const lastItem:HTMLDivElement = document.querySelector(".bucketView ul.MuiList-root > div:last-child") as HTMLDivElement;
         const scrollBarContainer = document.querySelector(".room div.scrollBar") as HTMLDivElement;
-        if(lastItem){
-        const lastItemOffset = lastItem.offsetTop + lastItem.clientHeight;
-        // const pageOffset = window.pageYOffset + window.innerHeight;
+        if (lastItem) {
+            const lastItemOffset = lastItem.offsetTop + lastItem.clientHeight;
+            // const pageOffset = window.pageYOffset + window.innerHeight;
 
-        if (!scrolling && scrollBarContainer.scrollHeight > lastItemOffset) {       
-            setScrolling(true);
-            paginateData();
-        }
+            if (!scrolling && scrollBarContainer.scrollHeight > lastItemOffset) {
+                setScrolling(true);
+                paginateData();
+            }
         }
     }
 
     const handleFileChange = async (e:React.ChangeEvent<HTMLInputElement>) => {
-        if(e.target.files){
+        console.log(e.target.files);
+        if(e.target.files && e.target.files[0]){
             const file = e.target.files[0];
-            console.log(file);
+            currentFile.current = file;
             try {
-                const response = await addData(props.bucketId,props.token,'',file);
+                setUploadState(true);
+              
+                const response = await addData(props.bucketId,props.token,'',file,(progress:number)=>{
+                    setUploadProgress(progress);
+                });
 
                 if(response){
-                    
+                    setUploadState(false);
                 }
             } catch (err) {
                 console.log(err.response);
@@ -446,7 +472,12 @@ function BucketRoom(props:propTypes) {
         e.preventDefault();
         downloadFile(props.bucketId,props.token,id);
     }
+
     
+    const handleCloseUploadDialog = () =>{  
+        setUploadState(false);
+    }
+
 
 
     return (
@@ -506,7 +537,12 @@ function BucketRoom(props:propTypes) {
                     </div>
                 </div>
             )}
-             <input ref={fileChoose} name="file" onChange={handleFileChange} type="file" style={{visibility:'hidden'}}/>
+            
+            
+            {uploadState && (<UploadDialog fileName={currentFile.current && currentFile.current.name} progress={uploadProgress} open={uploadState} handleClose={handleCloseUploadDialog} />)}
+
+
+             <input ref={fileChoose} name="file" onClick={(e)=>fileChoose.current.value = ""} onChange={handleFileChange} type="file" style={{visibility:'hidden'}}/>
         </div>
     )
 }
