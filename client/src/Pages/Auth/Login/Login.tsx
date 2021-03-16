@@ -2,6 +2,9 @@ import React,{useReducer,useState,useEffect,useContext} from 'react';
 import PersonIcon from "@material-ui/icons/Person";
 import LockIcon from "@material-ui/icons/Lock";
 import PropTypes from 'prop-types';
+import { Redirect, useHistory } from 'react-router-dom';
+
+
 
 import "./Login.css";
 import wave from "../../../res/images/wave.png" 
@@ -12,7 +15,8 @@ import Button from "../../../components/Button/Button";
 import axios from "../../../axios/config";
 import endpoints from "../../../axios/endpoints";
 import { FlashContext } from '../../../Contexts/FlashContext';
-import { Redirect, useHistory } from 'react-router-dom';
+import ProgressButton from "../../../components/ProgressButton/ProgressButton";
+
 
 
 const formReducer = (state:object, event: any) => {
@@ -55,8 +59,9 @@ function Login({setToken,isLoggedIn}:types) {
     password:''
   });
   const {setFlash} = useContext(FlashContext);
-
   const history = useHistory();
+  const [loading,setLoading] = useState<boolean>(false); 
+
   
   useEffect(() => {
     getMessageFromSession() && setFlash(getMessageFromSession());
@@ -105,13 +110,16 @@ function Login({setToken,isLoggedIn}:types) {
   }
  
     /* Handle login */
-    const loginHandler = async (event: { preventDefault: () => void; }) =>{
-        event.preventDefault();
+    const loginHandler = async () =>{
         if(handleValidation()){
           setErrors({  
             email:'',
             password:''
           });
+
+          if(!loading){
+            setLoading(true);
+          }
 
           try{
             const response:any = await loginUser(formData);
@@ -119,7 +127,9 @@ function Login({setToken,isLoggedIn}:types) {
               setToken(response.user);
               history.push('/');
             }
+            setLoading(false);
           }catch(err){
+            setLoading(false);
             if (err.response) {
               const errResponseData = err.response.data;
               setFlash({ message: errResponseData.message, type: 'error' })
@@ -183,15 +193,7 @@ function Login({setToken,isLoggedIn}:types) {
               />
 
               <a href="/forgot-password">Forgot Password</a>
-              <Button
-                class="btn"
-                link="/"
-                type="submit"
-                label="Login"
-                onClick={(e: any) => {
-                  loginHandler(e);
-                }}
-              />
+              <ProgressButton loading={loading} setLoading={setLoading} clickHandler={loginHandler}/>
             </form>
           </div>
         </div>

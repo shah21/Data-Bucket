@@ -221,6 +221,6 @@
 }
 
 
-.MuiCircularProgress-colorPrimary {
+.homePage .MuiCircularProgress-colorPrimary {
     color: green !important;
 }

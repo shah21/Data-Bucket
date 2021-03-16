@@ -14,6 +14,7 @@ import bg from "../../../res/images/bg.svg";
 import avatar from "../../../res/images/avatar.svg";
 import Input from "../../../components/Input/Input";
 import Button from "../../../components/Button/Button";
+import ProgressButton from "../../../components/ProgressButton/ProgressButton";
 
 interface PropsInterface {
     isLoggedIn:boolean;
@@ -35,9 +36,6 @@ const registerUser = async (credentails:object)=>{
           "Content-Type": "application/json"
         },
       });
-
-      console.log(response);
-  
       const status: number = response.status;
       return { ...response.data, status: status };
     } catch (err) {
@@ -66,6 +64,7 @@ function Signup(props:PropsInterface) {
         password:'',
         confirm_password:'',
       });
+    const [loading,setLoading] = useState<boolean>(false); 
     const [formData, setFormData] = useReducer(formReducer, {});  
     
     const {setFlash} = useContext(FlashContext);
@@ -78,11 +77,14 @@ function Signup(props:PropsInterface) {
         });
     }
 
-    const signupHandler = async (e:Event) => {
+    const signupHandler = async () => {
 
-    
-        e.preventDefault();
         if (handleValidation()) {
+
+          if(!loading){
+            setLoading(true);
+          }
+
           try {
             const response = await registerUser(formData);
             if (response.status !== 201) {
@@ -90,9 +92,11 @@ function Signup(props:PropsInterface) {
               setFlash({ message: errors.length > 0 ? errors[0].msg : response.message, type: 'error' });
               return;
             }
+            setLoading(false);
             addMessageToSession('Account created successfully', 'success');
             history.push('/login');
           } catch (err) {
+              setLoading(false);
               if (err.response) {
                   const errResponseData = err.response.data;
                   setFlash({ message: errResponseData.message ? errResponseData.message : 'Something went wrong!', type: 'error' });
@@ -212,15 +216,7 @@ function Signup(props:PropsInterface) {
                 />
       
                
-                <Button
-                  class="btn"
-                  link="/"
-                  type="submit"
-                  label="Signup"
-                  onClick={(e:Event) => {
-                    signupHandler(e);
-                  }}
-                />
+                <ProgressButton loading={loading} setLoading={setLoading} clickHandler={signupHandler}/>
               </form>
             </div>
           </div>
