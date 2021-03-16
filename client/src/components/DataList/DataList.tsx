@@ -1,6 +1,6 @@
-import React,{useState} from 'react'
-import {List} from "@material-ui/core"
-import { makeStyles } from '@material-ui/core/styles';
+import React,{useEffect, useMemo, useState} from 'react'
+import {CircularProgress, List, Theme} from "@material-ui/core"
+import { makeStyles,createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import IconButton from '@material-ui/core/IconButton';
@@ -35,80 +35,86 @@ interface propTypes{
     reloadHandler:()=>void,
     totalCount:number,
     handleDownloadFile:(e:any,uri:string)=>void,
+    loadingContent:boolean,
 }
 
-const useStyles = makeStyles({
-  root: {
-    minWidth: '100%',
-    marginBottom:'10px',
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-    color:'#32be8f',
-  },
-  pos: {
-    marginBottom: 12,
-  },
-  deleteIcon:{
-      color:'#333',
-      fontSize:'1.2rem',
-  },
-  listItem:{
-    width:250,
-  },
-  reloadContainer:{
-    width: '100%',
-    padding:'10px',
-    display: 'flex',
-    justifyContent: 'center',
-},
-reloadIcon:{
-    color:'#6C6C6C',
-},
-imageSection:{
-    position:'relative',
-    height:'50px',
-},
-file:{
-    fontSize:'50px',
-    color:'#6C6C6C',
-},
-download_file:{
-    background:'#E3E9E7',
-    alignItems:'center',
-    borderRadius:'5px',
-    position:'relative',
-    padding:'5px 0',
-    display:'flex',
-},
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            minWidth: '100%',
+            marginBottom: '10px',
+        },
+        bullet: {
+            display: 'inline-block',
+            margin: '0 2px',
+            transform: 'scale(0.8)',
+        },
+        title: {
+            fontSize: 14,
+            color: '#32be8f',
+        },
+        pos: {
+            marginBottom: 12,
+        },
+        deleteIcon: {
+            color: '#333',
+            fontSize: '1.2rem',
+        },
+        listItem: {
+            width: 250,
+        },
+        reloadContainer: {
+            width: '100%',
+            padding: '10px',
+            display: 'flex',
+            justifyContent: 'center',
+        },
+        reloadIcon: {
+            color: '#6C6C6C',
+        },
+        imageSection: {
+            position: 'relative',
+            height: '50px',
+        },
+        file: {
+            fontSize: '50px',
+            color: '#6C6C6C',
+        },
+        download_file: {
+            background: '#E3E9E7',
+            alignItems: 'center',
+            borderRadius: '5px',
+            position: 'relative',
+            padding: '5px 0',
+            display: 'flex',
+        },
 
-download:{
-    fontSize:'20px',
-    position:'absolute',
-    bottom:'5px',
-    right:'8px',
-    color:'#E3E9E7',
-},
-sideText:{
-    display:'flex',
-    flexDirection:'column',
-},
-download_link:{
-    fontSize:'10px',
-    textDecoration:'underline',
-    color:'blue',
-},
-typeText:{
-    fontFamily:'sans-serif',
-    fontSize:'14px',
-    textTransform:'capitalize'
-}
-});
+        download: {
+            fontSize: '20px',
+            position: 'absolute',
+            bottom: '5px',
+            right: '8px',
+            color: '#E3E9E7',
+        },
+        sideText: {
+            display: 'flex',
+            flexDirection: 'column',
+        },
+        download_link: {
+            fontSize: '10px',
+            textDecoration: 'underline',
+            color: 'blue',
+        },
+        typeText: {
+            fontFamily: 'sans-serif',
+            fontSize: '14px',
+            textTransform: 'capitalize'
+        },
+        progressCircle: {
+            color: '#6C6C6C',
+        }
+    }),
+);
 
 
 
@@ -146,8 +152,16 @@ const getType = (uri:string):string => {
 function DataList(props:propTypes) {
 
     const classes = useStyles();
-    const [selectedItemId,setItemId] = useState<string>(null!)
+    const [selectedItemId,setItemId] = useState<string>(null!);
+    const [loading,setLoading] = useState<boolean>(false);
 
+    useMemo(()=>{
+        if(props.loadingContent){
+            setLoading(true);
+            return;
+        }
+        setLoading(false);
+    },[props.loadingContent])
 
     const handleOpen = (id:string) =>{
         setItemId(id);
@@ -160,7 +174,10 @@ function DataList(props:propTypes) {
     }
 
     
-
+    const handleLoading = () => {
+        props.reloadHandler();
+        setLoading(true);
+    }
 
     return (
         <div className="dataList">
@@ -219,13 +236,20 @@ function DataList(props:propTypes) {
                         </div>
                     )
                 })}
-                {props.dataArray && props.totalCount > props.dataArray.length && (
-                <div className={classes.reloadContainer}>
-                        <IconButton onClick={props.reloadHandler}>
-                            <Reload  className={classes.reloadIcon} />
-                        </IconButton>
-                </div>
+                {((props.dataArray && props.totalCount > props.dataArray.length) || loading) && (
+                    <div className={classes.reloadContainer}>
+                        {!loading &&  (<IconButton onClick={handleLoading}>
+                            <Reload className={classes.reloadIcon} />
+                        </IconButton> )}
+                        <div className="progress-section">
+                            {loading && (<CircularProgress className={classes.progressCircle} />)}
+                        </div>
+                    </div>
                 )}
+
+                
+                
+
             </List>
 
         </div>

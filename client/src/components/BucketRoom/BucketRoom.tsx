@@ -284,13 +284,12 @@ function BucketRoom(props:propTypes) {
                     }
                     setLoading(false);
                 }else{
-                    setDataArray(dataArray);  
-                    setLoading(false); 
+                    setDataArray(dataArray);   
                 }
                    
-               
             } catch (err) {
                console.log(err);
+               setLoading(false); 
             }
         }
         promiseList();
@@ -508,11 +507,11 @@ function BucketRoom(props:propTypes) {
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                             <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                            <DataList handleDownloadFile={handleDownloadFile} totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
+                            <DataList loadingContent={isLoading} handleDownloadFile={handleDownloadFile} totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
                             </div>
-                            <div className="progress-section">
-                                {isLoading && (<CircularProgress className="loading-circle" />)}
-                            </div>
+                            {/* <div className="progress-section">
+                                {true && (<CircularProgress className="loading-circle" />)}
+                            </div> */}
                         </div>
                     </div>
                     <div className="inputSection">
