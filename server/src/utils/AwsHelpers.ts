@@ -89,36 +89,46 @@ export const deleteFile = (uri:string) => {
       });
 }
 
-export const deleteFolder = (userId:string,bucketId:string) => {
-      const params = {
-        Bucket:BUCKET_NAME,
-        Prefix:`${userId}/${bucketId}/`,
+export const deleteFolder = (userId: string, bucketId: string) => {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Prefix: `${userId}/${bucketId}/`,
+  };
+
+  s3.listObjectsV2(params)
+    .promise()
+    .then((data) => {
+      if (data.Contents && data.Contents?.length == 0) {
+        return null;
+      }
+      interface Type {
+        Key: string;
+      }
+      const newParams = {
+        Bucket: BUCKET_NAME,
+        Delete: { Objects: [] as Type[] },
       };
-    
+      data.Contents?.forEach((content) => {
+        newParams.Delete.Objects.push({ Key: content.Key! });
+      });
 
-      s3.listObjectsV2(params).promise().then((data) => {
-        if (data.Contents && data.Contents?.length == 0){
-            return null;
-        }
-        interface Type{
-            Key:string,
-        }
-        const newParams = {Bucket:BUCKET_NAME,Delete:{Objects:[] as Type[] }};
-        data.Contents?.forEach((content)=>{
-            newParams.Delete.Objects.push({Key:content.Key!});
+      return newParams;
+    })
+    .then((newParam) => {
+      if (!newParam) {
+        return null;
+      }
+      return s3
+        .deleteObjects(newParam!)
+        .promise()
+        .then((result) => {
+          return result;
         });
-
-        return newParams;
-      }).then(newParam=>{
-        return s3.deleteObjects(newParam!).promise().then((result) => {
-            return result;
-          });
-      }).catch((err) => {
-        throw err;
+    })
+    .catch((err) => {
+      throw err;
     });
-
-     
-}
+};
 
 
 
