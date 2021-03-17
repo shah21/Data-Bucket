@@ -14,18 +14,18 @@ import {
   deleteData,
 } from "../controllers/bucket";
 import Bucket from '../models/bucket';
-import isAuth from '../middlewares/is-auth';
+import {validateToken} from '../middlewares/is-auth';
 
 const router = Router();
 
 //get
-router.get('/',isAuth,getBuckets);
-router.get('/:bucketId',isAuth,getBucket);
-router.get('/:bucketId/data',isAuth,getData);
-router.get('/:bucketId/data/:dataId',isAuth,getDownloadFile);
+router.get('/',validateToken,getBuckets);
+router.get('/:bucketId',validateToken,getBucket);
+router.get('/:bucketId/data',validateToken,getData);
+router.get('/:bucketId/data/:dataId',validateToken,getDownloadFile);
 
 //create
-router.post('/create',isAuth,[
+router.post('/create',validateToken,[
     body('name').trim().not().isEmpty().custom(async (value,{req})=>{
         const query = {name:value,ownedBy:new ObjectId(req.userId)}
         const bucket = await Bucket.findByQuery(query);
@@ -35,17 +35,17 @@ router.post('/create',isAuth,[
     })
 ],postCreateBucket);
 
-router.post('/add-data',isAuth,[
+router.post('/add-data',validateToken,[
     body('text').trim().not().isEmpty(),
     body('deviceName').trim().not().isEmpty(),
 ],postCreateData);
 
 //update
-router.put('/update-bucket/:bucketId',isAuth,updateBucket);
+router.put('/update-bucket/:bucketId',validateToken,updateBucket);
 
 //delete
-router.delete('/delete-data',isAuth,deleteData);
-router.delete('/delete-bucket/:bucketId',isAuth,deleteBucket);
+router.delete('/delete-data',validateToken,deleteData);
+router.delete('/delete-bucket/:bucketId',validateToken,deleteBucket);
 
 
 export default router;

@@ -57,6 +57,7 @@ app.use('/auth',authRouter);
 app.use('/bucket',bucketRouter);
 
 app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
+  console.log(error);
     const status = error.statusCode || 500;
     const message = error.message;
     const data = error.data;
@@ -73,6 +74,12 @@ connectDb(()=>{
           credentials: true
         }});
     global.io.on('connection',WebSockets.connection);
+    global.io.on('disconnect',function(){
+      global.io.removeListener('bucket',null!);
+      global.io.removeListener('data',null!);
+      global.io.removeListener('connection',null!);
+      global.io.removeListener('disconnect',null!);
+    });
     
 })
 

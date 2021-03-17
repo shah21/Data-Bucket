@@ -123,6 +123,25 @@ const useStylesFacebook = makeStyles((theme: Theme) =>
 );
 
 
+const logout = async (userToken:any) => {
+    try {
+        const isAuthourized = await isAuth(userToken.accessToken, userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            const response = await axios.post(endpoints.logout, {
+                accessToken: isAuthourized.accessToken,
+                refreshToken: userToken.refreshToken,
+            });
+            if (response) {
+                console.log(response);
+                return response;
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+}
+
+
 function Home(props:any) {
 
     //states
@@ -133,11 +152,11 @@ function Home(props:any) {
     const [buckets,setBuckets] = useState<Bucket[]>([]);
     const [scrolling,setScrolling] = useState<boolean>(false);
     const [isLoading,setLoading] = useState<boolean>(false);
+    const [totalCount,setTotalCount] = useState<number>(0);
 
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
     const bucketsBackup = useRef<Bucket[]>([]);
-    const totalCount = useRef<number>(0);
     const currentPage = useRef<number>(1);
 
     //context
@@ -168,7 +187,7 @@ function Home(props:any) {
                 if(buckets.length === 0){
                     setLoading(true);
                     const responseData = await getBuckets(token,currentPage.current);
-                    totalCount.current = responseData.totalCount;
+                    setTotalCount(responseData.totalCount);
                     const array = [...responseData.buckets];
                     setBuckets(array);
                     bucketsBackup.current = array;
@@ -187,13 +206,14 @@ function Home(props:any) {
     useEffect(()=>{
         socket.emit('subscribe',token.userId);
         socket.on('bucket', (data: { action: string, bId: string,bucket:Bucket }) => {
-            console.log(data);
+            console.log('event data',data);
             switch (data.action) {
                 case 'bucket-created': {
                     setOpen(prev=>false);
                     setBuckets(prev=>[...prev,data.bucket as Bucket])
                     bucketsBackup.current = [...bucketsBackup.current,data.bucket as Bucket];
                     setFlash({message:`${data.bucket.name} Bucket created`,type:'success'});
+                    setTotalCount(prev=>prev+1);
                     break;
                 }
                 case 'bucket-deleted': {
@@ -202,6 +222,7 @@ function Home(props:any) {
                     setBuckets(prev=>prev.filter(bucket=>bucket._id !== data.bId));
                     bucketsBackup.current = bucketsBackup.current.filter(bucket=>bucket._id !== data.bId);
                     setFlash({message:`Bucket deleted successfully`,type:'success'});
+                    setTotalCount(prev=>prev-1);
                     break;
                 }
             }
@@ -245,32 +266,42 @@ function Home(props:any) {
         setOpen(prev=>false);
     }
 
-    const handleSaveBucket = (name:string)=>{
-        addBucket(name,token).then(data=>{
-            
-        }).catch(err=>{
-            if(err.response && err.response.status !== 401){
+    const handleSaveBucket = async (name:string)=>{
+        try {
+            await addBucket(name, token);
+        } catch (err) {
+            if (err.response && err.response.status !== 401) {
                 const error = err.response.data.errors[0];
-                if(error){
-                    setFlash({message:error.msg,type:'error'});
-                }else{
-                    setFlash({message:err.message,type:'error'});
+                if (error) {
+                    setFlash({ message: error.msg, type: 'error' });
+                } else {
+                    setFlash({ message: err.message, type: 'error' });
                 }
             }
-            setOpen(prev=>false);
-        })
-        
+            setOpen(prev => false);
+        }
     }
 
-    const handleLogout = () =>{
-        removeCookies().then((result) => {
-            if(result){
-                setToken({accessToken:undefined!,refreshToken:undefined!,userId:undefined!});
-                history.push('/login');
+    const handleLogout = async () =>{
+
+        try {
+
+            const response = await logout(token);
+
+            if(response){
+                // removeCookies().then((result) => {
+                //     if(result){
+                //         setToken({accessToken:undefined!,refreshToken:undefined!,userId:undefined!});
+                //         history.push('/login');
+                //     }
+                // });
             }
-        }).catch((err) => {
-            console.log(err);
-        });
+        } catch (error) {
+            console.log(error);
+        }
+
+
+       
     } 
 
     const handleClickBucket = (id:string) =>{
@@ -296,10 +327,10 @@ function Home(props:any) {
 
 
     const paginateData = async () =>{
-        if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
+        if(totalCount > LIMIT_PER_PAGE * currentPage.current){
             currentPage.current = ++currentPage.current; 
             const responseData = await getBuckets(token,currentPage.current);
-            totalCount.current = responseData.totalCount;
+            setTotalCount(responseData.totalCount);
             setScrolling(false);
             const array = [...buckets, ...responseData.buckets];
             setBuckets(array);
@@ -358,7 +389,7 @@ function Home(props:any) {
                 <div className="bucket-list" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                     {buckets.length === 0 && ( <h5 className="no_result_text">No buckets found</h5> )}
                     <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                    <BucketList totalCount={totalCount.current} reloadHandler={paginateData} clickHandler={handleClickBucket} bucketArray={buckets}/>
+                    <BucketList totalCount={totalCount} reloadHandler={paginateData} clickHandler={handleClickBucket} bucketArray={buckets}/>
                     </div>
                     <div className="progress-section">
                         {isLoading && (<CircularProgress className="loading-circle" />)}

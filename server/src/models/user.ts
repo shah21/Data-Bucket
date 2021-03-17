@@ -34,6 +34,14 @@ class User{
     static updateByQuery(query:object,values:object){
         return getDb().collection('users').updateOne(query,{$set:values});
     }
+
+    static addToken(data:object){
+        return getDb().collection("tokenBlackList").insertOne(data);
+    }
+    
+    static checkToken(accessToken:string){
+        return getDb().collection("tokenBlackList").findOne({accessToken:accessToken});
+    }
     
 }
 

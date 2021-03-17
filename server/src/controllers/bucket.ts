@@ -76,6 +76,7 @@ export const postCreateBucket = async (req:Request,res:Response,next:NextFunctio
         const result = await newBucket.save();
         global.io.to(req.userId!).emit('bucket',{action:'bucket-created',bucket:newBucket});
         res.status(201).json({messge:'bucket created',bucket:result.ops[0]});
+        console.log('created');
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;
@@ -210,7 +211,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         const newData = {_id:new ObjectID(Date.now()),data:text,file_path:imgUri,deviceName,addedAt:Date.now(),addedBy:new ObjectID(req.userId)};
         const updateValues = {data:[...dataArray,newData]};
         await Bucket.updateById(bucketId,updateValues);
-
+        
         global.io.to(bucketId).emit('data',{action:'created',data:newData,bId:bucketId});
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){

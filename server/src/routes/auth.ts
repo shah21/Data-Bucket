@@ -1,15 +1,15 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import isAuth from "../middlewares/is-auth"
+import {validateToken} from "../middlewares/is-auth"
 
-import {getUser,postLogin,postSignup,postRefreshToken,postResetPassword, postVerifyToken,postSentResetMail} from '../controllers/auth';
+import {getUser,postLogout,postLogin,postSignup,postRefreshToken,postResetPassword, postVerifyToken,postSentResetMail} from '../controllers/auth';
 import User from '../models/user';
 
 const router = Router();
 
 
 
-router.get('/user/:userId',isAuth,getUser)
+router.get('/user/:userId',validateToken,getUser)
 router.post('/login',postLogin);
 router.post('/verifyAccessToken',postVerifyToken);
 router.post('/signup',[
@@ -30,7 +30,9 @@ router.post('/signup',[
 ],postSignup);
 
 
-router.post('/refresh-token',postRefreshToken);
+router.post('/refresh-token',[
+    body('refreshToken','Refresh Token is missing').isEmpty(),
+],postRefreshToken);
 router.post('/send-reset-mail',[
     body('email').isEmail().withMessage('Invalid Email').normalizeEmail(),
 ],postSentResetMail)
@@ -44,6 +46,11 @@ router.post('/reset-password',[
         return true;
     }),
 ],postResetPassword)
+
+router.post('/logout',[
+    body('accessToken','Access Token is missing').isEmpty(),
+    body('refreshToken','Refresh Token is missing').isEmpty(),
+],postLogout);
 
 
 export default router;

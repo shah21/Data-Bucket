@@ -7,6 +7,7 @@ enum endpoints {
     signup = '/auth/signup',
     sendResetMail = '/auth/send-reset-mail',
     resetPassword = '/auth/reset-password',
+    logout = '/auth/logout',
     //bucket
     createBucket = '/bucket/create',
     verifyAccessToken = '/auth/verifyAccessToken',

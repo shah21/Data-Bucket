@@ -4,6 +4,7 @@ import bcryptjs from "bcryptjs";
 import crypto from 'crypto';
 import HttpException from "../utils/HttpException";
 import { generateAccessToken,generateRefreshToken, verifyRefreshToken,verifyAccessToken } from "../utils/jwt_helper";
+import { extractToken } from "../middlewares/is-auth";
 
 import User from "../models/user";
 import { sendMail } from "../utils/sendMail";
@@ -223,8 +224,34 @@ export const postResetPassword =(req:Request,res:Response,next:NextFunction)=>{
         }
         next(err);   
     });
-
-  
     
     
 };
+
+interface MyToken {
+    userId: string;
+    email: string;
+    // whatever else is in the JWT.
+  }
+
+export const postLogout = async (req:Request,res:Response,next:NextFunction) => {
+    const {refreshToken,accessToken} = req.body;
+    
+    try{
+        const tokenPayload:any = await verifyAccessToken(accessToken);
+        if(tokenPayload){
+            const refreshPayload = await verifyRefreshToken(refreshToken);
+            if(refreshPayload){
+                //upload to black list token
+                const data = {accessToken:accessToken,refreshToken:refreshToken,expiresIn:new Date(tokenPayload.exp *1000)};
+                await User.addToken(data);
+                res.json({message:'logout successfull'});
+            }
+        }
+    }catch(err){
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);   
+    }
+}

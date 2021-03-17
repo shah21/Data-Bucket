@@ -18,6 +18,11 @@ const getDb = ():Db=>{
     if(!_db){
         throw new Error('No database found.');
     }
+
+    //only run for 1st time of collection creation
+    // _db
+    // .collection("tokenBlackList")
+    // .createIndex({'expiresIn':1},{expireAfterSeconds:60});
     return _db;
 }
 
