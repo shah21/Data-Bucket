@@ -4,7 +4,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PersonIcon from '@material-ui/icons/Person';
 import AddIcon from '@material-ui/icons/AddBox';
 import SearchIcon from '@material-ui/icons/Search';
-import { CircularProgress, createStyles, IconButton, makeStyles, Theme } from '@material-ui/core';
+import {  CircularProgress, IconButton } from '@material-ui/core';
 import Cookies from "js-cookie";
 
 
@@ -61,7 +61,8 @@ const addBucket = async (name:string,userToken:any) =>{
     try {
         const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
-            const response = await axios.post(endpoints.createBucket, { name: name }, {
+            console.log(socket.id);
+            const response = await axios.post(endpoints.createBucket, { name: name,socket_id:socket.id }, {
                 headers: {
                     "Content-type": "application/json",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
@@ -101,26 +102,7 @@ function changeStyle(el: HTMLDivElement,parent: HTMLDivElement) {
     }
 }
 
-// Inspired by the former Facebook spinners.
-const useStylesFacebook = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      position: 'relative',
-    },
-    bottom: {
-      color: theme.palette.grey[theme.palette.type === 'light' ? 200 : 700],
-    },
-    top: {
-      color: '#1a90ff',
-      animationDuration: '550ms',
-      position: 'absolute',
-      left: 0,
-    },
-    circle: {
-      strokeLinecap: 'round',
-    },
-  }),
-);
+
 
 
 const logout = async (userToken:any) => {
@@ -167,6 +149,7 @@ function Home(props:any) {
     const history = useHistory();
     const LIMIT_PER_PAGE = 10;
 
+   
     useLayoutEffect(() => {
         function updateSize() {
             if(scroll){
@@ -185,13 +168,7 @@ function Home(props:any) {
         async function promiseList(){
             try {
                 if(buckets.length === 0){
-                    setLoading(true);
-                    const responseData = await getBuckets(token,currentPage.current);
-                    setTotalCount(responseData.totalCount);
-                    const array = [...responseData.buckets];
-                    setBuckets(array);
-                    bucketsBackup.current = array;
-                    setLoading(false);
+                    handleReloadBuckets();
                 }else{
                     setBuckets(buckets);
                 } 
@@ -204,16 +181,22 @@ function Home(props:any) {
     },[token]);
 
     useEffect(()=>{
+        
         socket.emit('subscribe',token.userId);
-        socket.on('bucket', (data: { action: string, bId: string,bucket:Bucket }) => {
-            console.log('event data',data);
+        socket.on('bucket', (data: { action: string, bId: string,bucket:Bucket,socket_id:string }) => {
+           
             switch (data.action) {
                 case 'bucket-created': {
-                    setOpen(prev=>false);
-                    setBuckets(prev=>[...prev,data.bucket as Bucket])
-                    bucketsBackup.current = [...bucketsBackup.current,data.bucket as Bucket];
-                    setFlash({message:`${data.bucket.name} Bucket created`,type:'success'});
-                    setTotalCount(prev=>prev+1);
+                    
+                    if(data.socket_id !== socket.id){
+                        handleReloadBuckets();
+                    }
+                    // console.log(socket.id);
+                    // setOpen(prev=>false);
+                    // setBuckets(prev=>[...prev,data.bucket as Bucket])
+                    // bucketsBackup.current = [...bucketsBackup.current,data.bucket as Bucket];
+                    // setFlash({message:`${data.bucket.name} Bucket created`,type:'success'});
+                    // setTotalCount(prev=>prev+1);
                     break;
                 }
                 case 'bucket-deleted': {
@@ -229,6 +212,7 @@ function Home(props:any) {
         
         return ()=>{
             socket.off('subscribe');
+            socket.off('unsubscribe');
             socket.off('bucket');
         }
 
@@ -268,7 +252,16 @@ function Home(props:any) {
 
     const handleSaveBucket = async (name:string)=>{
         try {
-            await addBucket(name, token);
+            const response = await addBucket(name, token);
+            if(response){
+                console.log('created');
+                const data = response;
+                setOpen(prev=>false);
+                setBuckets(prev=>[...prev,data.bucket as Bucket])
+                bucketsBackup.current = [...bucketsBackup.current,data.bucket as Bucket];
+                setFlash({message:`${data.bucket.name} Bucket created`,type:'success'});
+                setTotalCount(prev=>prev+1);
+            }
         } catch (err) {
             if (err.response && err.response.status !== 401) {
                 const error = err.response.data.errors[0];
@@ -352,6 +345,17 @@ function Home(props:any) {
         }
     }
 
+    const handleReloadBuckets = async () => {
+        setLoading(true);
+        const responseData = await getBuckets(token, currentPage.current);
+        setTotalCount(responseData.totalCount);
+        const array = [...responseData.buckets];
+        setBuckets(array);
+        bucketsBackup.current = array;
+        setLoading(false);
+        // setUpdateStatus(false);
+    }
+
 
     return (
         <div className="homePage">
@@ -368,7 +372,7 @@ function Home(props:any) {
                 </div>
             </nav>
             <div className="bucketBar">
-              
+
                 <div className="bucketTitle">
                     <h5>Buckets</h5>
                     <IconButton className="icon-btn-add" disableFocusRipple={true} onClick={handleAddButton} >

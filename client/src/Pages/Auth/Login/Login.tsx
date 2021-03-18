@@ -134,8 +134,9 @@ function Login({setToken,isLoggedIn}:types) {
               const errResponseData = err.response.data;
               setFlash({ message: errResponseData.message, type: 'error' })
               return;
+            }else{
+              setFlash({ message: err.message, type: 'error' })
             }
-            alert(err);
             return;
           }
           

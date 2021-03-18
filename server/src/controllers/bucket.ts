@@ -61,7 +61,10 @@ export const getBucket = async (req:Request,res:Response,next:NextFunction)=>{
 
 export const postCreateBucket = async (req:Request,res:Response,next:NextFunction)=>{
     const name = req.body.name;
+    const socket_id = req.body.socket_id;
     const errors = validationResult(req).array();
+
+    
 
     try{
 
@@ -74,9 +77,9 @@ export const postCreateBucket = async (req:Request,res:Response,next:NextFunctio
 
         const newBucket = new Bucket(name,new ObjectID(req.userId),Date.now(),undefined!,[]);
         const result = await newBucket.save();
-        global.io.to(req.userId!).emit('bucket',{action:'bucket-created',bucket:newBucket});
+        global.io.to(req.userId!).emit('bucket',{action:'bucket-created',bucket:newBucket,socket_id:socket_id});
         res.status(201).json({messge:'bucket created',bucket:result.ops[0]});
-        console.log('created');
+       
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;

@@ -72,7 +72,10 @@ connectDb(()=>{
           origin: "http://localhost:3000",
           credentials: true
         }});
-    global.io.on('connection',WebSockets.connection);
+
+    global.io.on('connection',(client)=>{
+      WebSockets.connection(client);
+    });
     global.io.on('disconnect',function(){
       global.io.removeListener('bucket',null!);
       global.io.removeListener('data',null!);

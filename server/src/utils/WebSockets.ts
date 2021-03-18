@@ -1,13 +1,11 @@
 class WebSockets {
     users:Array<{socketId:string,userId:string}> = [];
-    count = 0;
 
     constructor(){
         this.connection = this.connection.bind(this); 
     }
     
     connection(client:any) {
-        this.count++;
       // event fired when the  room is disconnected
       client.on("disconnect", () => {
         this.users = this.users.filter((user) => user.socketId !== client.id);
@@ -26,7 +24,11 @@ class WebSockets {
       });
       // subscribe person to chat & other user as well
       client.on("subscribe", (room: string) => {
-        client.join(room);
+        if(!Object.keys(client.rooms).includes(room)){
+          client.join(room);
+          // console.log(global.io.sockets.adapter.rooms);
+        }  
+        
       });
 
       // mute a chat room
