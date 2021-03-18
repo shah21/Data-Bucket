@@ -4,7 +4,6 @@ import bcryptjs from "bcryptjs";
 import crypto from 'crypto';
 import HttpException from "../utils/HttpException";
 import { generateAccessToken,generateRefreshToken, verifyRefreshToken,verifyAccessToken } from "../utils/jwt_helper";
-import { extractToken } from "../middlewares/is-auth";
 
 import User from "../models/user";
 import { sendMail } from "../utils/sendMail";

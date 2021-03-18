@@ -10,45 +10,51 @@ interface MyToken {
     // whatever else is in the JWT.
   }
 
-export const extractToken = async (headers:string) => {
-    if(!headers){
-        console.log('No header');
-        const error = new HttpException('Not authenticated')
-        error.statusCode = 401;
-        throw error;
-    }
-    const token = headers.split(' ')[1];
+export default async (req:Request,res:Response,next:NextFunction) => {
+    
     let decodedToken:MyToken;
     try{
+        const headers = req.get('Authorization');
+        if(!headers){
+            console.log('No header');
+            const error = new HttpException('Not authenticated')
+            error.statusCode = 401;
+            throw error;
+        }
+        const token = headers.split(' ')[1];
+
         const isAvailable = await User.checkToken(token);
+
         if(isAvailable){
-            const error = new HttpException('Not authenticated');
+            const error = new HttpException('Not authorized')
             error.statusCode = 401;
             throw error;
         }
         const secret_key = process.env.JWT_SECRET_KEY;
         decodedToken = jwt.verify(token,secret_key as string) as MyToken;
+        req.userId = decodedToken.userId;
+        next();
     }catch(err){
-        console.log(err);
-        // err.message = "Token is not valid"
-        // err.statusCode = 401;
-        // throw err;
+        err.message = "Token is not valid"
+        err.statusCode = 401;
+        next(err);
     }
 
-    if(!decodedToken){
-        const error = new HttpException('Not authorized')
-        error.statusCode = 401;
-        throw error;
-    }
-
-    return decodedToken;
+    
 }
    
 
 
-export const validateToken = async (req:Request,res:Response,next:NextFunction)=>{
-    const headers = req.get('Authorization');
-    const decodedToken = await extractToken(headers!);
-    req.userId = decodedToken.userId;
-    next();
-}
+// export const validateToken = async (req:Request,res:Response,next:NextFunction)=>{
+//     try{
+//         const headers = req.get('Authorization');
+//         const decodedToken = await extractToken(headers!);
+//         req.userId = decodedToken.userId;
+//         next();
+//     }catch(err){
+//         const error = new HttpException('Not authorized')
+//         error.statusCode = 401;
+//         next(error);
+//     }
+    
+// }

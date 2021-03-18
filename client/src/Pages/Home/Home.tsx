@@ -289,12 +289,12 @@ function Home(props:any) {
             const response = await logout(token);
 
             if(response){
-                // removeCookies().then((result) => {
-                //     if(result){
-                //         setToken({accessToken:undefined!,refreshToken:undefined!,userId:undefined!});
-                //         history.push('/login');
-                //     }
-                // });
+                removeCookies().then((result) => {
+                    if(result){
+                        setToken({accessToken:undefined!,refreshToken:undefined!,userId:undefined!});
+                        history.push('/login');
+                    }
+                });
             }
         } catch (error) {
             console.log(error);

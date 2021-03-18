@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import {validateToken} from "../middlewares/is-auth"
+import isAuth from "../middlewares/is-auth"
 
 import {getUser,postLogout,postLogin,postSignup,postRefreshToken,postResetPassword, postVerifyToken,postSentResetMail} from '../controllers/auth';
 import User from '../models/user';
@@ -9,7 +9,7 @@ const router = Router();
 
 
 
-router.get('/user/:userId',validateToken,getUser)
+router.get('/user/:userId',isAuth,getUser)
 router.post('/login',postLogin);
 router.post('/verifyAccessToken',postVerifyToken);
 router.post('/signup',[

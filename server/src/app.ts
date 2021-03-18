@@ -57,7 +57,6 @@ app.use('/auth',authRouter);
 app.use('/bucket',bucketRouter);
 
 app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
-  console.log(error);
     const status = error.statusCode || 500;
     const message = error.message;
     const data = error.data;
