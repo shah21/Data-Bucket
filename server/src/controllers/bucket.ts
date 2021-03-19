@@ -1,16 +1,22 @@
 import { validationResult } from "express-validator";
 import {Request,Response,NextFunction} from "express";
 import { ObjectID } from "mongodb";
+import zlib from "zlib";
+import fs from "fs";
+
 import HttpException from "../utils/HttpException";
-
-
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
 import { uploadFile,getKey, deleteFile, deleteFolder} from "../utils/AwsHelpers";
 import aws from "../utils/aws_config";
-const LIMIT_PER_PAGE = 10;
 
+
+
+const LIMIT_PER_PAGE = 10;
 type UserId = {userId:string};
+const compress = zlib.createGzip(),
+      decompress = zlib.createGunzip();
+
 
 //buckets
 export const getBuckets = async (req:Request,res:Response,next:NextFunction)=>{
@@ -179,7 +185,6 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
     const errors = validationResult(req).array();
     const file = req.file;
 
-    
 
     try{
 
@@ -203,6 +208,10 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         }
 
         if(req.file){
+            const readStream = fs.createReadStream(req.file.name);
+            const fileName = 'dfdfdf.gz',   
+                writeStream = fs.createWriteStream(fileName);
+            readStream.pipe()
             /* Upload file to s3 bucket */
             const uri = await uploadFile(req.file,req.userId!,bucketId);
             if(uri){
@@ -218,6 +227,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
         global.io.to(bucketId).emit('data',{action:'created',data:newData,bId:bucketId});
         res.status(201).json({messge:'Successfully added',data:newData});
     }catch(err){
+        
         if(!err.statusCode){
             err.statusCode = 500;
         }

@@ -25,7 +25,7 @@ declare global {
 
 const app = express();
 const storage = multer.memoryStorage();
-const upload = multer({storage}).single('file');
+const upload = multer({storage,limits:{fileSize:10000000}}).single('file');
 
 
 //sessions
@@ -57,10 +57,11 @@ app.use('/auth',authRouter);
 app.use('/bucket',bucketRouter);
 
 app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
-    const status = error.statusCode || 500;
-    const message = error.message;
-    const data = error.data;
-    res.status(status).json({message:message,errors:data});
+  console.log(error);
+  const status = error.statusCode || 500;
+  const message = error.message;
+  const data = error.data;
+  res.status(status).json({message:message,errors:data});
 }); 
 
 
@@ -73,9 +74,7 @@ connectDb(()=>{
           credentials: true
         }});
 
-    global.io.on('connection',(client)=>{
-      WebSockets.connection(client);
-    });
+    global.io.on('connection',WebSockets.connection);
     global.io.on('disconnect',function(){
       global.io.removeListener('bucket',null!);
       global.io.removeListener('data',null!);

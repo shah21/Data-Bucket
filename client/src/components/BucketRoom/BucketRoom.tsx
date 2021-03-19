@@ -451,7 +451,6 @@ function BucketRoom(props:propTypes) {
     }
 
     const handleFileChange = async (e:React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.files);
         if(e.target.files && e.target.files[0]){
             const file = e.target.files[0];
             currentFile.current = file;
@@ -466,8 +465,16 @@ function BucketRoom(props:propTypes) {
                     setUploadState(false);
                 }
             } catch (err) {
-                console.log(err.response);
-                setFlash({message:err.message,type:'error'});
+                if(err.response){
+                    let errMessage = err.response.data.message;
+                    if(errMessage === 'File too large!'){
+                        errMessage += '.Pick another one' 
+                    }
+                    setFlash({message:errMessage,type:'error'});
+                }else{
+                    setFlash({message:err.message,type:'error'});
+                }
+                setUploadState(false);
             }
         }
     }
