@@ -1,21 +1,21 @@
 import { validationResult } from "express-validator";
 import {Request,Response,NextFunction} from "express";
 import { ObjectID } from "mongodb";
-import zlib from "zlib";
-import fs from "fs";
+import zlib from 'zlib';
+
 
 import HttpException from "../utils/HttpException";
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
 import { uploadFile,getKey, deleteFile, deleteFolder} from "../utils/AwsHelpers";
 import aws from "../utils/aws_config";
+import { createWriteStream,createReadStream } from "fs";
 
 
 
 const LIMIT_PER_PAGE = 10;
 type UserId = {userId:string};
-const compress = zlib.createGzip(),
-      decompress = zlib.createGunzip();
+
 
 
 //buckets
@@ -189,6 +189,7 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
     try{
 
         let imgUri:string = null!;
+        let fileType:string= null!;
 
         if(!file && errors.length > 0){
             const error = new HttpException('Invalid data');
@@ -207,16 +208,14 @@ export const postCreateData = async (req:Request,res:Response,next:NextFunction)
             throw error;    
         }
 
-        if(req.file){
-            const readStream = fs.createReadStream(req.file.name);
-            const fileName = 'dfdfdf.gz',   
-                writeStream = fs.createWriteStream(fileName);
-            readStream.pipe()
-            /* Upload file to s3 bucket */
-            const uri = await uploadFile(req.file,req.userId!,bucketId);
-            if(uri){
-                imgUri = uri as string;
-            }
+        if (req.file) {
+            
+          /* Upload file to s3 bucket */
+          const response:any = await uploadFile(req.file, req.userId!, bucketId);
+          if (response) {
+            imgUri = response.uri as string;
+            fileType = response.fileType;
+          }
         }
 
         const dataArray = bucket.data;
@@ -285,6 +284,7 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
 export const getDownloadFile = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const dataId = req.params.dataId;
+    const decompress = zlib.createUnzip();
 
 
     try {
@@ -302,10 +302,12 @@ export const getDownloadFile = async (req:Request,res:Response,next:NextFunction
 
 
         // //download file
-        const downloadUri = data[0].file_path;
+        const downloadUri:string = data[0].file_path;
+        const attachmentUrl = downloadUri.substring(0,downloadUri.lastIndexOf('.'));
+        
         // const urlparts = downloadUri.split('/');
         const key = getKey(downloadUri);
-        res.attachment(downloadUri);
+        res.attachment(attachmentUrl);
 
         const params = {
             Bucket:process.env.AWS_BUCKET_NAME!,
@@ -316,7 +318,11 @@ export const getDownloadFile = async (req:Request,res:Response,next:NextFunction
         const stream = s3.getObject(params).createReadStream().on('error',(err)=>{
             throw err;    
         });
-        stream.pipe(res);
+
+        res.setHeader('content-length',1000000);
+        stream.pipe(decompress).pipe(res);
+
+
     } catch (err) {
         console.log(err);
         if(!err.statusCode){

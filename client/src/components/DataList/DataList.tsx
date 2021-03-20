@@ -141,7 +141,7 @@ const getType = (uri:string):string => {
     const fileName = urlParts[urlParts.length -1];
     const nameParts = fileName.split('.');
     const imageTypes = ['jpg','jpeg','png','svg'];
-    let type = nameParts[nameParts.length -1];;
+    let type = nameParts[nameParts.length -2];;
     imageTypes.forEach(imgType=>{
         type  = imgType === type ? 'Image' : type;
     })

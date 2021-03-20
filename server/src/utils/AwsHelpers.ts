@@ -3,10 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { GetObjectRequest } from "aws-sdk/clients/s3";
 import { createReadStream, createWriteStream } from "fs";
 import { Stream } from "stream";
+import zlib from "zlib";
+import fs from "fs";
+
+
+import { bufferToStream } from "./fileUtils";
 
 
 const s3 = new aws.S3({apiVersion: '2006-03-01'});
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
+
+const compress = zlib.createGzip({
+  flush:zlib.constants.Z_SYNC_FLUSH,
+});
 
 export const getKey = (uri:string) => {
     const urlparts = uri.split('/');
@@ -29,23 +38,41 @@ export const uploadFile =  (file:File,userId:string,bucketId:string)=>{
     const fileType = splitName[splitName.length -1];
     const buffer = fileKeys[4];
     
+    const fileName = `${uuidv4()}.${fileType}.gz`;
 
-    const fileName = `${uuidv4()}.${fileType}`;
+    const stream = bufferToStream(buffer);
 
     return new Promise((resolve,reject)=>{
-        s3.upload({
-            Bucket:BUCKET_NAME,
-            Key:`${userId}/${bucketId}/${fileName}`,
-            Body:buffer,
-        },(err:any,data:any)=>{
-            if(err){
-                reject(err);
-            }if(data){
-                resolve(data.Location);
-            }
-        });
+      stream.pipe(compress).pipe(uploadFromStream(userId,bucketId,fileName,(err:any,data:any)=>{
+        if(err){
+          reject(err);
+        }
+        resolve({uri:data.Location,fileType:fileType});
+      }))
     });
    
+}
+
+function uploadFromStream(userId:string,bucketId:string,fileName:string,callback:(err:any,data:any)=>void) {
+  var pass = new Stream.PassThrough();
+
+  s3.upload(
+    {
+      Bucket: BUCKET_NAME,
+      Key: `${userId}/${bucketId}/${fileName}`,
+      Body: pass,
+    },
+    (err: any, data: any) => {
+      if (err) {
+        callback(err,null);
+      }
+      if (data) {
+        callback(null,data);
+      }
+    }
+  );
+
+  return pass;
 }
 
 export const downloadFile = async (uri:string) => {

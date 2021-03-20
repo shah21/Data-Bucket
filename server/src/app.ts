@@ -12,6 +12,7 @@ import * as socketio from "socket.io";
 import WebSockets from "./utils/WebSockets";
 import aws from "./utils/aws_config";
 
+
 declare global {
     namespace NodeJS {
       interface Global {
@@ -57,7 +58,6 @@ app.use('/auth',authRouter);
 app.use('/bucket',bucketRouter);
 
 app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
-  console.log(error);
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;

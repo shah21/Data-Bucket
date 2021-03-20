@@ -1,5 +1,5 @@
 import React,{useMemo, useContext,useState,useRef, useEffect} from 'react'
-import { Button,TextField,IconButton, CircularProgress } from "@material-ui/core";
+import { Button,TextField,IconButton, CircularProgress, Snackbar, Fade } from "@material-ui/core";
 import Send from "@material-ui/icons/Send";
 import AttachFile from "@material-ui/icons/AttachFile";
 import OptionsIcon from "@material-ui/icons/MoreVert";
@@ -177,7 +177,7 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File,progr
     }
 }
 
-const downloadFile = async (bucketId:string,userToken:any,dataId:string) =>{
+const downloadFile = async (bucketId:string,userToken:any,dataId:string,onProgress:(progress:number)=>void) =>{
     
     
     try {
@@ -189,8 +189,13 @@ const downloadFile = async (bucketId:string,userToken:any,dataId:string) =>{
                 "Authorization": `Bearer ${isAuthourized.accessToken}`,
             },
             responseType:'blob',
+            onDownloadProgress:(progressEvent:ProgressEvent)=>{
+                let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                onProgress(percentCompleted);
+            }
            });
            if(response){
+            console.log(response);
                const type = response.data.type.split('/')[1];
             //    console.log(response.data);
                download(response.data,`${Date.now()}.${type}`);
@@ -228,6 +233,8 @@ function BucketRoom(props:propTypes) {
     const [uploadProgress,setUploadProgress] = useState<number>(0);
     const [uploadState,setUploadState] = useState<boolean>(false);
     const [isLoading,setLoading] = useState<boolean>(false);
+    const [downloadStart,setDownloadStart] = useState<boolean>(false);
+    const [downloadProgress,setDonwloadProgress] = useState<number>(0);
 
     
     const {setFlash} = useContext(FlashContext);
@@ -432,7 +439,7 @@ function BucketRoom(props:propTypes) {
             // setCountState(responseData.totalCount);
         }
         setScrolling(false);
-        setLoading(true);
+        setLoading(false);
     }
 
 
@@ -482,7 +489,14 @@ function BucketRoom(props:propTypes) {
 
     const handleDownloadFile = (e:any,id:string) => {
         e.preventDefault();
-        downloadFile(props.bucketId,props.token,id);
+        setDonwloadProgress(0);
+        setDownloadStart(true);
+        downloadFile(props.bucketId,props.token,id,(percent:number)=>{
+            setDonwloadProgress(percent);
+            if(percent === 100){
+                setDownloadStart(false);
+            }
+        });
     }
 
     
@@ -557,6 +571,12 @@ function BucketRoom(props:propTypes) {
             
             {uploadState && (<UploadDialog fileName={currentFile.current && currentFile.current.name} progress={uploadProgress} open={uploadState} handleClose={handleCloseUploadDialog} />)}
 
+                         
+            <Snackbar
+                open={downloadStart}
+                TransitionComponent={Fade}
+                message={`Downloading ${downloadProgress}%`}
+            />
 
              <input ref={fileChoose} name="file" onClick={(e)=>fileChoose.current.value = ""} onChange={handleFileChange} type="file" style={{visibility:'hidden'}}/>
         </div>

@@ -348,11 +348,13 @@ function Home(props:any) {
     const handleReloadBuckets = async () => {
         setLoading(true);
         const responseData = await getBuckets(token, currentPage.current);
-        setTotalCount(responseData.totalCount);
-        const array = [...responseData.buckets];
-        setBuckets(array);
-        bucketsBackup.current = array;
-        setLoading(false);
+        if(responseData){
+            setTotalCount(responseData.totalCount);
+            const array = [...responseData.buckets];
+            setBuckets(array);
+            bucketsBackup.current = array;
+            setLoading(false);
+        }
         // setUpdateStatus(false);
     }
 
