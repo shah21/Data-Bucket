@@ -319,7 +319,7 @@ export const getDownloadFile = async (req:Request,res:Response,next:NextFunction
             throw err;    
         });
 
-        res.setHeader('content-length',1000000);
+        // res.setHeader('content-length',1000000);
         stream.pipe(decompress).pipe(res);
 
 

@@ -163,6 +163,7 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File,progr
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 },
                 onUploadProgress:(progressEvent:ProgressEvent)=>{
+                
                     const percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
                     progressListener(percentCompleted);
                 }
@@ -284,7 +285,6 @@ function BucketRoom(props:propTypes) {
                     setLoading(true);
                     const response = await getDataArray(props.bucketId, props.token,currentPage.current);
                     if (response) {
-                        console.log(response);
                         totalCount.current = response.totalCount;
                         setDataArray(response.bucket.data ? response.bucket.data : []);
                         setScrolling(false);

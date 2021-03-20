@@ -13,9 +13,7 @@ import { bufferToStream } from "./fileUtils";
 const s3 = new aws.S3({apiVersion: '2006-03-01'});
 const BUCKET_NAME = process.env.AWS_BUCKET_NAME!;
 
-const compress = zlib.createGzip({
-  flush:zlib.constants.Z_SYNC_FLUSH,
-});
+
 
 export const getKey = (uri:string) => {
     const urlparts = uri.split('/');
@@ -37,25 +35,28 @@ export const uploadFile =  (file:File,userId:string,bucketId:string)=>{
     const splitName = fileKeys[1].split('.');
     const fileType = splitName[splitName.length -1];
     const buffer = fileKeys[4];
-    
     const fileName = `${uuidv4()}.${fileType}.gz`;
 
     const stream = bufferToStream(buffer);
+    const compress = zlib.createGzip({
+      flush:zlib.constants.Z_SYNC_FLUSH,
+    });
 
     return new Promise((resolve,reject)=>{
-      stream.pipe(compress).pipe(uploadFromStream(userId,bucketId,fileName,(err:any,data:any)=>{
+      stream
+      .pipe(compress)
+      .pipe(uploadFromStream(userId,bucketId,fileName,(err:any,data:any)=>{
         if(err){
           reject(err);
         }
         resolve({uri:data.Location,fileType:fileType});
-      }))
+      }));
     });
    
 }
 
 function uploadFromStream(userId:string,bucketId:string,fileName:string,callback:(err:any,data:any)=>void) {
-  var pass = new Stream.PassThrough();
-
+  const pass = new Stream.PassThrough();
   s3.upload(
     {
       Bucket: BUCKET_NAME,
@@ -103,7 +104,6 @@ export const downloadFile = async (uri:string) => {
 
 export const deleteFile = (uri:string) => {
     const key = getKey(uri);
-    console.log(key);
       const params = {
         Bucket:BUCKET_NAME,
         Key: key,
