@@ -164,7 +164,7 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File,progr
                 },
                 onUploadProgress:(progressEvent:ProgressEvent)=>{
                 
-                    const percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+                    let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
                     progressListener(percentCompleted);
                 }
             });

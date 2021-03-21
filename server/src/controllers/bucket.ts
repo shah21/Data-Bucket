@@ -2,14 +2,17 @@ import { validationResult } from "express-validator";
 import {Request,Response,NextFunction} from "express";
 import { ObjectID } from "mongodb";
 import zlib from 'zlib';
+import fs from "fs";
+import path from "path";
 
 
 import HttpException from "../utils/HttpException";
 import Bucket from "../models/bucket";
 import socket from "../utils/socket";
-import { uploadFile,getKey, deleteFile, deleteFolder} from "../utils/AwsHelpers";
+import { uploadFile,getKey, deleteFile, deleteFolder, downloadFile} from "../utils/AwsHelpers";
 import aws from "../utils/aws_config";
 import { createWriteStream,createReadStream } from "fs";
+import { Readable } from "node:stream";
 
 
 
@@ -284,9 +287,7 @@ export const deleteData = async (req:Request,res:Response,next:NextFunction)=>{
 export const getDownloadFile = async (req:Request,res:Response,next:NextFunction)=>{
     const bucketId = req.params.bucketId;
     const dataId = req.params.dataId;
-    const decompress = zlib.createUnzip();
-
-
+   
     try {
         const data = await Bucket.findDataByQuery({
             "_id":new ObjectID(bucketId),
@@ -301,28 +302,15 @@ export const getDownloadFile = async (req:Request,res:Response,next:NextFunction
         }
 
 
-        // //download file
+        //download file and send to client
         const downloadUri:string = data[0].file_path;
-        const attachmentUrl = downloadUri.substring(0,downloadUri.lastIndexOf('.'));
+        await downloadFile(downloadUri,(metadata:aws.S3.HeadObjectOutput,attachUri:string)=>{
+            res.attachment(attachUri);
+            res.setHeader('content-length',metadata.ContentLength!);
+        }).then(stream=>{
+            stream.pipe(res);
+        })
         
-        // const urlparts = downloadUri.split('/');
-        const key = getKey(downloadUri);
-        res.attachment(attachmentUrl);
-
-        const params = {
-            Bucket:process.env.AWS_BUCKET_NAME!,
-            Key:key,
-        }
-        
-        const s3 = new aws.S3({apiVersion: '2006-03-01'});
-        const stream = s3.getObject(params).createReadStream().on('error',(err)=>{
-            throw err;    
-        });
-
-        // res.setHeader('content-length',1000000);
-        stream.pipe(decompress).pipe(res);
-
-
     } catch (err) {
         console.log(err);
         if(!err.statusCode){

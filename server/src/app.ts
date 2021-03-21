@@ -20,9 +20,13 @@ declare global {
          window: Window;
          navigator: Navigator;
          io:socketio.Server,
+         baseDir:string,
       } 
     }
   }
+
+
+  global.baseDir = __dirname;
 
 const app = express();
 const storage = multer.memoryStorage();

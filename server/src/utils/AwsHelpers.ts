@@ -76,31 +76,25 @@ function uploadFromStream(userId:string,bucketId:string,fileName:string,callback
   return pass;
 }
 
-export const downloadFile = async (uri:string) => {
-    const key = getKey(uri);
-   
-    const params = {
-        Bucket:BUCKET_NAME,
-        Key:key,
-    }
+export const downloadFile = async (uri: string,setMetaData:(metadata:aws.S3.HeadObjectOutput,attachUri:string)=>void) => {
+  const decompress = zlib.createUnzip();
+  const attachmentUrl = uri.substring(0,uri.lastIndexOf('.'));
 
-    // const fs = createWriteStream('./files/'+key);
-    // const s3Object = await s3.getObject(params).promise();
-    // const stream = new Stream.Readable();
-    // stream._read = () =>{};
-    // stream.push(s3Object.Body);
+  const key = getKey(uri);
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME!,
+    Key: key,
+  };
 
-    // return stream;
 
-    try {
-        const file = createWriteStream("./files/" + key);
-        return new Promise((resolve, reject) => {
-            resolve(s3.getObject(params).createReadStream().pipe(file));
-        });
-    } catch (err) {
-        console.log(err);
-    }
-}
+  //get metadata of an object from s3
+  const metadata = await s3.headObject(params).promise();
+  setMetaData(metadata,attachmentUrl);
+  //get object from s3 and pipe to decompress then send to the client
+  return s3.getObject(params).createReadStream().pipe(decompress).on('data',(chunk:any)=>{
+      return chunk;
+  });
+};
 
 export const deleteFile = (uri:string) => {
     const key = getKey(uri);
