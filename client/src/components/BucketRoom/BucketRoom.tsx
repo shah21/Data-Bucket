@@ -163,7 +163,8 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File,progr
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 },
                 onUploadProgress:(progressEvent:ProgressEvent)=>{
-                
+                    console.log('total',progressEvent.total);
+                    console.log('loaded',progressEvent.loaded);
                     let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
                     progressListener(percentCompleted);
                 }
@@ -236,14 +237,14 @@ function BucketRoom(props:propTypes) {
     const [isLoading,setLoading] = useState<boolean>(false);
     const [downloadStart,setDownloadStart] = useState<boolean>(false);
     const [downloadProgress,setDonwloadProgress] = useState<number>(0);
-
+    const [totalCount,setTotal] = useState<number>(0);
     
     const {setFlash} = useContext(FlashContext);
 
     const classes = useStyle();
     const contentRef = useRef<HTMLDivElement>(null!);
     const parentRef = useRef<HTMLDivElement>(null!);
-    const totalCount = useRef<number>(0);
+    
     const currentPage = useRef<number>(1);
     const fileChoose = useRef<HTMLInputElement>(null!);
     const currentFile = useRef<File>(null!);
@@ -285,7 +286,7 @@ function BucketRoom(props:propTypes) {
                     setLoading(true);
                     const response = await getDataArray(props.bucketId, props.token,currentPage.current);
                     if (response) {
-                        totalCount.current = response.totalCount;
+                        setTotal(response.totalCount);
                         setDataArray(response.bucket.data ? response.bucket.data : []);
                         setScrolling(false);
                     }
@@ -323,6 +324,7 @@ function BucketRoom(props:propTypes) {
                             });
                         });
                         setFlash({ message: `Data deleted successfully !`, type: 'success' });
+                        setTotal(prev=>prev-1);
                         break;
                     }
                 }
@@ -369,7 +371,7 @@ function BucketRoom(props:propTypes) {
         if(type==="delete"){
             deleteData(dataId,props.bucketId,props.token);
         }else if(type==="favorite"){
-            //TOD
+            //TODO
            
         }
         setOpenOptions(false);
@@ -429,12 +431,12 @@ function BucketRoom(props:propTypes) {
 
 
     const paginateData = async () =>{
-        if(totalCount.current > LIMIT_PER_PAGE * currentPage.current){
+        if(totalCount > LIMIT_PER_PAGE * currentPage.current){
             setLoading(true);
             currentPage.current = ++currentPage.current; 
             const responseData = await getDataArray(props.bucketId,props.token,currentPage.current);
             const array = [...dataArray, ...responseData.bucket.data];
-            totalCount.current = responseData.totalCount;
+            setTotal(responseData.totalCount);
             setDataArray(array);
             // setCountState(responseData.totalCount);
         }
@@ -528,7 +530,7 @@ function BucketRoom(props:propTypes) {
                         </div>
                         <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
                             <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                            <DataList loadingContent={isLoading} handleDownloadFile={handleDownloadFile} totalCount={totalCount.current} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
+                            <DataList loadingContent={isLoading} handleDownloadFile={handleDownloadFile} totalCount={totalCount} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
                             </div>
                             {/* <div className="progress-section">
                                 {true && (<CircularProgress className="loading-circle" />)}
