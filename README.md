@@ -50,7 +50,7 @@
 
 [![main-shot][product-screenshot]](https://example.com)
 
-There are many so many great data sharing platforms available on World Now, however, I didn't find one that really suit my needs so I created this enhanced one. I want to create a fast and scalable data bucket for sharing data between devices of a single user. this repo contains web and server part . apps for other platforms will be coming soon
+There are many so many great data sharing platforms available on internet, however, I didn't find one that really suit my needs so I created this enhanced one. I want to create a fast and scalable data bucket for sharing data between devices of a single user. this repo contains web and server part . apps for other platforms will be coming soon
 
 Here's why:
 * You can share data fastly and fetch from anywhere 
