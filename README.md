@@ -45,6 +45,19 @@
   </ol>
 </details>
 
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+[![main-shot][product-screenshot]](https://example.com)
+
+There are many so many great data sharing platforms available on World Now, however, I didn't find one that really suit my needs so I created this enhanced one. I want to create a fast and scalable data bucket for sharing data between devices of a single user. this repo contains web and server part . apps for other platforms will be coming soon
+
+Here's why:
+* You can share data fastly and fetch from anywhere 
+* Data bucket means any kind of data text and file
+* If you are frustrated about manually copying data between devices, this is for you 
+
+Of course, no one project serve all features since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have have contributed to expanding this project!
 
 
 
@@ -78,3 +91,4 @@
 [Forks-sheild]: https://img.shields.io/github/forks/shah21/data-bucket?logo=git&style=for-the-badge
 [Issues-sheild]:https://img.shields.io/github/issues/shah21/data-bucket?logo=Bitrise&style=for-the-badge
 [Licence-sheild]:https://img.shields.io/github/license/shah21/data-bucket?logo=lbry&style=for-the-badge
+[product-screenshot]: screenshots/sc1.PNG
