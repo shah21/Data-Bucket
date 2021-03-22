@@ -5,7 +5,8 @@
 
   
  </br>
- <h1 align="center" >Data-Bucket 🗃️</h1>
+ <p align="center">
+  <h3 align="center" >DATA BUCKET 🗃️</h3>
  <p align="center">
   An awesome  Mini drop box with minimalistic features
   <br />
@@ -15,7 +16,7 @@
   ·
   <a href="https://github.com/shah21/Data-Bucket/issues">Request Feature</a>
  </p>
-
+ </p>
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
