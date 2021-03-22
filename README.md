@@ -60,8 +60,12 @@ Here's why:
 Of course, no one project serve all features since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have have contributed to expanding this project!
 
 
+### Built With
 
-
+![react][react-url]
+![typescript][types-url]
+![node][npm-image]
+![mongodb][mongo-url]
 
 
 
@@ -92,3 +96,9 @@ Of course, no one project serve all features since your needs may be different. 
 [Issues-sheild]:https://img.shields.io/github/issues/shah21/data-bucket?logo=Bitrise&style=for-the-badge
 [Licence-sheild]:https://img.shields.io/github/license/shah21/data-bucket?logo=lbry&style=for-the-badge
 [product-screenshot]: screenshots/sc1.PNG
+
+[node-js]: https://img.shields.io/badge/node-javascript-green
+[npm-image]: https://img.shields.io/badge/node-v12.18.3-green
+[mongo-url]: https://img.shields.io/badge/mongodb-v4.4-brightgreen
+[react-url]: https://img.shields.io/badge/reactJs-%20v17.0.1-blue
+[types-url]: https://img.shields.io/badge/typescript-4.1.5-%236E97CC
