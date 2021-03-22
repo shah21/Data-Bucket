@@ -10,7 +10,7 @@ interface MyToken {
     // whatever else is in the JWT.
   }
 
-export default async (req:Request,res:Response,next:NextFunction) => {
+export default async (req:any,res:Response,next:NextFunction) => {
     
     let decodedToken:MyToken;
     try{
@@ -24,17 +24,19 @@ export default async (req:Request,res:Response,next:NextFunction) => {
         const token = headers.split(' ')[1];
 
         const isAvailable = await User.checkToken(token);
-
-        if(isAvailable){
-            const error = new HttpException('Not authorized')
-            error.statusCode = 401;
-            throw error;
+        if (isAvailable) {
+          const error = new HttpException("Not authorized");
+          error.statusCode = 401;
+          throw error;
         }
+        
         const secret_key = process.env.JWT_SECRET_KEY;
         decodedToken = jwt.verify(token,secret_key as string) as MyToken;
         req.userId = decodedToken.userId;
         next();
+
     }catch(err){
+        console.log(err);
         err.message = "Token is not valid"
         err.statusCode = 401;
         next(err);

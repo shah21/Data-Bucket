@@ -163,14 +163,11 @@ const addData = async (bucketId:string,userToken:any,text:string,file:File,progr
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 },
                 onUploadProgress:(progressEvent:ProgressEvent)=>{
-                    console.log('total',progressEvent.total);
-                    console.log('loaded',progressEvent.loaded);
                     let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
                     progressListener(percentCompleted);
                 }
             });
             if(response){
-                console.log(response);
                 return response;
             }
         }
@@ -331,10 +328,6 @@ function BucketRoom(props:propTypes) {
             }
 
         });
-        return ()=>{
-            socket.off('subscribe');
-            socket.off('data');
-        }
     },[props.bucketId]);
 
 

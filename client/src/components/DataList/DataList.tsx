@@ -1,4 +1,4 @@
-import React,{useEffect, useMemo, useState} from 'react'
+import React,{useMemo, useState} from 'react'
 import {CircularProgress, List, Theme} from "@material-ui/core"
 import { makeStyles,createStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -154,6 +154,7 @@ function DataList(props:propTypes) {
     const classes = useStyles();
     const [selectedItemId,setItemId] = useState<string>(null!);
     const [loading,setLoading] = useState<boolean>(false);
+    
 
     useMemo(()=>{
         if(props.loadingContent){
@@ -178,6 +179,7 @@ function DataList(props:propTypes) {
         props.reloadHandler();
         setLoading(true);
     }
+
 
     return (
         <div className="dataList">

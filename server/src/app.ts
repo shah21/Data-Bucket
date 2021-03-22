@@ -30,7 +30,15 @@ declare global {
 
 const app = express();
 const storage = multer.memoryStorage();
-const upload = multer({storage,limits:{fileSize:10000000}}).single('file');
+const fileFilter = (req:Request,file:any,cb:any) =>{
+  if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg" || file.mimetype == "application/pdf" || file.mimetype == "video/mp4" || file.mimetype == "text/plain") {
+    cb(null, true);
+  } else {
+    cb(null, false);
+    return cb(new Error('Only .png, .jpg and .jpeg .pdf .mp4 .txt formats are allowed!'));
+  }
+}
+const upload = multer({storage,limits:{fileSize:10000000},fileFilter:fileFilter}).single('file');
 
 
 //sessions
@@ -71,12 +79,15 @@ app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
 
 connectDb(()=>{
     console.log('Databse connection successfull...');
-    const server = app.listen(8080);
-    global.io = require('socket.io')(server,{
-        cors: {
-          origin: "http://localhost:3000",
-          credentials: true
-        }});
+    const server = app.listen(process.env.PORT);
+    global.io = require('socket.io')(server,
+      {
+        // cors: {
+        //   origin: "http://localhost:3000",
+        //   credentials: true
+        // }
+      }
+      );
 
     global.io.on('connection',WebSockets.connection);
     global.io.on('disconnect',function(){

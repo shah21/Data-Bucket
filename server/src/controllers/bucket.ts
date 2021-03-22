@@ -161,6 +161,8 @@ export const getData = async (req:Request,res:Response,next:NextFunction)=>{
     const page = req.query.page || 1;
     let bucket;
 
+    console.log('get data');
+
     try{
         const query = {ownedBy:new ObjectID(req.userId),_id:new ObjectID(bucketId)};
         const count = await Bucket.getDataCount(query);
