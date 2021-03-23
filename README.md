@@ -46,7 +46,7 @@
 </details>
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About The Project 🚀
 
 [![main-shot][product-screenshot]](https://example.com)
 
