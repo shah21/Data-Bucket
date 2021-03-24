@@ -1,3 +1,5 @@
+<link href="./style.css" rel="stylesheet"/>
+
 ![Contributors][contributors-shield]
 ![Froks][Forks-sheild]
 ![Issues][Issues-sheild]
@@ -153,18 +155,6 @@ Project Link: [https://github.com/shah21/Data-Bucket.git](https://github.com/sha
 
 
 
-
-
-img[src*='#left'] {
-    float: left;
-}
-img[src*='#right'] {
-    float: right;
-}
-img[src*='#center'] {
-    display: block;
-    margin: auto;
-}
 
 
 
