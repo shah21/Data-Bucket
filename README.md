@@ -1,5 +1,3 @@
-<link href="./style.css" rel="stylesheet"/>
-
 ![Contributors][contributors-shield]
 ![Froks][Forks-sheild]
 ![Issues][Issues-sheild]
@@ -161,11 +159,11 @@ Project Link: [https://github.com/shah21/Data-Bucket.git](https://github.com/sha
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/shah21/data-bucket?style=for-the-badge&logo=github#center
-[Forks-sheild]: https://img.shields.io/github/forks/shah21/data-bucket?logo=git&style=for-the-badge#center
-[Issues-sheild]:https://img.shields.io/github/issues/shah21/data-bucket?logo=Bitrise&style=for-the-badge#center
-[Licence-sheild]: https://img.shields.io/github/license/shah21/data-bucket?style=for-the-badge#center
-[product-screenshot]: screenshots/sc1.PNG#center
+[contributors-shield]: https://img.shields.io/github/contributors/shah21/data-bucket?style=for-the-badge&logo=github
+[Forks-sheild]: https://img.shields.io/github/forks/shah21/data-bucket?logo=git&style=for-the-badge
+[Issues-sheild]:https://img.shields.io/github/issues/shah21/data-bucket?logo=Bitrise&style=for-the-badge
+[Licence-sheild]: https://img.shields.io/github/license/shah21/data-bucket?style=for-the-badge
+[product-screenshot]: screenshots/sc1.PNG
 
 [node-js]: https://img.shields.io/badge/node-javascript-green
 [npm-image]: https://img.shields.io/badge/node-v12.18.3-green
