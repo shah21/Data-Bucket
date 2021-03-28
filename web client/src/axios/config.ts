@@ -3,7 +3,7 @@ import axios from "axios";
 // import endpoints from "./endpoints";
 
 
-const host = window.location.host;
+const host = 'localhost:8080';
 const BASE_URL = `http://${host}`;
 
 const axiosInstance =  axios.create({
