@@ -15,7 +15,9 @@ target 'DataBucket' do
 
   pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
   pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
-  pod 'react-native-progress', :path => '../node_modules/react-native-progress'
+  pod 'ReactNativeART', :podspec => '../node_modules/@react-native-community/art/ReactNativeART.podspec'
+
+  pod 'RNSnackbar', :path => '../node_modules/react-native-snackbar'
 
   target 'DataBucketTests' do
     inherit! :complete

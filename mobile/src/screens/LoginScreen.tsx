@@ -1,15 +1,17 @@
 import React from 'react'
 import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Platform, TextInput, StatusBar, Alert } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Feather from "react-native-vector-icons/Feather";
 import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Progress from 'react-native-progress';
+import Snackbar from "react-native-snackbar";
 
 import axios from "../axios/config";
 import endpoints from '../axios/endpoints';
+import InputField from "../components/Form/InputField";
+import { FlashContext } from '../Contexts/FlashContext';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -20,68 +22,60 @@ type TypeProps = {
     navigation: SplashNavigationProps
 }
 
-const loginUser = async (credentails:object) =>{
+const loginUser = async (credentails: object) => {
 
     try {
-      const response = await axios.post(endpoints.login, JSON.stringify(credentails), {
-        headers: {
-          "Content-Type": "application/json"
-        },
-      });
-      return response.data;
+        const response = await axios.post(endpoints.login, JSON.stringify(credentails), {
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        return response.data;
     } catch (err) {
-      throw err
+        throw err
     }
-  }
+}
 
+const formReducer = (state: object, event: any) => {
+    return {
+        ...state,
+        ...event
+    }
+}
 
 export default function LoginScreen({navigation}:TypeProps) {
    
-    const [data,setData] = React.useState({
-        email:'',
-        password:'',
-        check_textChange:false,
-        secureTextEntry:true,
-    });
-
+    const [formData, setFormData] = React.useReducer(formReducer, {});
     const [errors, setErrors] = React.useState({
         email:'',
         password:''
       });
-
     const [loading,setLoading] = React.useState<boolean>(false);  
+    const {setFlash} = React.useContext(FlashContext);
 
-
-    const textInputChange = (val:string) => {
-        if (val.length !== 0) {
-            setData({
-                ...data,
-                email: val,
-                check_textChange: true,
-            });
-            return;
-        }
-        setData({
-            ...data,
-            email: val,
-            check_textChange: false,
-        });
+    // const textInputChange = (val:string) => {
+    //     if (val.length !== 0) {
+    //         setData({
+    //             ...formData,
+    //             email: val,
+    //             check_textChange: true,
+    //         });
+    //         return;
+    //     }
+    //     setData({
+    //         ...formData,
+    //         email: val,
+    //         check_textChange: false,
+    //     });
         
+    // }
+
+    const handleTextChange = (val:string,fieldName:string) => {
+        setFormData({
+            [fieldName]:val,
+        });
     }
 
-    const handlePasswordChange = (val:string) => {
-        setData({
-            ...data,
-            password:val,
-        })
-    }
-
-    const handlePasswordVisibility = () => {
-        setData({
-            ...data,
-            secureTextEntry:!data.secureTextEntry,
-        })
-    }
 
     
     /* Handle validation of form */
@@ -93,17 +87,17 @@ export default function LoginScreen({navigation}:TypeProps) {
         };
 
         //Email
-        if (!data.email) {
+        if (!formData.email) {
             
             formIsValid = false;
             newErrors['email'] = "Cannot be empty";
         }
 
-        if (typeof data.email !== "undefined") {
-            let lastAtPos = data.email.lastIndexOf('@');
-            let lastDotPos = data.email.lastIndexOf('.');
+        if (typeof formData.email !== "undefined") {
+            let lastAtPos = formData.email.lastIndexOf('@');
+            let lastDotPos = formData.email.lastIndexOf('.');
 
-            if (!(lastAtPos < lastDotPos && lastAtPos > 0 && data.email.indexOf('@@') === -1 && lastDotPos > 2 && (data.email.length - lastDotPos) > 2)) {
+            if (!(lastAtPos < lastDotPos && lastAtPos > 0 && formData.email.indexOf('@@') === -1 && lastDotPos > 2 && (formData.email.length - lastDotPos) > 2)) {
                 formIsValid = false;
                 newErrors["email"] = "Email is not valid";
             }
@@ -111,7 +105,7 @@ export default function LoginScreen({navigation}:TypeProps) {
 
 
         //password
-        if (!data.password) {
+        if (!formData.password) {
             formIsValid = false;
             newErrors["password"] = "Cannot be empty";
         }
@@ -135,26 +129,25 @@ export default function LoginScreen({navigation}:TypeProps) {
           });
 
           if(!loading){
-            // setLoading(true);
+            setLoading(true);
           }
 
           try{
-            const response:any = await loginUser({email:data.email,password:data.password});
+            const response:any = await loginUser({email:formData.email,password:formData.password});
             if(response){
             //   setToken(response.user);
             //   history.push('/');
-            Alert.alert('login',response.user);
             }
-            // setLoading(false);
+            setLoading(false);
           }catch(err){
-            Alert.alert('login',err.message);
-            // setLoading(false);
+            setLoading(false);
             if (err.response) {
               const errResponseData = err.response.data;
-            //   setFlash({ message: errResponseData.message, type: 'error' })
+
+              setFlash({ message: errResponseData.message, type: 'error' })
               return;
             }else{
-            //   setFlash({ message: err.message, type: 'error' })
+              setFlash({ message: err.message, type: 'error' })
             }
             return;
           }
@@ -176,82 +169,35 @@ export default function LoginScreen({navigation}:TypeProps) {
 
             <Animatable.View 
                 animation="fadeInUpBig"
-                style={styles.footer}
-                >
-                <View style={styles.field}>
-                    <Text style={styles.text_footer}>Email</Text>
-                    <View style={styles.action}>
-                        <FontAwesome
-                            name="user-o"
-                            color="#05375a"
-                            size={20} />
-
-                        <TextInput
-                            onChangeText={(val) => textInputChange(val)}
-                            placeholder="Your Email"
-                            style={styles.textInput}
-                            autoCapitalize="none"
-                        />
-
-                        {data.check_textChange ?
-                            (
-
-                                <Animatable.View
-                                    animation="bounceIn">
-                                    <Feather
-                                        name="check-circle"
-                                        color="green"
-                                        size={20} />
-                                </Animatable.View>
-
-
-
-                            ) : null}
-                    </View>
-                    
+                style={styles.footer}>
                 
-                    {errors.email.length > 0 ? (
-                    <Text style={styles.textError}>{errors.email}</Text>
-                    ):null}
-                    
-                </View>
-
-                
-                <View style={styles.field}>
-                    <Text style={[styles.text_footer, { marginTop: 35 }]}>Password</Text>
-                    <View style={styles.action}>
+                <InputField 
+                    iconComponent={
                         <FontAwesome
                             name="lock"
                             color="#05375a"
                             size={20} />
+                    }
+                    placeholder="Your email"
+                    handleChange={handleTextChange} 
+                    label="Email" 
+                    errorText={errors.email.length > 0 ? errors.email : null!} 
+                    name="email"
+                    />
 
-                        <TextInput
-                            onChangeText={(val) => handlePasswordChange(val)}
-                            placeholder="Your Password"
-                            secureTextEntry={data.secureTextEntry}
-                            style={styles.textInput}
-                            autoCapitalize="none"
-                        />
-                        {data.secureTextEntry ? (
-                            <Feather
-                                onPress={handlePasswordVisibility}
-                                name="eye-off"
-                                color="green"
-                                size={20} />
-
-                        ) :
-                            (
-                                <Feather
-                                    onPress={handlePasswordVisibility}
-                                    name="eye"
-                                    color="green"
-                                    size={20} />
-                            )}
-                    </View>
-                    {errors.password.length > 0 ? (
-                        <Text style={styles.textError}>{errors.password}</Text>
-                    ) : null}
-                </View>
+                <InputField
+                    iconComponent={
+                        <FontAwesome
+                            name="user-o"
+                            color="#05375a"
+                            size={20} />}
+                    placeholder="Your password"
+                    handleChange={handleTextChange}
+                    label="Password"
+                    errorText={errors.password.length > 0 ? errors.password : null!}
+                    name="password"
+                />
+                
 
                 <View style={styles.button}>
                     <LinearGradient
@@ -264,8 +210,15 @@ export default function LoginScreen({navigation}:TypeProps) {
                             Login
                         </Text>
 
-                        <Progress.Circle size={30} indeterminate={true} />
 
+                        {loading && (
+                        <Progress.Circle
+                            size={25} 
+                            borderWidth={5}
+                            borderColor="#fff"
+                            indeterminate={true} />
+
+                        )}    
                     </LinearGradient>
 
                     <TouchableOpacity
@@ -282,6 +235,8 @@ export default function LoginScreen({navigation}:TypeProps) {
                 </View>
 
             </Animatable.View >
+            
+           
         </View>
     )
 }
@@ -341,12 +296,14 @@ const styles = StyleSheet.create({
     signIn: {
         width: '100%',
         height: 50,
+        flexDirection:'row',
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10
     },
     textSign: {
         fontSize: 18,
-        fontWeight: 'bold'
+        paddingHorizontal:5,
+        fontWeight: 'bold',
     }
 });
