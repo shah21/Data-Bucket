@@ -6,6 +6,7 @@ import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Progress from 'react-native-progress';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Theme from "../res/styles/theme.style";
 
 import axios from "../axios/config";
 import endpoints from '../axios/endpoints';
@@ -234,11 +235,11 @@ export default function LoginScreen({navigation}:TypeProps) {
 const styles = StyleSheet.create({
     container:{
         flex:1,
-        backgroundColor:'#32be8f',
+        backgroundColor:Theme.PRIMARY_COLOR,
     },
     footer:{
         flex:3,
-        backgroundColor:'#fff',
+        backgroundColor:Theme.WHITE,
         borderTopLeftRadius:30,
         borderTopRightRadius:30,
         paddingVertical:30,
@@ -251,33 +252,10 @@ const styles = StyleSheet.create({
         paddingBottom:30,
     },
     text_header: {
-        color: '#fff',
+        color: Theme.WHITE,
         fontWeight: 'bold',
-        fontSize: 30
-    },
-    text_footer: {
-        color: '#05375a',
-        fontSize: 18
-    },
-    field:{
-        borderBottomWidth: 1,
-        borderBottomColor: '#f2f2f2',
-        paddingBottom: 5
-    },
-    textError:{
-        fontSize:10,
-        color:'red',
-    },
-    action: {
-        flexDirection: 'row',
-        marginTop: 10,
-    },
-    textInput: {
-        flex: 1,
-        marginTop: Platform.OS === 'ios' ? 0 : -12,
-        paddingLeft: 10,
-        color: '#05375a',
-    },
+        fontSize: Theme.FONT_SIZE_HEADER
+    },    
     button: {
         alignItems: 'center',
         marginTop: 50
@@ -291,7 +269,7 @@ const styles = StyleSheet.create({
         borderRadius: 10
     },
     textSign: {
-        fontSize: 18,
+        fontSize: Theme.FONT_SIZE_LARGE,
         paddingHorizontal:5,
         fontWeight: 'bold',
     }

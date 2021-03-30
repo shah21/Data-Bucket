@@ -1,11 +1,13 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity } from 'react-native'
+import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import Theme from "../res/styles/theme.style";
 
 import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { AuthContext } from '../contexts/context';
+import SearchField from '../components/SearchField/SearchField';
 
 
 type SplashNavigationProps = StackNavigationProp<
@@ -21,11 +23,30 @@ type TypeProps = {
 export default function HomeScreen({navigation}:TypeProps) {
 
     const {signOut} = React.useContext(AuthContext);
+    
+
+    navigation.setOptions({
+        headerRight:()=>(
+            <TouchableOpacity>
+            <MaterialIcons
+                onPress={signOut}
+                style={{padding:10}} 
+                name="logout"
+                color={Theme.WHITE}
+                size={25}/>
+            </TouchableOpacity>    
+        )
+    })
+    
+    React.useEffect(() => {
+        
+
+    }, [])
 
 
     return (
         <View style={styles.container}>
-            <Text style={{textAlign:'center'}} onPress={signOut}>Logout</Text>
+            <SearchField placeHolder="Search bucket"/>
         </View>
     )
 }
@@ -36,8 +57,6 @@ const height_logo = height * 0.28;
 const styles = StyleSheet.create({
     container:{
         flex:1,
-        justifyContent:'center',
-        alignItems:'center',
     },
     footer:{
         flex:1,

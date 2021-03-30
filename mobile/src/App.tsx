@@ -1,5 +1,5 @@
 import React, { Reducer } from 'react';
-import {View, Text, ActivityIndicator, StyleSheet} from 'react-native';
+import {View, Text, ActivityIndicator, StyleSheet, StatusBar} from 'react-native';
 import { NavigationContainer } from "@react-navigation/native"
 import { createStackNavigator } from "@react-navigation/stack"
 import Snackbar from 'react-native-snackbar';
@@ -141,14 +141,23 @@ export default function App() {
     )
   }
 
+  const screenOptions = {
+    headerTintColor:'#fff',
+    headerStyle:{
+      backgroundColor:'#32be8f',
+    }
+  }
+
   return (
     <AuthContext.Provider value={authContext}>
     <FlashContext.Provider value={{ flash, setFlash }}>
     <NavigationContainer>
+      <StatusBar backgroundColor="#128976" barStyle="light-content"/>
       {loginState.accessToken !== null ? (
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={screenOptions}>
           <Stack.Screen 
           name="HomeScreen"
+          options={{title:'Buckets'}}
           component={HomeScreen}
         />
         </Stack.Navigator>
@@ -160,3 +169,4 @@ export default function App() {
     </AuthContext.Provider>
   );
 }
+
