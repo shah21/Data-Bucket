@@ -2,16 +2,16 @@ import React from 'react'
 import { View, Text, Dimensions, StyleSheet, TouchableOpacity, Platform, TextInput, StatusBar, Alert } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import Feather from "react-native-vector-icons/Feather";
 import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Progress from 'react-native-progress';
-import Snackbar from "react-native-snackbar";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import axios from "../axios/config";
 import endpoints from '../axios/endpoints';
 import InputField from "../components/Form/InputField";
-import { FlashContext } from '../Contexts/FlashContext';
+import { FlashContext } from '../contexts/FlashContext';
+import {AuthContext} from "../contexts/context"
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -53,29 +53,17 @@ export default function LoginScreen({navigation}:TypeProps) {
     const [loading,setLoading] = React.useState<boolean>(false);  
     const {setFlash} = React.useContext(FlashContext);
 
-    // const textInputChange = (val:string) => {
-    //     if (val.length !== 0) {
-    //         setData({
-    //             ...formData,
-    //             email: val,
-    //             check_textChange: true,
-    //         });
-    //         return;
-    //     }
-    //     setData({
-    //         ...formData,
-    //         email: val,
-    //         check_textChange: false,
-    //     });
-        
-    // }
-
     const handleTextChange = (val:string,fieldName:string) => {
+        setErrors({
+            email:fieldName === 'email' ? '' : errors.email,
+            password:fieldName === 'password' ? '' : errors.password
+        });
         setFormData({
             [fieldName]:val,
         });
     }
 
+    const {signIn} = React.useContext(AuthContext);
 
     
     /* Handle validation of form */
@@ -135,11 +123,12 @@ export default function LoginScreen({navigation}:TypeProps) {
           try{
             const response:any = await loginUser({email:formData.email,password:formData.password});
             if(response){
-            //   setToken(response.user);
-            //   history.push('/');
+                setFlash({ message : response.message, type: 'success' });
+                signIn(response.user);
             }
             setLoading(false);
           }catch(err){
+            console.log(err);
             setLoading(false);
             if (err.response) {
               const errResponseData = err.response.data;
@@ -174,9 +163,9 @@ export default function LoginScreen({navigation}:TypeProps) {
                 <InputField 
                     iconComponent={
                         <FontAwesome
-                            name="lock"
-                            color="#05375a"
-                            size={20} />
+                        name="user-o"
+                        color="#05375a"
+                        size={20} />
                     }
                     placeholder="Your email"
                     handleChange={handleTextChange} 
@@ -188,7 +177,7 @@ export default function LoginScreen({navigation}:TypeProps) {
                 <InputField
                     iconComponent={
                         <FontAwesome
-                            name="user-o"
+                            name="lock"
                             color="#05375a"
                             size={20} />}
                     placeholder="Your password"
@@ -201,11 +190,11 @@ export default function LoginScreen({navigation}:TypeProps) {
 
                 <View style={styles.button}>
                     <LinearGradient
+                        onTouchStart={loginHandler}
                         colors={['#08d4c4', '#01ab9d']}
                         style={styles.signIn}>
 
                         <Text
-                            onPress={loginHandler}
                             style={[styles.textSign, { color: '#fff' }]}>
                             Login
                         </Text>

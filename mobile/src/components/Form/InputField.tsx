@@ -15,7 +15,7 @@ interface PropsType{
 
 export default function InputField({iconComponent,handleChange,errorText,label,name,placeholder}:PropsType) {
     
-    const [isHidden,setHide] = React.useState<boolean>(false);
+    const [isHidden,setHide] = React.useState<boolean>(true);
     const [isFilled,setFilledStatus] = React.useState<boolean>(false);
     const fieldName = React.useRef<string>(name);
 
@@ -43,12 +43,12 @@ export default function InputField({iconComponent,handleChange,errorText,label,n
                 <TextInput
                     onChangeText={(val) =>handleTextChange(val)}
                     placeholder={placeholder}
-                    secureTextEntry={isHidden && (name === "password"||name === "confirm password") ? isHidden : false}
+                    secureTextEntry={isHidden && (name === "password"||name === "confirm_password") ? isHidden : false}
                     style={styles.textInput}
                     autoCapitalize="none"
                 />
 
-                {isHidden && (name === "password"||name === "confirm password") ? (
+                {isHidden && (name === "password"||name === "confirm_password") ? (
                     <Feather
                         onPress={handleVisibility}
                         name="eye-off"
@@ -57,7 +57,7 @@ export default function InputField({iconComponent,handleChange,errorText,label,n
 
                 ) : null}
 
-                {!isHidden && (name === "password"||name === "confirm password") ? 
+                {!isHidden && (name === "password"||name === "confirm_password") ? 
                 (  
                     <Feather
                         onPress={handleVisibility}
@@ -66,7 +66,7 @@ export default function InputField({iconComponent,handleChange,errorText,label,n
                         size={20} />
                 ):null}
 
-                {isFilled && (name !== "password" && name !== "confirm password") ?
+                {isFilled && (name !== "password" && name !== "confirm_password") ?
                     (
 
                         <Animatable.View

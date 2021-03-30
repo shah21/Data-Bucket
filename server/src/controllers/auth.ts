@@ -61,7 +61,7 @@ export const postLogin = async (req:Request,res:Response,next:NextFunction)=>{
         const accessToken = await generateAccessToken(payload);
         const refreshToken = await generateRefreshToken(payload);
 
-        res.status(200).json({messge:'login successfull.',user:{accessToken:accessToken,refreshToken:refreshToken, userId:user._id}});
+        res.status(200).json({message:'login successfull.',user:{accessToken:accessToken,refreshToken:refreshToken, userId:user._id}});
     }catch(err){
         if(!err.statusCode){
             err.statusCode = 500;
