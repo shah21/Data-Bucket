@@ -15,6 +15,7 @@ import axios from '../axios/config';
 import endpoints from '../axios/endpoints';
 import Bucket from '../Models/bucket';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Fab } from 'native-base';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -99,6 +100,11 @@ export default function HomeScreen({navigation}:TypeProps) {
     const onSearchTextChange = (val:string) => {
         console.log(val);
     }
+
+    const openCreateDialog = () => {
+        
+    }
+    
     
 
 
@@ -106,9 +112,18 @@ export default function HomeScreen({navigation}:TypeProps) {
         <View style={styles.container}>
             <SearchField onTextChange={onSearchTextChange}  placeHolder="Search bucket"/>
             <FlatList data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item)=>{
-                console.log(item);
                 return (<BucketItem item={item.item} />)
             }} />
+
+            
+            <Fab
+                direction="up"
+                containerStyle={{}}
+                style={{ backgroundColor: Theme.PRIMARY_COLOR }}
+                onPress={openCreateDialog}
+                position="bottomRight">
+                    <MaterialIcons name="add" />
+            </Fab>
         </View>
     )
 }
