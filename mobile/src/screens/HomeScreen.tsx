@@ -1,14 +1,20 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable } from 'react-native'
+import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import Theme from "../res/styles/theme.style";
-
 import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
+
+
 import { AuthContext } from '../contexts/context';
 import SearchField from '../components/SearchField/SearchField';
-
+import Theme from "../res/styles/theme.style";
+import BucketItem from "../components/ListItems/BucketItem";
+import isAuth from '../utils/isAuth';
+import axios from '../axios/config';
+import endpoints from '../axios/endpoints';
+import Bucket from '../Models/bucket';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -19,34 +25,90 @@ type TypeProps = {
     navigation: SplashNavigationProps
 }
 
+const getBuckets = async (userToken:any,page:number) =>{
+    try {
+        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            
+            const response = await axios.get(endpoints.getBuckets + `/?page=${page}`, {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                }
+            });
+            if(response){
+                return response.data;
+            }
+        }
+    } catch (err) {
+        console.log(err)
+        throw err;
+    }
+
+}        
+
 
 export default function HomeScreen({navigation}:TypeProps) {
 
     const {signOut} = React.useContext(AuthContext);
+    const [buckets,setBuckets] = React.useState<Bucket[]>([]);
+    const currentPage = React.useRef<number>(1);
+
+
+    const updateStatusBar = () => {
+        navigation.setOptions({
+            headerRight:()=>(
+                <TouchableOpacity>
+                <MaterialIcons
+                    onPress={signOut}
+                    style={{padding:10}} 
+                    name="logout"
+                    color={Theme.WHITE}
+                    size={25}/>
+                </TouchableOpacity>    
+            )
+        })
+    }
+    
     
 
-    navigation.setOptions({
-        headerRight:()=>(
-            <TouchableOpacity>
-            <MaterialIcons
-                onPress={signOut}
-                style={{padding:10}} 
-                name="logout"
-                color={Theme.WHITE}
-                size={25}/>
-            </TouchableOpacity>    
-        )
-    })
-    
     React.useEffect(() => {
-        
+        updateStatusBar();
+        async function loadBuckets(){
+            try{
+                const accessToken = await AsyncStorage.getItem('accessToken');
+                const refreshToken = await AsyncStorage.getItem('refreshToken');
 
+                const userToken = {
+                    accessToken,
+                    refreshToken
+                }
+
+                const response = await getBuckets(userToken,currentPage.current);
+                if(response){
+                    setBuckets(response.buckets);
+                }
+            }catch(err){
+               
+            }
+        }
+        loadBuckets();
     }, [])
+
+
+    const onSearchTextChange = (val:string) => {
+        console.log(val);
+    }
+    
 
 
     return (
         <View style={styles.container}>
-            <SearchField placeHolder="Search bucket"/>
+            <SearchField onTextChange={onSearchTextChange}  placeHolder="Search bucket"/>
+            <FlatList data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item)=>{
+                console.log(item);
+                return (<BucketItem item={item.item} />)
+            }} />
         </View>
     )
 }
