@@ -1,5 +1,5 @@
 import  {getDb} from '../utils/database';
-import {ObjectId, ObjectID} from'mongodb';
+import {ObjectId} from'mongodb';
 
 class User{
     email:string;
@@ -24,7 +24,7 @@ class User{
     }
 
     static findById(id:string){
-        return getDb().collection('users').findOne({_id:new ObjectID(id)});
+        return getDb().collection('users').findOne({_id:new ObjectId(id)});
     }
 
     static updateById(id:string,values:object){
