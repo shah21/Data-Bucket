@@ -41,9 +41,9 @@ bower_components
 build/Release
 
 # Dependency directories
-"mobile"/node_modules/
+mobile/node_modules/
 server/node_modules/
-"web"/node_modules/
+web/node_modules/
 jspm_packages/
 
 # TypeScript v1 declaration files

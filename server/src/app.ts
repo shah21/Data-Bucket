@@ -1,4 +1,4 @@
-import express,{Request,Response,NextFunction} from "express";
+  import express,{Request,Response,NextFunction} from "express";
 import cors from "cors";
 import session from "express-session";
 import multer from "multer";
@@ -79,7 +79,8 @@ app.use((error:HttpException,req:Request,res:Response,next:NextFunction)=>{
 
 connectDb(()=>{
     console.log('Databse connection successfull...');
-    const server = app.listen(process.env.PORT);
+    const port = process.env.PORT || 8080;
+    const server = app.listen(port);
     global.io = require('socket.io')(server,
       {
         // cors: {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList } from 'react-native'
+import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList, ScrollView, RefreshControl } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from "react-native-animatable";
@@ -16,6 +16,9 @@ import endpoints from '../axios/endpoints';
 import Bucket from '../Models/bucket';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Fab } from 'native-base';
+import AddBucketDialog from '../components/Dialogs/AddBucketDialog';
+import { FlashContext } from '../contexts/FlashContext';
+import { socket } from '../utils/socket';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -49,11 +52,43 @@ const getBuckets = async (userToken:any,page:number) =>{
 }        
 
 
+const addBucket = async (userToken:any,body:object) =>{
+    try {
+        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            
+            const response = await axios.post(endpoints.createBucket,body, {
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                }
+            });
+            if(response){
+                return response.data;
+            }
+        }
+    } catch (err) {
+        console.log(err)
+        throw err;
+    }
+
+}        
+
+
 export default function HomeScreen({navigation}:TypeProps) {
 
     const {signOut} = React.useContext(AuthContext);
+
     const [buckets,setBuckets] = React.useState<Bucket[]>([]);
+    const [modalVisible, setModalVisible] = React.useState<boolean>(false);
+    const [isRefreshing,setRefreshing] = React.useState<boolean>(false);
+    const [totalCount,setTotalCount] = React.useState<number>(0);
+
     const currentPage = React.useRef<number>(1);
+    const bucketsBackup = React.useRef<Bucket[]>([]);
+
+    const {setFlash} = React.useContext(FlashContext);
+
 
 
     const updateStatusBar = () => {
@@ -70,40 +105,125 @@ export default function HomeScreen({navigation}:TypeProps) {
             )
         })
     }
+
+    async function loadBuckets(){
+        try{
+            setRefreshing(true);
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            const refreshToken = await AsyncStorage.getItem('refreshToken');
+
+            const userToken = {
+                accessToken,
+                refreshToken
+            }
+
+            const response = await getBuckets(userToken,currentPage.current);
+            if(response){
+                setBuckets(response.buckets);
+            }
+            setRefreshing(false);
+        }catch(err){
+            setRefreshing(false);
+           setFlash({message:err.message,type:'error'})
+        }
+    }
     
     
 
     React.useEffect(() => {
         updateStatusBar();
-        async function loadBuckets(){
-            try{
-                const accessToken = await AsyncStorage.getItem('accessToken');
-                const refreshToken = await AsyncStorage.getItem('refreshToken');
-
-                const userToken = {
-                    accessToken,
-                    refreshToken
-                }
-
-                const response = await getBuckets(userToken,currentPage.current);
-                if(response){
-                    setBuckets(response.buckets);
-                }
-            }catch(err){
-               
-            }
-        }
         loadBuckets();
-    }, [])
+    }, []);
+
+
+    React.useEffect(()=>{
+
+        async function setupSocket() {
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            const refreshToken = await AsyncStorage.getItem('refreshToken');
+            const userId = await AsyncStorage.getItem('userId');
+
+            const userToken = {
+                accessToken,
+                refreshToken,
+                userId,
+            }
+
+            socket.emit('subscribe', userToken.userId);
+            socket.on('bucket', (data: { action: string, bId: string, bucket: Bucket, socket_id: string }) => {
+
+                switch (data.action) {
+                    case 'bucket-created': {
+                        if (data.socket_id !== socket.id) {
+                            loadBuckets();
+                        }
+                        break;
+                    }
+                    case 'bucket-deleted': {
+                        socket.emit('unsubscribe', data.bId);
+                        // setBucketId(null!);
+                        setBuckets(prev => prev.filter(bucket => bucket._id !== data.bId));
+                        bucketsBackup.current = bucketsBackup.current.filter(bucket => bucket._id !== data.bId);
+                        setFlash({ message: `Bucket deleted successfully`, type: 'success' });
+                        setTotalCount(prev => prev - 1);
+                        break;
+                    }
+                }
+
+            });
+            }
+
+
+        setupSocket();    
+        
+        return ()=>{
+            socket.off('subscribe');
+            socket.off('unsubscribe');
+            socket.off('bucket');
+        }
+    },[]);
+
+
+
 
 
     const onSearchTextChange = (val:string) => {
         console.log(val);
     }
 
-    const openCreateDialog = () => {
-        
+    const handleAdd = async (val:string) => {
+        try{
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            const refreshToken = await AsyncStorage.getItem('refreshToken');
+
+            const userToken = {
+                accessToken,
+                refreshToken
+            }
+            const body:{name:string} = {name:val};
+            const response = await addBucket(userToken,body);
+            if(response){
+                setFlash({message:`${val} bucket created`,type:'error'})
+                setModalVisible(false);
+            }
+        }catch(err){
+            if (err.response && err.response.status !== 401) {
+                const error = err.response.data.errors[0];
+                if (error) {
+                    setFlash({ message: error.msg, type: 'error' });
+                } else {
+                    setFlash({ message: err.message, type: 'error' });
+                }
+            }
+            setModalVisible(false);
+        }
     }
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        loadBuckets();
+    }
+    
     
     
 
@@ -111,19 +231,32 @@ export default function HomeScreen({navigation}:TypeProps) {
     return (
         <View style={styles.container}>
             <SearchField onTextChange={onSearchTextChange}  placeHolder="Search bucket"/>
-            <FlatList data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item)=>{
+            
+
+            <FlatList refreshControl={
+                <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+            } data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
                 return (<BucketItem item={item.item} />)
             }} />
+                
 
             
             <Fab
                 direction="up"
                 containerStyle={{}}
                 style={{ backgroundColor: Theme.PRIMARY_COLOR }}
-                onPress={openCreateDialog}
+                onPress={()=>setModalVisible(true)}
                 position="bottomRight">
                     <MaterialIcons name="add" />
             </Fab>
+
+            <AddBucketDialog 
+                modelInputLabel="Bucket Name"
+                modelTitle="Add Bucket"
+                handleDone={handleAdd}
+                modelBtnLabel="Save"
+                closeModel={()=>setModalVisible(false)} 
+                modalVisible = {modalVisible}/>
         </View>
     )
 }

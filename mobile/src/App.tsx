@@ -12,6 +12,8 @@ import { FlashContext } from './contexts/FlashContext';
 import { AuthContext } from "./contexts/context";
 import RootStackScreen from './screens/RootstackScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Provider as PaperProvider  } from 'react-native-paper';
+import { socket } from './utils/socket';
 
 
 
@@ -124,6 +126,11 @@ export default function App() {
         const refreshToken  = await AsyncStorage.getItem('refreshToken');
         const userId = await AsyncStorage.getItem('userId');
 
+
+        socket.on('connect', () => {
+          socket.emit('identity', { userId: userId });
+        });
+    
         dispatch({ type: 'RETRIEVE_TOKEN', authObject: { accessToken: accessToken!, refreshToken: refreshToken!, userId: userId! } });
       } catch (error) {
         console.log(error);
@@ -131,6 +138,14 @@ export default function App() {
     }
 
     getFromStorage();
+
+
+
+    return () => {
+      socket.off('connect');
+      socket.off('identity');
+    }
+
   }, [])
 
   if(loginState.isLoading){
@@ -149,6 +164,7 @@ export default function App() {
   }
 
   return (
+    <PaperProvider>
     <AuthContext.Provider value={authContext}>
     <FlashContext.Provider value={{ flash, setFlash }}>
     <NavigationContainer>
@@ -167,6 +183,7 @@ export default function App() {
     </NavigationContainer>
     </FlashContext.Provider>
     </AuthContext.Provider>
+    </PaperProvider>
   );
 }
 

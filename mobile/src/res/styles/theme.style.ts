@@ -4,6 +4,7 @@ export default {
     PRIMARY_COLOR_DARK:'#128976',
     WHITE:'#fff',
     BLACK:'#000',
+    ERROR:'red',
 
     /* Font size */
     FONT_SIZE_HEADER:30,

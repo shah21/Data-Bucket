@@ -6,6 +6,10 @@ class WebSockets {
     }
     
     connection(client:any) {
+
+
+      console.log('connection');
+
       // event fired when the  room is disconnected
       client.on("disconnect", () => {
         this.users = this.users.filter((user) => user.socketId !== client.id);
