@@ -4,14 +4,15 @@ import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 
 type propTypes = {
     placeHolder?:string,
-    onTextChange:(val:string)=>void
+    onTextChange:(val:string)=>void,
+    onClearText?:()=>void
 }
 
 const defaultProps: propTypes = {
     placeHolder:'Search',
     onTextChange:undefined!,
 }
-const SearchField:React.FunctionComponent<propTypes> = ({placeHolder,onTextChange}:propTypes)=> {
+const SearchField:React.FunctionComponent<propTypes> = ({placeHolder,onTextChange,onClearText}:propTypes)=> {
 
     const inputRef = React.useRef<TextInput>(null!);
     
@@ -19,6 +20,9 @@ const SearchField:React.FunctionComponent<propTypes> = ({placeHolder,onTextChang
     
     const clearText = () => {
         inputRef.current.clear();
+        if(onClearText){
+            onClearText();
+        }
     }
     
     

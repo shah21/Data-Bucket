@@ -120,6 +120,7 @@ export default function HomeScreen({navigation}:TypeProps) {
             const response = await getBuckets(userToken,currentPage.current);
             if(response){
                 setBuckets(response.buckets);
+                bucketsBackup.current = response.buckets;
             }
             setRefreshing(false);
         }catch(err){
@@ -179,12 +180,14 @@ export default function HomeScreen({navigation}:TypeProps) {
         }
     },[]);
 
-
-
-
-
-    const onSearchTextChange = (val:string) => {
-        console.log(val);
+    const onSearchTextChange = (text:string) => {
+        setBuckets(bucketsBackup.current);
+        if(text){
+            setBuckets(prev=>prev.filter(x=>x.name.toLowerCase().includes(text.toLowerCase())));
+            if(buckets.length === 0){
+                console.log('No buckets found');
+            }
+        }
     }
 
     const handleAdd = async (val:string) => {
@@ -226,14 +229,17 @@ export default function HomeScreen({navigation}:TypeProps) {
 
     return (
         <View style={styles.container}>
-            <SearchField onTextChange={onSearchTextChange}  placeHolder="Search bucket"/>
+            <SearchField 
+                onClearText={()=> setBuckets(bucketsBackup.current)}
+                onTextChange={onSearchTextChange}  
+                placeHolder="Search bucket"/>
             
 
-            <FlatList refreshControl={
+            {buckets.length !== 0 ? <FlatList refreshControl={
                 <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
             } data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
                 return (<BucketItem item={item.item} />)
-            }} />
+            }} /> : ( <Text style={styles.emptyText}>No buckets found !</Text> )}
                 
 
             
@@ -305,5 +311,12 @@ const styles = StyleSheet.create({
     button:{
         alignItems:'flex-end',
         marginTop:30,
+    },
+    emptyText:{
+        flex:1,
+        textAlign:'center',
+        color:'grey',
+        fontSize:16,
+        marginTop:20,
     }
 });
