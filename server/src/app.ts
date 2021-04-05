@@ -83,10 +83,10 @@ connectDb(()=>{
     const server = app.listen(port);
     global.io = require('socket.io')(server,
       {
-        // cors: {
-        //   origin: "http://localhost:3000",
-        //   credentials: true
-        // }
+        cors: {
+          origin: "http://localhost:3000",
+          credentials: true
+        }
       }
       );
 

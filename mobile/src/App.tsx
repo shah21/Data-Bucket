@@ -31,6 +31,41 @@ type Action =
  | { type: 'LOGIN',authObject:AuthObjectType }
  | { type: 'LOGOUT' }
 
+ const loginReducer = (prevState:State, action:Action):State => {
+  switch( action.type ) {
+    case 'RETRIEVE_TOKEN': 
+      return {
+        ...prevState,
+        accessToken: action.authObject.accessToken,
+        refreshToken:action.authObject.refreshToken,
+        isLoading: false,
+      };
+    case 'LOGIN': 
+      return {
+        ...prevState,
+        userId:action.authObject.userId,
+        accessToken: action.authObject.accessToken,
+        refreshToken:action.authObject.refreshToken,
+        isLoading: false,
+      };
+    case 'LOGOUT': 
+      return {
+        ...prevState,
+        userId: null!,
+        accessToken: null!,
+        isLoading: false,
+        refreshToken:null!,
+      };
+  }
+}; 
+
+const initialLoginState = {
+  isLoading:true,
+  userId:null!,
+  accessToken:null!,
+  refreshToken:null!,
+} as State;
+
 export default function App() {
 
 
@@ -40,42 +75,7 @@ export default function App() {
   // const [isLoading,setLoading] = React.useState<boolean>(true);
   // const [userToken,setUserToken] = React.useState(null!);
 
-  const initialLoginState = {
-    isLoading:true,
-    userId:null!,
-    accessToken:null!,
-    refreshToken:null!,
-  } as State;
-
-
-
-  const loginReducer = (prevState:State, action:Action):State => {
-    switch( action.type ) {
-      case 'RETRIEVE_TOKEN': 
-        return {
-          ...prevState,
-          accessToken: action.authObject.accessToken,
-          refreshToken:action.authObject.refreshToken,
-          isLoading: false,
-        };
-      case 'LOGIN': 
-        return {
-          ...prevState,
-          userId:action.authObject.userId,
-          accessToken: action.authObject.accessToken,
-          refreshToken:action.authObject.refreshToken,
-          isLoading: false,
-        };
-      case 'LOGOUT': 
-        return {
-          ...prevState,
-          userId: null!,
-          accessToken: null!,
-          isLoading: false,
-          refreshToken:null!,
-        };
-    }
-  };
+ 
 
   const [loginState, dispatch] = React.useReducer(loginReducer, initialLoginState);
   
@@ -102,6 +102,17 @@ export default function App() {
       dispatch({type:'LOGOUT'});
     },
     signUp:()=>{},
+    getToken:async ():Promise<UserToken>=>{
+      const accessToken =  await AsyncStorage.getItem('accessToken');
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      const userId =  await AsyncStorage.getItem('userId');
+
+      return {
+        accessToken:accessToken!,
+        refreshToken:refreshToken!,
+        userId:userId!
+      } as UserToken;
+    }
   }),[])
 
   /* open and close flash messages */
@@ -119,6 +130,18 @@ export default function App() {
     }
   }, [flash]);
 
+
+  React.useEffect(()=>{
+    socket.on('connect', () => {
+      socket.emit('identity', { userId: loginState.userId });
+    });
+
+    return () => {
+      socket.off('connect');
+      socket.off('identity');
+    }
+  },[]);
+
   React.useEffect(() => {
     async function getFromStorage(){
       try {
@@ -126,11 +149,6 @@ export default function App() {
         const refreshToken  = await AsyncStorage.getItem('refreshToken');
         const userId = await AsyncStorage.getItem('userId');
 
-
-        socket.on('connect', () => {
-          socket.emit('identity', { userId: userId });
-        });
-    
         dispatch({ type: 'RETRIEVE_TOKEN', authObject: { accessToken: accessToken!, refreshToken: refreshToken!, userId: userId! } });
       } catch (error) {
         console.log(error);
@@ -138,14 +156,6 @@ export default function App() {
     }
 
     getFromStorage();
-
-
-
-    return () => {
-      socket.off('connect');
-      socket.off('identity');
-    }
-
   }, [])
 
   if(loginState.isLoading){

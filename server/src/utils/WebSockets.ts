@@ -7,9 +7,6 @@ class WebSockets {
     
     connection(client:any) {
 
-
-      console.log('connection');
-
       // event fired when the  room is disconnected
       client.on("disconnect", () => {
         this.users = this.users.filter((user) => user.socketId !== client.id);
@@ -28,6 +25,9 @@ class WebSockets {
       });
       // subscribe person to chat & other user as well
       client.on("subscribe", (room: string) => {
+
+        console.log('subscribe');
+
         if(!Object.keys(client.rooms).includes(room)){
           client.join(room);
           // console.log(global.io.sockets.adapter.rooms);

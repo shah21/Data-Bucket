@@ -77,7 +77,7 @@ const addBucket = async (userToken:any,body:object) =>{
 
 export default function HomeScreen({navigation}:TypeProps) {
 
-    const {signOut} = React.useContext(AuthContext);
+    const {signOut,getToken} = React.useContext(AuthContext);
 
     const [buckets,setBuckets] = React.useState<Bucket[]>([]);
     const [modalVisible, setModalVisible] = React.useState<boolean>(false);
@@ -139,16 +139,10 @@ export default function HomeScreen({navigation}:TypeProps) {
     React.useEffect(()=>{
 
         async function setupSocket() {
-            const accessToken = await AsyncStorage.getItem('accessToken');
-            const refreshToken = await AsyncStorage.getItem('refreshToken');
-            const userId = await AsyncStorage.getItem('userId');
+            
+            const userToken = await getToken();
 
-            const userToken = {
-                accessToken,
-                refreshToken,
-                userId,
-            }
-
+            
             socket.emit('subscribe', userToken.userId);
             socket.on('bucket', (data: { action: string, bId: string, bucket: Bucket, socket_id: string }) => {
 
@@ -164,7 +158,9 @@ export default function HomeScreen({navigation}:TypeProps) {
                         // setBucketId(null!);
                         setBuckets(prev => prev.filter(bucket => bucket._id !== data.bId));
                         bucketsBackup.current = bucketsBackup.current.filter(bucket => bucket._id !== data.bId);
-                        setFlash({ message: `Bucket deleted successfully`, type: 'success' });
+                        if (data.socket_id === socket.id) {
+                            setFlash({ message: `Bucket deleted successfully`, type: 'success' });
+                        }
                         setTotalCount(prev => prev - 1);
                         break;
                     }

@@ -16,5 +16,11 @@ declare module "*.png" {
     classes:Record<string,string>
   }
 
-
  type ErrorType = {msg:string,field:string}
+
+
+interface UserToken{
+  accessToken:string,
+  refreshToken:string,
+  userId:string,
+}
