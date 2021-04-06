@@ -225,7 +225,7 @@ export default function HomeScreen({navigation}:TypeProps) {
     
     const onClick = (id:string) => {
         navigation.navigate('RoomScreen',{
-            id:id,
+            bucketId:id,
         });
     }
     

@@ -23,6 +23,7 @@ import { socket } from '../utils/socket';
 import Data from '../Models/data';
 import SingleData from '../components/SingleData/SingleData';
 import { IconButton } from 'react-native-paper';
+import OptionsDialog from '../components/Dialogs/OptionsDialog';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -113,10 +114,30 @@ const addData = async (bucketId:string,userToken:any,text:string,file:any,progre
 }
 
 
+const deleteData = async (dataId:string,bucketId:string,token:any)=>{
+    try {
+        const isAuthourized = await isAuth(token.accessToken, token.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            const response = await axios.delete(endpoints.deleteData + `dataId=${dataId}&bucketId=${bucketId}`,{
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                }
+            });
+            if (response) {
+                return response;
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+}
+
+
 export default function HomeScreen({route,navigation}:TypeProps) {
 
     /* Params */
-    const {id} = route.params;
+    const {bucketId} = route.params;
 
     const {signOut,getToken} = React.useContext(AuthContext);
     
@@ -125,9 +146,11 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     const [bucket,setBucket] = React.useState<Bucket>(null!);
     const [dataArray,setDataArray] = React.useState<Data[]>([]);
     const [text,setText] = React.useState<string>(null!);
+    const [modalVisible, setModalVisible] = React.useState<boolean>(false);
+    const [selectedId, setSelectedId] = React.useState<string>(null!);
 
     const currentPage = React.useRef<number>(1);
-    const bucketsBackup = React.useRef<Bucket[]>([]);
+    const inputRef = React.useRef<TextInput>(null!);
     
 
     const {setFlash} = React.useContext(FlashContext);
@@ -149,7 +172,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
         try{
             setRefreshing(true);
             const userToken = await getToken();
-            const response = await getBucket(id,userToken);
+            const response = await getBucket(bucketId,userToken);
             if(response){
                 setBucket(response);
                 updateStatusBar(response.name);
@@ -165,7 +188,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
         try{
             setRefreshing(true);
             const userToken = await getToken();
-            const response = await getBucket(id,userToken);
+            const response = await getBucket(bucketId,userToken);
             if(response){
                 setBucket(response);
                 updateStatusBar(response.name);
@@ -180,10 +203,10 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     async function promiseList(){
         try {
             //run only dataArray is empty or bucket id changed
-            if(dataArray.length === 0 || id){
+            if(dataArray.length === 0 || bucketId){
                 setRefreshing(true);
                 const userToken = await getToken();
-                const response = await getDataArray(id, userToken,currentPage.current);
+                const response = await getDataArray(bucketId, userToken,currentPage.current);
                 if (response) {
                     setTotal(response.totalCount);
                     setDataArray(response.bucket.data ? response.bucket.data : []);
@@ -208,11 +231,11 @@ export default function HomeScreen({route,navigation}:TypeProps) {
         promiseList();
         async function setupSocket() {
 
-            const userToken = await getToken();
-            socket.emit('subscribe', id);
+            socket.emit('subscribe', bucketId);
             socket.on('data', (data: { action: string, data: Data, bId: string, id: string }) => {
+                
                 //check if it is correct bucket/room
-                if (data.bId === id) {
+                if (data.bId === bucketId) {
                     switch (data.action) {
                         case 'created': {
                             setDataArray(prev => [...prev, data.data]);
@@ -237,72 +260,100 @@ export default function HomeScreen({route,navigation}:TypeProps) {
 
         }
 
+        setupSocket();    
+
         return  ()=>{
             socket.off('subscribe');
-            socket.off('unsubscribe');
             socket.off('data');
         }
-
-
-        setupSocket();    
     },[]);
 
     const onRefresh = () => {
         setRefreshing(true);
         loadData();
     }
-    
-    const onClick = (id:string) => {
-        navigation.navigate('RoomScreen',{
-            id:id,
-        });
-    }
+
     
     
     const handleSend = async () =>{
         if(text){
             try {
                 const userToken = await getToken();
-                const response = await addData(id,userToken,text,null!,(progress:number)=>{
+                const response = await addData(bucketId,userToken,text,null!,(progress:number)=>{
 
                 });
                 if(response){
-                    
+                    inputRef.current.clear();
                 }
             } catch (err) {
                 setFlash({message:err.message,type:'error'});
             }
         }
     } 
+
+    const handleOptions =  async (option:string) => {
+        switch(option){
+            case 'Delete':
+                try{
+                    const userToken = await getToken();
+                    await deleteData(selectedId,bucketId,userToken);
+                    setModalVisible(false);
+                }catch(err){
+                    setFlash({message:err.message,type:'error'});
+                }
+            default:
+                return;
+                
+        }
+    }
+
+    const openOptions = (id:string) => {
+        setSelectedId(id);
+        setModalVisible(true);    
+    }
+    
+
+    
+    
     
 
 
     return (
         <View style={styles.container}>
             <View>
-            {dataArray.length !== 0 ? <FlatList refreshControl={
-                <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-            } data={dataArray} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
-                return (<SingleData item={item.item} />)
-            }} /> : ( <Text style={styles.emptyText}>No data found !</Text> )}
+                {dataArray.length !== 0 ? <FlatList refreshControl={
+                    <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+                } data={dataArray} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
+                    return (<SingleData openOptions={openOptions} item={item.item} />)
+                }} /> : (<Text style={styles.emptyText}>No data found !</Text>)}
             </View>
             
             <View style={styles.sendContainer}>
-                <TextInput 
-                onChangeText={(val)=>setText(val)}
-                placeholder="Enter here"
-                style={styles.inputField}/>
-                <IconButton 
-                onPress={handleSend}
-                size={30}
-                style={styles.btnSend}
-                icon={()=>(
-                    <MaterialIcons
-                    color={Theme.WHITE}
-                        name="send"
+                <TextInput
+                    ref={inputRef}
+                    onChangeText={(val) => setText(val)}
+                    placeholder="Enter here"
+                    style={styles.inputField} />
+                <IconButton
+                    onPress={handleSend}
+                    size={30}
+                    style={styles.btnSend}
+                    icon={() => (
+                        <MaterialIcons
+                            color={Theme.WHITE}
+                            name="send"
                         />
-                )}/>
+                    )} />
+
+                <OptionsDialog
+                    closeModel={() => setModalVisible(false)}
+                    chooseOption={handleOptions}
+                    contentType="text"
+                    modalVisible={modalVisible} />
+
             </View>
+
+
         
         </View>
     )

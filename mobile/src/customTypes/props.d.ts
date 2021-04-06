@@ -5,7 +5,7 @@ type StackProps = {
     RootStackScreen:undefined,
     HomeScreen:undefined,
     RoomScreen:{
-        id:string,
+        bucketId:string,
     },
 }
 

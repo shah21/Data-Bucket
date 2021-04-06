@@ -73,7 +73,6 @@ export const postCreateBucket = async (req:Request,res:Response,next:NextFunctio
     const socket_id = req.body.socket_id;
     const errors = validationResult(req).array();
 
-    
 
     try{
 

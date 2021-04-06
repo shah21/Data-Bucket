@@ -10,6 +10,7 @@ import Theme from "../../res/styles/theme.style";
 
 type Props  = {
     item:Data,
+    openOptions:(id:string)=>void,
 }
 
 
@@ -25,7 +26,7 @@ const getType = (uri:string):string => {
     return type;
 }
 
-const SingleData = ({item}:Props) => {
+const SingleData = ({item,openOptions}:Props) => {
     return (
         <View style={styles.container}>
             <Card style={styles.card}>
@@ -55,7 +56,7 @@ const SingleData = ({item}:Props) => {
 
 
                 </View>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={()=>openOptions(item._id)}>
                     <MaterialCommunityIcons
                         size={23}
                         name="dots-vertical" />
