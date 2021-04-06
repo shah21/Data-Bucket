@@ -340,12 +340,14 @@ export default function HomeScreen({route,navigation}:TypeProps) {
                     style={styles.btnSend}
                     icon={() => (
                         <MaterialIcons
+                            size={20}
                             color={Theme.WHITE}
                             name="send"
                         />
                     )} />
 
                 <OptionsDialog
+                    optionList={["Copy","Delete","Favourite"]}
                     closeModel={() => setModalVisible(false)}
                     chooseOption={handleOptions}
                     contentType="text"

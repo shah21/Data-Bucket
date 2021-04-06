@@ -11,18 +11,18 @@ type TypeProps = {
     closeModel:()=>void,
     chooseOption:(val:string)=>void,
     contentType:string,
+    optionList:string[],
 }
 
 
-const OptionsDialog = ({ modalVisible, closeModel, chooseOption,contentType }: TypeProps) => {
+const OptionsDialog = ({ modalVisible, closeModel, chooseOption,contentType,optionList }: TypeProps) => {
 
-    const options = ["Copy", "Delete", "Favourite"];
 
     return (
         <View>
             <Portal>
                 <Dialog style={styles.dialog} visible={modalVisible} onDismiss={closeModel}>
-                    <FlatList data={options}  
+                    <FlatList data={optionList}  
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={(item)=>{
                             if(contentType === 'file' && item.item === 'Copy'){

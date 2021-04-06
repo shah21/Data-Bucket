@@ -8,12 +8,13 @@ import Theme from "../../res/styles/theme.style";
 type TypeProps = {
     item:any,
     onClick:(id:string)=>void
+    onLongPress:(id:string)=>void
 }
 
 
-export default function BucketItem({item,onClick}:TypeProps) {
+export default function BucketItem({item,onClick,onLongPress}:TypeProps) {
     return (
-        <ListItem onPress={()=>onClick(item._id)}>
+        <ListItem onPress={()=>onClick(item._id)} onLongPress={()=>onLongPress(item._id)}>
             <Left style={{flex:0.2}}>
                 <Thumbnail square source={require("../../res/images/folder.jpg")}/>
             </Left>

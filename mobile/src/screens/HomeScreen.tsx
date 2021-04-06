@@ -19,6 +19,7 @@ import { Fab } from 'native-base';
 import AddBucketDialog from '../components/Dialogs/AddBucketDialog';
 import { FlashContext } from '../contexts/FlashContext';
 import { socket } from '../utils/socket';
+import OptionsDialog from '../components/Dialogs/OptionsDialog';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -72,7 +73,27 @@ const addBucket = async (userToken:any,body:object) =>{
         throw err;
     }
 
-}        
+}     
+
+
+const deleteBucket = async (bucketId:string,token:any)=>{
+    try {
+        const isAuthourized = await isAuth(token.accessToken, token.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            const response = await axios.delete(endpoints.deleteBucket + bucketId,{
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                }
+            });
+            if (response) {
+                return response;
+            }
+        }
+    } catch (err) {
+        throw err;
+    }
+}
 
 
 export default function HomeScreen({navigation}:TypeProps) {
@@ -81,8 +102,10 @@ export default function HomeScreen({navigation}:TypeProps) {
 
     const [buckets,setBuckets] = React.useState<Bucket[]>([]);
     const [modalVisible, setModalVisible] = React.useState<boolean>(false);
+    const [optionsVisible, setOptionsVisible] = React.useState<boolean>(false);
     const [isRefreshing,setRefreshing] = React.useState<boolean>(false);
     const [totalCount,setTotalCount] = React.useState<number>(0);
+    const [selectedId, setSelectedId] = React.useState<string>(null!);
 
     const currentPage = React.useRef<number>(1);
     const bucketsBackup = React.useRef<Bucket[]>([]);
@@ -159,9 +182,10 @@ export default function HomeScreen({navigation}:TypeProps) {
                         // setBucketId(null!);
                         setBuckets(prev => prev.filter(bucket => bucket._id !== data.bId));
                         bucketsBackup.current = bucketsBackup.current.filter(bucket => bucket._id !== data.bId);
-                        if (data.socket_id === socket.id) {
-                            setFlash({ message: `Bucket deleted successfully`, type: 'success' });
-                        }
+                        // if (data.socket_id === socket.id) {
+                        //     setFlash({ message: `Bucket deleted successfully`, type: 'success' });
+                        // }
+                        setFlash({ message: `Bucket deleted successfully`, type: 'success' });
                         setTotalCount(prev => prev - 1);
                         break;
                     }
@@ -231,7 +255,27 @@ export default function HomeScreen({navigation}:TypeProps) {
     
     
     
+    const onLongPress = (id:string) => {
+        setSelectedId(id);
+        setOptionsVisible(true);
+    }
 
+
+    const handleOptions =  async (option:string) => {
+        switch(option){
+            case 'Delete':
+                try{
+                    const userToken = await getToken();
+                    await deleteBucket(selectedId,userToken);
+                    setOptionsVisible(false);
+                }catch(err){
+                    setFlash({message:err.message,type:'error'});
+                }
+            default:
+                return;
+                
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -244,7 +288,7 @@ export default function HomeScreen({navigation}:TypeProps) {
             {buckets.length !== 0 ? <FlatList refreshControl={
                 <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
             } data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
-                return (<BucketItem onClick={onClick} item={item.item} />)
+                return (<BucketItem onLongPress={onLongPress} onClick={onClick} item={item.item} />)
             }} /> : ( <Text style={styles.emptyText}>No buckets found !</Text> )}
                 
 
@@ -265,6 +309,14 @@ export default function HomeScreen({navigation}:TypeProps) {
                 modelBtnLabel="Save"
                 closeModel={()=>setModalVisible(false)} 
                 modalVisible = {modalVisible}/>
+
+            <OptionsDialog
+                    optionList={["Rename","Delete"]}
+                    closeModel={() => setOptionsVisible(false)}
+                    chooseOption={handleOptions}
+                    contentType="text"
+                    modalVisible={optionsVisible} />
+
         </View>
     )
 }
