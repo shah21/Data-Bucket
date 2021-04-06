@@ -209,7 +209,7 @@ export default function HomeScreen({navigation}:TypeProps) {
         if(text){
             setBuckets(prev=>prev.filter(x=>x.name.toLowerCase().includes(text.toLowerCase())));
             if(buckets.length === 0){
-                console.log('No buckets found');
+                return;
             }
         }
     }

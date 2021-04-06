@@ -155,15 +155,26 @@ export default function HomeScreen({route,navigation}:TypeProps) {
 
     const {setFlash} = React.useContext(FlashContext);
 
+    const selectFile = () => {
+        
+    }
+    
 
 
     const updateStatusBar = (title:string) => {
         navigation.setOptions({
             title:title,
             headerRight:()=>(
-                <TouchableOpacity>
-                
-                </TouchableOpacity>    
+                <IconButton  
+                    onPress={selectFile}
+                    icon={()=>(
+                    <MaterialIcons
+                    style={styles.iconAttach}
+                    name="attach-file"
+                    color={Theme.WHITE}
+                    /> 
+                )}/>
+                   
             )
         })
     }
@@ -396,6 +407,10 @@ const styles = StyleSheet.create({
         borderColor:Theme.PRIMARY_COLOR_DARK,
         marginLeft:10,
         paddingHorizontal:10,
+    },
+    iconAttach:{
+        color:Theme.WHITE,
+        fontSize:23,
     }
     
 });
