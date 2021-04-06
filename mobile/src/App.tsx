@@ -8,6 +8,7 @@ import SplashScreen from "./screens/SplashScreen";
 import SignUpScreen from "./screens/SignupScreen";
 import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
+import RoomScreen from "./screens/RoomScreen";
 import { FlashContext } from './contexts/FlashContext';
 import { AuthContext } from "./contexts/context";
 import RootStackScreen from './screens/RootstackScreen';
@@ -185,6 +186,13 @@ export default function App() {
           name="HomeScreen"
           options={{title:'Buckets'}}
           component={HomeScreen}
+        />
+         <Stack.Screen 
+          name="RoomScreen"
+          options={{
+            title:null!,
+          }}
+          component={RoomScreen}
         />
         </Stack.Navigator>
       ):(

@@ -9,6 +9,7 @@ import LoginScreen from './LoginScreen';
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
     "RootStackScreen"
+    
 >;
 
 type TypeProps = {

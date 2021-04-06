@@ -6,13 +6,14 @@ import { ListItem,Left, Thumbnail, Right,Text, Body, Image } from "native-base";
 import Theme from "../../res/styles/theme.style";
 
 type TypeProps = {
-    item:any
+    item:any,
+    onClick:(id:string)=>void
 }
 
 
-export default function BucketItem({item}:TypeProps) {
+export default function BucketItem({item,onClick}:TypeProps) {
     return (
-        <ListItem>
+        <ListItem onPress={()=>onClick(item._id)}>
             <Left style={{flex:0.2}}>
                 <Thumbnail square source={require("../../res/images/folder.jpg")}/>
             </Left>

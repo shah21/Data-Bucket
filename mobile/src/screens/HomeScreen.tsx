@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList, ScrollView, RefreshControl } from 'react-native'
+import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList, ScrollView, RefreshControl, Route } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from "react-native-animatable";
@@ -26,7 +26,7 @@ type SplashNavigationProps = StackNavigationProp<
 >;
 
 type TypeProps = {
-    navigation: SplashNavigationProps
+    navigation: SplashNavigationProps,
 }
 
 const getBuckets = async (userToken:any,page:number) =>{
@@ -223,6 +223,12 @@ export default function HomeScreen({navigation}:TypeProps) {
         loadBuckets();
     }
     
+    const onClick = (id:string) => {
+        navigation.navigate('RoomScreen',{
+            id:id,
+        });
+    }
+    
     
     
 
@@ -238,7 +244,7 @@ export default function HomeScreen({navigation}:TypeProps) {
             {buckets.length !== 0 ? <FlatList refreshControl={
                 <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
             } data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
-                return (<BucketItem item={item.item} />)
+                return (<BucketItem onClick={onClick} item={item.item} />)
             }} /> : ( <Text style={styles.emptyText}>No buckets found !</Text> )}
                 
 
