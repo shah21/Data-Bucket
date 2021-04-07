@@ -21,6 +21,10 @@ target 'DataBucket' do
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
 
+  pod 'react-native-document-picker', :path => '../node_modules/react-native-document-picker'
+
+  pod 'RNFS', :path => '../node_modules/react-native-fs'
+
   target 'DataBucketTests' do
     inherit! :complete
     # Pods for testing

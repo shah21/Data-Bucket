@@ -11,6 +11,7 @@ import Theme from "../../res/styles/theme.style";
 type Props  = {
     item:Data,
     openOptions:(id:string)=>void,
+    downloadFile:(id:string)=>void,
 }
 
 
@@ -26,7 +27,7 @@ const getType = (uri:string):string => {
     return type;
 }
 
-const SingleData = ({item,openOptions}:Props) => {
+const SingleData = ({item,openOptions,downloadFile}:Props) => {
     return (
         <View style={styles.container}>
             <Card style={styles.card}>
@@ -44,7 +45,7 @@ const SingleData = ({item,openOptions}:Props) => {
 
                             <View style={styles.fileTextView}>
                                 <Text>{`${getType(item.file_path)} file`}</Text>
-                                <Text style={styles.downloadText}>Download</Text>
+                                <Text onPress={()=>downloadFile(item._id)} style={styles.downloadText}>Download</Text>
                             </View>
                         </View>
 

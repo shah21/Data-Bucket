@@ -1,29 +1,25 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList, ScrollView, RefreshControl, TextInput, Platform } from 'react-native'
+import { View, Text,Dimensions,StyleSheet, FlatList,  RefreshControl, TextInput, Platform, PermissionsAndroid, Image } from 'react-native'
 import { RouteProp } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
+import DocumentPicker from 'react-native-document-picker';
+import { IconButton } from 'react-native-paper';
 
 
 import { AuthContext } from '../contexts/context';
-import SearchField from '../components/SearchField/SearchField';
 import Theme from "../res/styles/theme.style";
-import BucketItem from "../components/ListItems/BucketItem";
 import isAuth from '../utils/isAuth';
 import axios from '../axios/config';
 import endpoints from '../axios/endpoints';
 import Bucket from '../Models/bucket';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Fab } from 'native-base';
-import AddBucketDialog from '../components/Dialogs/AddBucketDialog';
 import { FlashContext } from '../contexts/FlashContext';
 import { socket } from '../utils/socket';
 import Data from '../Models/data';
 import SingleData from '../components/SingleData/SingleData';
-import { IconButton } from 'react-native-paper';
 import OptionsDialog from '../components/Dialogs/OptionsDialog';
+import ProgressDialog from '../components/Dialogs/ProgressDialog';
+import RNFetchBlob from 'rn-fetch-blob';
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,
@@ -113,6 +109,61 @@ const addData = async (bucketId:string,userToken:any,text:string,file:any,progre
     }
 }
 
+const checkPermission = async () => {
+ 
+    if (Platform.OS === 'ios') {
+      return true;
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'Storage Permission Required',
+            message:
+              'Application needs access to your storage to download File',
+              buttonPositive:null!,
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Storage Permission Granted.');
+          // Start downloading
+          return true;
+        } else {
+          // If permission denied then show alert
+        //   Alert.alert('Error','Storage Permission Not Granted');
+        }
+      } catch (err) {
+        // To handle permission related exception
+        console.log("++++"+err);
+      }
+    }
+  };
+
+const downloadFile = async (bucketId:string,userToken:any,dataId:string,onProgress:(progress:number)=>void) =>{
+    
+    
+    try {
+        const isAuthourized = await isAuth(userToken.accessToken, userToken.refreshToken);
+        if (isAuthourized && isAuthourized.isVerified) {
+            const dirs = RNFetchBlob.fs.dirs
+            const res = await RNFetchBlob
+                .config({
+                    path: dirs.DocumentDir + `/123.png`
+                })
+                .fetch('GET', 'http://192.168.1.5:8080'+endpoints.getBucket + `${bucketId}/data/${dataId}`, {
+                    "Content-type": "multipart/form-data",
+                    "Authorization": `Bearer ${isAuthourized.accessToken}`,
+                });
+            return res.path();
+        }
+    } catch (err) {
+        console.log(err.message);
+    }
+
+
+
+}
+
 
 const deleteData = async (dataId:string,bucketId:string,token:any)=>{
     try {
@@ -134,6 +185,9 @@ const deleteData = async (dataId:string,bucketId:string,token:any)=>{
 }
 
 
+
+
+
 export default function HomeScreen({route,navigation}:TypeProps) {
 
     /* Params */
@@ -148,6 +202,8 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     const [text,setText] = React.useState<string>(null!);
     const [modalVisible, setModalVisible] = React.useState<boolean>(false);
     const [selectedId, setSelectedId] = React.useState<string>(null!);
+    const [uploadProgress,setUploadProgress] = React.useState<number>(0);
+    const [uploadState,setUploadState] = React.useState<boolean>(false);
 
     const currentPage = React.useRef<number>(1);
     const inputRef = React.useRef<TextInput>(null!);
@@ -155,9 +211,6 @@ export default function HomeScreen({route,navigation}:TypeProps) {
 
     const {setFlash} = React.useContext(FlashContext);
 
-    const selectFile = () => {
-        
-    }
     
 
 
@@ -178,6 +231,43 @@ export default function HomeScreen({route,navigation}:TypeProps) {
             )
         })
     }
+
+
+    const selectFile = async () => {
+        try {
+            const userToken = await getToken();
+            const res = await DocumentPicker.pick({
+                type: ['image/*', '.pdf', '.mp4'],
+            });
+
+            if(res){
+                setUploadState(true);
+                setUploadProgress(0);
+                const response = await addData(bucketId,userToken,'',res,(progress:number)=>{
+                    setUploadProgress(progress);
+                });
+    
+                if(response){
+                    setUploadState(false);
+                }
+            }
+            
+           
+            
+        } catch (err) {
+            if(err.response){
+                let errMessage = err.response.data.message;
+                if(errMessage === 'File too large!'){
+                    errMessage += '.Pick another one' 
+                }
+                setFlash({message:errMessage,type:'error'});
+            }else{
+                setFlash({message:err.message,type:'error'});
+            }
+            setUploadState(false);
+        }
+    }
+    
 
     async function loadData(){
         try{
@@ -325,7 +415,20 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     
 
     
-    
+    const handleDownloadFile = async (id: string) => {
+        if (checkPermission()) {
+            // setDonwloadProgress(0);
+            // setDownloadStart(true);
+            const userToken = await getToken();
+            await downloadFile(bucketId, userToken, id, (percent: number) => {
+                // setDonwloadProgress(percent);
+                if (percent === 100) {
+                    // setDownloadStart(false);
+                }
+            });
+        }
+    }
+
     
 
 
@@ -335,7 +438,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
                 {dataArray.length !== 0 ? <FlatList refreshControl={
                     <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
                 } data={dataArray} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
-                    return (<SingleData openOptions={openOptions} item={item.item} />)
+                    return (<SingleData downloadFile={handleDownloadFile} openOptions={openOptions} item={item.item} />)
                 }} /> : (<Text style={styles.emptyText}>No data found !</Text>)}
             </View>
             
@@ -363,6 +466,14 @@ export default function HomeScreen({route,navigation}:TypeProps) {
                     chooseOption={handleOptions}
                     contentType="text"
                     modalVisible={modalVisible} />
+
+                <ProgressDialog 
+                    modalVisible={uploadState}
+                    closeModel={() => setUploadState(false)}
+                    progress={uploadProgress} />
+
+
+            
 
             </View>
 
