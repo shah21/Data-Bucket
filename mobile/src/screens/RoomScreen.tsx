@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet, FlatList,  RefreshControl, TextInput, Platform, PermissionsAndroid, Image } from 'react-native'
+import { View, Text,Dimensions,StyleSheet, FlatList,  RefreshControl, TextInput, Platform, PermissionsAndroid, Image, NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { RouteProp } from '@react-navigation/native';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -150,7 +150,7 @@ const downloadFile = async (bucketId:string,userToken:any,dataId:string,onProgre
                 .config({
                     path: dirs.DocumentDir + `/123.png`
                 })
-                .fetch('GET', 'http://192.168.1.5:8080'+endpoints.getBucket + `${bucketId}/data/${dataId}`, {
+                .fetch('GET', 'http://databucket-env-1.eba-mxjyzwxn.eu-west-3.elasticbeanstalk.com'+endpoints.getBucket + `${bucketId}/data/${dataId}`, {
                     "Content-type": "multipart/form-data",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 });
@@ -204,13 +204,14 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     const [selectedId, setSelectedId] = React.useState<string>(null!);
     const [uploadProgress,setUploadProgress] = React.useState<number>(0);
     const [uploadState,setUploadState] = React.useState<boolean>(false);
+    const [scrolling,setScrolling] = React.useState<boolean>(false);
 
     const currentPage = React.useRef<number>(1);
     const inputRef = React.useRef<TextInput>(null!);
     
-
     const {setFlash} = React.useContext(FlashContext);
 
+    const LIMIT_PER_PAGE = 10;
     
 
 
@@ -304,16 +305,18 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     async function promiseList(){
         try {
             //run only dataArray is empty or bucket id changed
+            
             if(dataArray.length === 0 || bucketId){
                 setRefreshing(true);
                 const userToken = await getToken();
-                const response = await getDataArray(bucketId, userToken,currentPage.current);
+                const response = await getDataArray(bucketId, userToken,1);
                 if (response) {
+                    
                     setTotal(response.totalCount);
                     setDataArray(response.bucket.data ? response.bucket.data : []);
-                    // setScrolling(false);
+                    setScrolling(false);
                 }
-                // setLoading(false);
+                setRefreshing(false);
             }else{
                 setDataArray(dataArray);   
             }
@@ -325,11 +328,13 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     }
     
 
+    React.useMemo(()=>{
+        promiseList();
+    },[bucketId]);
+
 
     React.useEffect(()=>{
-
         loadBucket();
-        promiseList();
         async function setupSocket() {
 
             socket.emit('subscribe', bucketId);
@@ -367,7 +372,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
             socket.off('subscribe');
             socket.off('data');
         }
-    },[]);
+    },[bucketId]);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -429,15 +434,54 @@ export default function HomeScreen({route,navigation}:TypeProps) {
         }
     }
 
+
+
+
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}:NativeScrollEvent) => {
+        const paddingToBottom = 20;
+        return layoutMeasurement.height + contentOffset.y >=
+          contentSize.height - paddingToBottom;
+      };
+
+    const onScroll = (nativeEvent:NativeScrollEvent) => {
+        if (!isRefreshing && isCloseToBottom(nativeEvent)) {
+            loadMoreData();
+        }    
+    }
+
+
+    const loadMoreData = async () => {
+        if(totalCount > LIMIT_PER_PAGE * currentPage.current){
+            const userToken = await getToken();
+            setRefreshing(true);
+            currentPage.current = ++currentPage.current; 
+            const responseData = await getDataArray(bucketId,userToken,currentPage.current);
+            if (responseData) {
+                const array = [...dataArray, ...responseData.bucket.data];
+                setTotal(responseData.totalCount);
+                setDataArray(array);
+            }
+            // setCountState(responseData.totalCount);
+        }
+        setScrolling(false);
+        setRefreshing(false);
+        
+    }
     
 
 
     return (
         <View style={styles.container}>
-            <View>
-                {dataArray.length !== 0 ? <FlatList refreshControl={
+            <View style={styles.list}>
+                {dataArray.length !== 0 ? 
+                <FlatList 
+                onScroll={({nativeEvent})=>onScroll(nativeEvent)}
+                refreshControl={
                     <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-                } data={dataArray} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
+                } data={dataArray} 
+                keyExtractor={(item, index) => index.toString()} 
+                extraData={dataArray}
+                renderItem={(item) => {
                     return (<SingleData downloadFile={handleDownloadFile} openOptions={openOptions} item={item.item} />)
                 }} /> : (<Text style={styles.emptyText}>No data found !</Text>)}
             </View>
@@ -491,6 +535,9 @@ const styles = StyleSheet.create({
         flex:1,
         justifyContent:'space-between',
     },
+    list:{
+        flex:1,
+    },
     emptyText:{
         flex:1,
         textAlign:'center',
@@ -499,12 +546,11 @@ const styles = StyleSheet.create({
         marginTop:20,
     },
     sendContainer:{
-        height:60,
         backgroundColor:Theme.WHITE,
         flexDirection:'row',
         justifyContent:'space-between',
         alignItems:'center',
-        paddingVertical:8,
+        paddingVertical:5,
         elevation:10,
     },
     btnSend:{

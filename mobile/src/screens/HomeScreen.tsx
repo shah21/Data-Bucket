@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList, ScrollView, RefreshControl, Route } from 'react-native'
+import { View, Text,Dimensions,StyleSheet,Image,TouchableOpacity, Pressable, FlatList, ScrollView, RefreshControl, Route, NativeScrollEvent } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as Animatable from "react-native-animatable";
@@ -112,6 +112,8 @@ export default function HomeScreen({navigation}:TypeProps) {
 
     const {setFlash} = React.useContext(FlashContext);
 
+    const LIMIT_PER_PAGE = 10;
+
 
 
     const updateStatusBar = () => {
@@ -144,6 +146,7 @@ export default function HomeScreen({navigation}:TypeProps) {
             if(response){
                 setBuckets(response.buckets);
                 bucketsBackup.current = response.buckets;
+                setTotalCount(response.totalCount);
             }
             setRefreshing(false);
         }catch(err){
@@ -277,6 +280,35 @@ export default function HomeScreen({navigation}:TypeProps) {
         }
     }
 
+    const isCloseToBottom = ({layoutMeasurement, contentOffset, contentSize}:NativeScrollEvent) => {
+        const paddingToBottom = 20;
+        return layoutMeasurement.height + contentOffset.y >=
+          contentSize.height - paddingToBottom;
+      };
+
+    const onScroll = (nativeEvent:NativeScrollEvent) => {
+        if (!isRefreshing && isCloseToBottom(nativeEvent)) {
+            loadMoreData();
+        }    
+    }
+
+    const loadMoreData = async () =>{
+        if(totalCount > LIMIT_PER_PAGE * currentPage.current){
+            setRefreshing(true);
+            currentPage.current = ++currentPage.current; 
+            const userToken = await getToken();
+            const responseData = await getBuckets(userToken,currentPage.current);
+            if (responseData) {
+                setTotalCount(responseData.totalCount);
+                const array = [...buckets, ...responseData.buckets];
+                setBuckets(array);
+                bucketsBackup.current = array;
+            }
+        }
+        setRefreshing(false);
+    }
+
+
     return (
         <View style={styles.container}>
             <SearchField 
@@ -285,7 +317,9 @@ export default function HomeScreen({navigation}:TypeProps) {
                 placeHolder="Search bucket"/>
             
 
-            {buckets.length !== 0 ? <FlatList refreshControl={
+            {buckets.length !== 0 ? <FlatList 
+                onScroll={({nativeEvent})=>onScroll(nativeEvent)}
+                refreshControl={
                 <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
             } data={buckets} keyExtractor={(item, index) => index.toString()} renderItem={(item) => {
                 return (<BucketItem onLongPress={onLongPress} onClick={onClick} item={item.item} />)

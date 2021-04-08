@@ -3,8 +3,8 @@ import axios from "axios";
 // import endpoints from "./endpoints";
 
 
-const host = 'localhost:8080';
-const BASE_URL = `http://${host}`;
+const host = 'http://databucket-env-1.eba-mxjyzwxn.eu-west-3.elasticbeanstalk.com';
+const BASE_URL = host;
 
 const axiosInstance =  axios.create({
     baseURL:BASE_URL,
