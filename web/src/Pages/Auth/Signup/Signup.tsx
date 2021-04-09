@@ -216,7 +216,7 @@ function Signup(props:PropsInterface) {
                 />
       
                
-                <ProgressButton loading={loading} setLoading={setLoading} clickHandler={signupHandler}/>
+                <ProgressButton label="Signup" loading={loading} setLoading={setLoading} clickHandler={signupHandler}/>
               </form>
             </div>
           </div>

@@ -7,7 +7,7 @@ import DocumentPicker from 'react-native-document-picker';
 import { IconButton } from 'react-native-paper';
 
 
-import { AuthContext } from '../contexts/context';
+import AuthContext from '../contexts/AuthContext';
 import Theme from "../res/styles/theme.style";
 import isAuth from '../utils/isAuth';
 import axios from '../axios/config';
@@ -34,9 +34,9 @@ type TypeProps = {
     route:ProfileScreenRouteProp,
 }
 
-const getBucket = async (bucketId:string,userToken:any) =>{    
+const getBucket = async (bucketId:string,token:any) =>{    
     try {
-        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        const isAuthourized = await isAuth(token.accessToken,token.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
             const response = await axios.get(endpoints.getBucket + bucketId, {
                 headers: {
@@ -54,9 +54,9 @@ const getBucket = async (bucketId:string,userToken:any) =>{
 
 }    
 
-const getDataArray = async (bucketId:string,userToken:any,page:number) =>{
+const getDataArray = async (bucketId:string,token:any,page:number) =>{
     try {
-        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        const isAuthourized = await isAuth(token.accessToken,token.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
             const response = await axios.get(endpoints.getBucket + bucketId +`/data?page=${page}`, {
                 headers: {
@@ -77,9 +77,9 @@ const getDataArray = async (bucketId:string,userToken:any,page:number) =>{
 
 
 
-const addData = async (bucketId:string,userToken:any,text:string,file:any,progressListener:(progress:number)=>void) =>{
+const addData = async (bucketId:string,token:any,text:string,file:any,progressListener:(progress:number)=>void) =>{
     try {
-        const isAuthourized = await isAuth(userToken.accessToken,userToken.refreshToken);
+        const isAuthourized = await isAuth(token.accessToken,token.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
            
             //setting form data for multipart/form 
@@ -139,21 +139,22 @@ const checkPermission = async () => {
     }
   };
 
-const downloadFile = async (bucketId:string,userToken:any,dataId:string,onProgress:(progress:number)=>void) =>{
+const downloadFile = async (bucketId:string,token:any,dataId:string,onProgress:(progress:number)=>void) =>{
     
     
     try {
-        const isAuthourized = await isAuth(userToken.accessToken, userToken.refreshToken);
+        const isAuthourized = await isAuth(token.accessToken, token.refreshToken);
         if (isAuthourized && isAuthourized.isVerified) {
             const dirs = RNFetchBlob.fs.dirs
             const res = await RNFetchBlob
                 .config({
-                    path: dirs.DocumentDir + `/123.png`
+                    fileCache: true,
                 })
                 .fetch('GET', 'http://databucket-env-1.eba-mxjyzwxn.eu-west-3.elasticbeanstalk.com'+endpoints.getBucket + `${bucketId}/data/${dataId}`, {
                     "Content-type": "multipart/form-data",
                     "Authorization": `Bearer ${isAuthourized.accessToken}`,
                 });
+                console.log(res.path())
             return res.path();
         }
     } catch (err) {
@@ -193,7 +194,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     /* Params */
     const {bucketId} = route.params;
 
-    const {signOut,getToken} = React.useContext(AuthContext);
+    const {signOut,token} = React.useContext(AuthContext);
     
     const [isRefreshing,setRefreshing] = React.useState<boolean>(false);
     const [totalCount,setTotal] = React.useState<number>(0);
@@ -236,7 +237,6 @@ export default function HomeScreen({route,navigation}:TypeProps) {
 
     const selectFile = async () => {
         try {
-            const userToken = await getToken();
             const res = await DocumentPicker.pick({
                 type: ['image/*', '.pdf', '.mp4'],
             });
@@ -244,7 +244,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
             if(res){
                 setUploadState(true);
                 setUploadProgress(0);
-                const response = await addData(bucketId,userToken,'',res,(progress:number)=>{
+                const response = await addData(bucketId,token,'',res,(progress:number)=>{
                     setUploadProgress(progress);
                 });
     
@@ -273,8 +273,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     async function loadData(){
         try{
             setRefreshing(true);
-            const userToken = await getToken();
-            const response = await getBucket(bucketId,userToken);
+            const response = await getBucket(bucketId,token);
             if(response){
                 setBucket(response);
                 updateStatusBar(response.name);
@@ -289,8 +288,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     async function loadBucket(){
         try{
             setRefreshing(true);
-            const userToken = await getToken();
-            const response = await getBucket(bucketId,userToken);
+            const response = await getBucket(bucketId,token);
             if(response){
                 setBucket(response);
                 updateStatusBar(response.name);
@@ -308,8 +306,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
             
             if(dataArray.length === 0 || bucketId){
                 setRefreshing(true);
-                const userToken = await getToken();
-                const response = await getDataArray(bucketId, userToken,1);
+                const response = await getDataArray(bucketId, token,1);
                 if (response) {
                     
                     setTotal(response.totalCount);
@@ -384,8 +381,7 @@ export default function HomeScreen({route,navigation}:TypeProps) {
     const handleSend = async () =>{
         if(text){
             try {
-                const userToken = await getToken();
-                const response = await addData(bucketId,userToken,text,null!,(progress:number)=>{
+                const response = await addData(bucketId,token,text,null!,(progress:number)=>{
 
                 });
                 if(response){
@@ -401,8 +397,8 @@ export default function HomeScreen({route,navigation}:TypeProps) {
         switch(option){
             case 'Delete':
                 try{
-                    const userToken = await getToken();
-                    await deleteData(selectedId,bucketId,userToken);
+                    
+                    await deleteData(selectedId,bucketId,token);
                     setModalVisible(false);
                 }catch(err){
                     setFlash({message:err.message,type:'error'});
@@ -424,8 +420,8 @@ export default function HomeScreen({route,navigation}:TypeProps) {
         if (checkPermission()) {
             // setDonwloadProgress(0);
             // setDownloadStart(true);
-            const userToken = await getToken();
-            await downloadFile(bucketId, userToken, id, (percent: number) => {
+            
+            await downloadFile(bucketId, token, id, (percent: number) => {
                 // setDonwloadProgress(percent);
                 if (percent === 100) {
                     // setDownloadStart(false);
@@ -452,10 +448,10 @@ export default function HomeScreen({route,navigation}:TypeProps) {
 
     const loadMoreData = async () => {
         if(totalCount > LIMIT_PER_PAGE * currentPage.current){
-            const userToken = await getToken();
+           
             setRefreshing(true);
             currentPage.current = ++currentPage.current; 
-            const responseData = await getDataArray(bucketId,userToken,currentPage.current);
+            const responseData = await getDataArray(bucketId,token,currentPage.current);
             if (responseData) {
                 const array = [...dataArray, ...responseData.bucket.data];
                 setTotal(responseData.totalCount);
@@ -528,7 +524,6 @@ export default function HomeScreen({route,navigation}:TypeProps) {
 }
 
 const { height } = Dimensions.get('screen');
-const height_logo = height * 0.28;
 
 const styles = StyleSheet.create({
     container:{

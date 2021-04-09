@@ -12,7 +12,7 @@ import axios from "../axios/config";
 import endpoints from '../axios/endpoints';
 import InputField from "../components/Form/InputField";
 import { FlashContext } from '../contexts/FlashContext';
-import {AuthContext} from "../contexts/context"
+import AuthContext from "../contexts/AuthContext"
 
 type SplashNavigationProps = StackNavigationProp<
     StackProps,

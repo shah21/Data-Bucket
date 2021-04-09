@@ -6,7 +6,7 @@ import * as Animatable from "react-native-animatable";
 import { StackNavigationProp } from "@react-navigation/stack";
 
 
-import { AuthContext } from '../contexts/context';
+import AuthContext from '../contexts/AuthContext';
 import SearchField from '../components/SearchField/SearchField';
 import Theme from "../res/styles/theme.style";
 import BucketItem from "../components/ListItems/BucketItem";
@@ -98,7 +98,7 @@ const deleteBucket = async (bucketId:string,token:any)=>{
 
 export default function HomeScreen({navigation}:TypeProps) {
 
-    const {signOut,getToken} = React.useContext(AuthContext);
+    const {signOut,token} = React.useContext(AuthContext);    
 
     const [buckets,setBuckets] = React.useState<Bucket[]>([]);
     const [modalVisible, setModalVisible] = React.useState<boolean>(false);
@@ -166,11 +166,9 @@ export default function HomeScreen({navigation}:TypeProps) {
     React.useEffect(()=>{
 
         async function setupSocket() {
+    
             
-            const userToken = await getToken();
-
-            
-            socket.emit('subscribe', userToken.userId);
+            socket.emit('subscribe', token.userId);
             socket.on('bucket', (data: { action: string, bId: string, bucket: Bucket, socket_id: string }) => {
 
                 switch (data.action) {
@@ -268,8 +266,7 @@ export default function HomeScreen({navigation}:TypeProps) {
         switch(option){
             case 'Delete':
                 try{
-                    const userToken = await getToken();
-                    await deleteBucket(selectedId,userToken);
+                    await deleteBucket(selectedId,token);
                     setOptionsVisible(false);
                 }catch(err){
                     setFlash({message:err.message,type:'error'});
@@ -296,8 +293,7 @@ export default function HomeScreen({navigation}:TypeProps) {
         if(totalCount > LIMIT_PER_PAGE * currentPage.current){
             setRefreshing(true);
             currentPage.current = ++currentPage.current; 
-            const userToken = await getToken();
-            const responseData = await getBuckets(userToken,currentPage.current);
+            const responseData = await getBuckets(token,currentPage.current);
             if (responseData) {
                 setTotalCount(responseData.totalCount);
                 const array = [...buckets, ...responseData.buckets];

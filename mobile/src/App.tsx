@@ -4,13 +4,10 @@ import { NavigationContainer } from "@react-navigation/native"
 import { createStackNavigator } from "@react-navigation/stack"
 import Snackbar from 'react-native-snackbar';
 
-import SplashScreen from "./screens/SplashScreen";
-import SignUpScreen from "./screens/SignupScreen";
-import LoginScreen from "./screens/LoginScreen";
 import HomeScreen from "./screens/HomeScreen";
 import RoomScreen from "./screens/RoomScreen";
 import { FlashContext } from './contexts/FlashContext';
-import { AuthContext } from "./contexts/context";
+import AuthContext from "./contexts/AuthContext";
 import RootStackScreen from './screens/RootstackScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Provider as PaperProvider  } from 'react-native-paper';
@@ -70,11 +67,9 @@ const initialLoginState = {
 export default function App() {
 
 
-  const [flash, setFlash] = React.useState<FlashType>(null!); 
-  // const [flashBackup, setFlashBackup] = React.useState<FlashType>(null!); 
+  const [flash, setFlash] = React.useState<FlashType>(null!);  
   const [open,setOpen] = React.useState(false);
-  // const [isLoading,setLoading] = React.useState<boolean>(true);
-  // const [userToken,setUserToken] = React.useState(null!);
+  const [token,setToken] = React.useState<UserToken>(null!);
 
  
 
@@ -102,18 +97,7 @@ export default function App() {
       }
       dispatch({type:'LOGOUT'});
     },
-    signUp:()=>{},
-    getToken:async ():Promise<UserToken>=>{
-      const accessToken =  await AsyncStorage.getItem('accessToken');
-      const refreshToken = await AsyncStorage.getItem('refreshToken');
-      const userId =  await AsyncStorage.getItem('userId');
-
-      return {
-        accessToken:accessToken!,
-        refreshToken:refreshToken!,
-        userId:userId!
-      } as UserToken;
-    }
+    signUp:()=>{}
   }),[])
 
   /* open and close flash messages */
@@ -149,8 +133,9 @@ export default function App() {
         const accessToken = await AsyncStorage.getItem('accessToken');
         const refreshToken  = await AsyncStorage.getItem('refreshToken');
         const userId = await AsyncStorage.getItem('userId');
-
-        dispatch({ type: 'RETRIEVE_TOKEN', authObject: { accessToken: accessToken!, refreshToken: refreshToken!, userId: userId! } });
+        const tokenObj =  { accessToken: accessToken!, refreshToken: refreshToken!, userId: userId! };
+        setToken(tokenObj);
+        dispatch({ type: 'RETRIEVE_TOKEN', authObject:tokenObj });
       } catch (error) {
         console.log(error);
       }
@@ -176,7 +161,7 @@ export default function App() {
 
   return (
     <PaperProvider>
-    <AuthContext.Provider value={authContext}>
+    <AuthContext.Provider value={{...authContext,token}}>
     <FlashContext.Provider value={{ flash, setFlash }}>
     <NavigationContainer>
       <StatusBar backgroundColor="#128976" barStyle="light-content"/>

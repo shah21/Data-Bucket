@@ -9,6 +9,7 @@ interface Propstypes{
     clickHandler:()=>void,
     loading:boolean;
     setLoading:any;
+    label:string,
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function ProgressButton({clickHandler,loading,setLoading}:Propstypes) {
+function ProgressButton({clickHandler,loading,setLoading,label}:Propstypes) {
 
     const classes = useStyles();
 
@@ -67,7 +68,7 @@ function ProgressButton({clickHandler,loading,setLoading}:Propstypes) {
                         link="/"
                         disabled={loading}
                         type="submit"
-                        label="Login"
+                        label={label}
                         onClick={(e: any) => {
                             handleButtonClick(e);
                         }}

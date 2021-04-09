@@ -194,7 +194,7 @@ function Login({setToken,isLoggedIn}:types) {
               />
 
               <a href="/forgot-password">Forgot Password</a>
-              <ProgressButton loading={loading} setLoading={setLoading} clickHandler={loginHandler}/>
+              <ProgressButton label="Login" loading={loading} setLoading={setLoading} clickHandler={loginHandler}/>
             </form>
           </div>
         </div>
