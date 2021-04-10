@@ -84,7 +84,7 @@ Of course, no one project serve all features since your needs may be different. 
     <td>Web App</td><td>web</td>
   </tr>
    <tr>
-    <td>Rest Api</td><td>Server</td>
+    <td>Rest Api</td><td>server</td>
   </tr>
 <table>
 
