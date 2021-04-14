@@ -27,6 +27,7 @@ function Input(props:any) {
           <h5>{props.label}</h5>
 
           <input
+            style={{fontFamily: 'Poppins,sans-serif'}}
             className="input"
             ref={textInput}
             type={props.type}

@@ -213,6 +213,10 @@
     text-align: start;
 }
 
+.login_page a {
+    font-family: 'Poppins',sans-serif;
+}
+
 @media screen and (max-width: 1050px){
 	
     .login_page .container{
