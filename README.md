@@ -10,7 +10,7 @@
  <p align="center">
   An awesome  Mini drop box with minimalistic features
   <br />
-  <a href="https://github.com/shah21/Data-Bucket/">View Demo</a>
+  <a href="">View Demo</a>
   ·
   <a href="https://github.com/shah21/Data-Bucket/issues">Report Bug</a>
   ·
@@ -44,6 +44,9 @@
   </ol>
 </details>
 
+
+
+
 <!-- ABOUT THE PROJECT -->
 ## About The Project  🚀
 
@@ -69,6 +72,21 @@ Of course, no one project serve all features since your needs may be different. 
 
 <!-- GETTING STARTED -->
 ## Getting Started
+
+<table>
+  <tr>
+    <th>Platform</th> <th>Folder</th>  
+  </tr>
+  <tr>
+    <td>Mobile App</td><td>mobile</td>
+  </tr>
+   <tr>
+    <td>Web App</td><td>web</td>
+  </tr>
+   <tr>
+    <td>Rest Api</td><td>server</td>
+  </tr>
+<table>
 
 To run and rebuild project locally in any enviroment you want these things 👇
 
@@ -103,7 +121,7 @@ To run and rebuild project locally in any enviroment you want these things 👇
     DB_USER = USER_NAME
     etc...
    ```
-<h4> Frontend </h4> 
+<h4> Frontend (Web) </h4> 
 
 1. Install NPM packages
 
