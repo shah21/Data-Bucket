@@ -3,7 +3,7 @@ import axios from "axios";
 // import endpoints from "./endpoints";
 
 
-const host = 'http://databucket-env-1.eba-mxjyzwxn.eu-west-3.elasticbeanstalk.com';
+const host = 'https://databucket.azurewebsites.net';
 const BASE_URL = host;
 
 const axiosInstance =  axios.create({
