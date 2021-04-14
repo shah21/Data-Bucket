@@ -10,7 +10,7 @@
  <p align="center">
   An awesome  Mini drop box with minimalistic features
   <br />
-  <a href="">View Demo</a>
+  <a href="https://main.d6fe105zm3v3.amplifyapp.com/">View Demo</a>
   ·
   <a href="https://github.com/shah21/Data-Bucket/issues">Report Bug</a>
   ·
