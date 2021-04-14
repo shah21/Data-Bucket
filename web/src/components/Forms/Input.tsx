@@ -10,6 +10,7 @@ const useStyle = makeStyles({
         marginTop:'100px',
         display:'flex',
         flexDirection:'column',
+        fontFamily: 'Poppins,sans-serif',
         alignItems:'center',
         justifyContent:'center',
     },
