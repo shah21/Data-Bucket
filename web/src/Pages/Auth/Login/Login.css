@@ -4,6 +4,7 @@
 
 .login_page{
     position: absolute;
+    font-family: 'Poppins',sans-serif;
 }
 
 .login_page .btn-signup{
