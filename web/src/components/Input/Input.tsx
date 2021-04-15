@@ -1,6 +1,6 @@
 import React from 'react'
 
-  
+
 
 function Input(props:any) {
 
@@ -25,7 +25,7 @@ function Input(props:any) {
       <div className={`input-div ${props.class}`}>
         <div className="i">{props.component}</div>
         <div>
-          <h5>{props.label}</h5>
+          <h5 style={{fontFamily: 'Poppins,sans-serif'}} >{props.label}</h5>
 
           <input
             style={{fontFamily: 'Poppins,sans-serif'}}
