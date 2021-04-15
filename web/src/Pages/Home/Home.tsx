@@ -410,7 +410,7 @@ function Home(props:any) {
                             <img src={Folder} alt="" className="bucketImg" />
                         </div>
                         <div className="text">
-                            <p>Put your things here</p>
+                            <p style={{ fontFamily: 'Poppins,sans-serif'}}>Put your things here</p>
                         </div>
                     </div>
                 )}
