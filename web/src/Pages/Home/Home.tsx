@@ -363,12 +363,12 @@ function Home(props:any) {
         <div className="homePage">
             <nav className="header">
                 <div className="title">
-                    <h4>Data Bucket</h4>
+                    <h4 style={{ fontFamily: 'Poppins,sans-serif'}} >Data Bucket</h4>
                 </div>
                 <div className="linkSection">
                     <div className="user">
                         <PersonIcon fontSize="small" className="icon-person"/> 
-                        <span>{userData.email}</span>
+                        <span style={{ fontFamily: 'Poppins,sans-serif'}} >{userData.email}</span>
                     </div>
                     <ExitToAppIcon fontSize="small" className="btn-logout" onClick={handleLogout}/>
                 </div>
@@ -376,7 +376,7 @@ function Home(props:any) {
             <div className="bucketBar">
 
                 <div className="bucketTitle">
-                    <h5>Buckets</h5>
+                    <h5 style={{ fontFamily: 'Poppins,sans-serif'}} >Buckets</h5>
                     <IconButton className="icon-btn-add" disableFocusRipple={true} onClick={handleAddButton} >
                         <AddIcon fontSize="small" className="icon-add" />
                     </IconButton>
@@ -384,7 +384,7 @@ function Home(props:any) {
                 </div>
                 <div className="sb-example-1">
                     <div className="search">
-                        <input type="text" onChange={handleSearch} className="searchTerm" placeholder="Search bucket"/>
+                        <input type="text" style={{ fontFamily: 'Poppins,sans-serif'}} onChange={handleSearch} className="searchTerm" placeholder="Search bucket"/>
                         <button type="submit" className="searchButton">
                         <SearchIcon fontSize="small" className="icon-add"/>
                         </button>
