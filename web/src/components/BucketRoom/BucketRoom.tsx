@@ -511,7 +511,7 @@ function BucketRoom(props:propTypes) {
                 <div>
                     <div className="room">
                         <div className="headerSection">
-                            <h4>{bucket.name}</h4>
+                            <h4 style={{ fontFamily: 'Poppins,sans-serif'}}>{bucket.name}</h4>
                             <div>
                             <IconButton onClick={(e)=>{fileChoose.current.click()}} className="attachIcon">
                                 <AttachFile className={classes.attachIcon}/>
