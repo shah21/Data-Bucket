@@ -50,6 +50,9 @@ const theme = createMuiTheme({
 const themeTextField = createMuiTheme({
   overrides: {
     MuiInput: {
+      formControl:{
+        fontFamily:'Poppins,sans-serif',
+      },  
       underline: {
         '&:before': { //underline color when textfield is inactive
           borderBottom: `1px solid #32be8f`,
@@ -64,6 +67,7 @@ const themeTextField = createMuiTheme({
     },
     MuiFormLabel: {
       root: {
+        fontFamily:'Poppins,sans-serif',
         "&$focused": {
           color: "#333",
           fontWeight:500,
