@@ -42,6 +42,7 @@ const theme = createMuiTheme({
       label:{
         color:'#32be8f',
         fontWeight:600,
+        fontFamily:'Poppins,sans-serif'
       }
     }
   }
@@ -82,7 +83,7 @@ const themeTextField = createMuiTheme({
   return (
     <div className="formDialog">
       <Dialog open={props.open} onClose={props.handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">New Bucket</DialogTitle>
+        <DialogTitle id="form-dialog-title" style={{fontFamily:'Poppins,sans-serif'}} >New Bucket</DialogTitle>
         <DialogContent dividers={true}>
           <MuiThemeProvider theme={themeTextField}>
             <TextField
