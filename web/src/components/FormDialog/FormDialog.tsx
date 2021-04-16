@@ -101,8 +101,8 @@ const themeTextField = createMuiTheme({
         <DialogActions>
         <MuiThemeProvider theme={defaultTheme}>
           
-            <Button onClick={props.handleClose} className="btn-cancel" color="inherit">
-              Cancel
+            <Button onClick={props.handleClose} style={{fontFamily:'Poppins,sans-serif'}} className="btn-cancel" color="inherit">
+              Cancel 
             </Button>
 
           
