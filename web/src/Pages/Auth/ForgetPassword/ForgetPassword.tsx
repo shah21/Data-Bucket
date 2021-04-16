@@ -28,6 +28,7 @@ const useStyle = makeStyles({
     },
     input:{
         width:'300px',
+        fontFamily:'Poppins,sans-serif',
     },
     inputArea:{
         margin:'50px 0 30px',
@@ -42,8 +43,10 @@ const useStyle = makeStyles({
     },
     forgetHeading:{
         fontSize:'1.5rem',
+        fontFamily:'Poppins,sans-serif',
     },
     buttonSend:{
+        fontFamily:'Poppins,sans-serif',
         width:'300px',
         backgroundColor: "#32be8f",
         textTransform:'capitalize',
