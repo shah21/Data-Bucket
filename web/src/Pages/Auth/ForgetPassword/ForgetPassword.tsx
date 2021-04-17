@@ -47,6 +47,7 @@ const useStyle = makeStyles({
     },
     buttonSend:{
         width:'300px',
+        fontFamily:'Poppins,sans-serif',
         backgroundColor: "#32be8f",
         textTransform:'capitalize',
         "&:hover": {
@@ -146,7 +147,7 @@ function ForgetPassword() {
                 />
                 <p className="error-text">{errorText}</p>
                 </div>
-                <Button onClick={handleSubmit} style={{fontFamily:'Poppins,sans-serif',}}  className={classes.buttonSend} variant="contained"  color="primary" component="span">
+                <Button onClick={handleSubmit} className={classes.buttonSend} variant="contained"  color="primary" component="span">
                     Sent reset email
                 </Button>
             </Card>
