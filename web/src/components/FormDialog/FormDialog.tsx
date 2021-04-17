@@ -48,6 +48,16 @@ const theme = createMuiTheme({
   }
 });
 
+const themeCancelBtn = createMuiTheme({
+  overrides:{
+    MuiButton:{
+      label:{
+        fontFamily:'Poppins,sans-serif'
+      }
+    }
+  }
+});
+
 const themeTextField = createMuiTheme({
   overrides: {
     MuiInput: {
@@ -82,8 +92,17 @@ const themeTextField = createMuiTheme({
 
   return (
     <div className="formDialog">
-      <Dialog open={props.open} onClose={props.handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title" style={{fontFamily:'Poppins,sans-serif'}} >New Bucket</DialogTitle>
+      <Dialog
+        open={props.open}
+        onClose={props.handleClose}
+        aria-labelledby="form-dialog-title"
+      >
+        <DialogTitle
+          id="form-dialog-title"
+          style={{ fontFamily: "Poppins,sans-serif" }}
+        >
+          New Bucket
+        </DialogTitle>
         <DialogContent dividers={true}>
           <MuiThemeProvider theme={themeTextField}>
             <TextField
@@ -99,20 +118,23 @@ const themeTextField = createMuiTheme({
           <span className="error-text">{error}</span>
         </DialogContent>
         <DialogActions>
-        <MuiThemeProvider theme={defaultTheme}>
-          
-            <Button onClick={props.handleClose} style={{fontFamily:'Poppins,sans-serif'}} className="btn-cancel" color="inherit">
-              Cancel 
-            </Button>
+          <MuiThemeProvider theme={defaultTheme}>
+            <MuiThemeProvider theme={themeCancelBtn}>
+              <Button
+                onClick={props.handleClose}
+                className="btn-cancel"
+                color="inherit"
+              >
+                Cancel
+              </Button>
+            </MuiThemeProvider>
 
-          
-          <MuiThemeProvider theme={theme}>
-            <Button onClick={handleSave} className="btn-add" >
-              Save
-            </Button>
-          </MuiThemeProvider>  
-        </MuiThemeProvider>
-          
+            <MuiThemeProvider theme={theme}>
+              <Button onClick={handleSave} className="btn-add">
+                Save
+              </Button>
+            </MuiThemeProvider>
+          </MuiThemeProvider>
         </DialogActions>
       </Dialog>
     </div>
