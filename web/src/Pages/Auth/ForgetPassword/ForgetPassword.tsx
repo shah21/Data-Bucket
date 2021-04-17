@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react'
-import {makeStyles, TextField,Button, Card} from "@material-ui/core";
+import {makeStyles, TextField,Button, Card, createMuiTheme, MuiThemeProvider} from "@material-ui/core";
 import SendMailCard from './SendMailCard';
 import axios from '../../../axios/config';
 import endpoints from '../../../axios/endpoints';
@@ -47,7 +47,6 @@ const useStyle = makeStyles({
     },
     buttonSend:{
         width:'300px',
-        fontFamily:'Poppins,sans-serif',
         backgroundColor: "#32be8f",
         textTransform:'capitalize',
         "&:hover": {
@@ -55,6 +54,17 @@ const useStyle = makeStyles({
           }
     },
 });
+
+
+const themeCancelBtn = createMuiTheme({
+    overrides:{
+      MuiButton:{
+        label:{
+          fontFamily:'Poppins,sans-serif'
+        }
+      }
+    }
+  });
 
 
 const sentMail = (email:string) => {
@@ -117,42 +127,48 @@ function ForgetPassword() {
     }
 
     return (
-        <div className={classes.forgetPage}>
-             <Card raised={true} className={classes.container}>
-                <h3 className={classes.forgetHeading}>Forget Password</h3>
-                <div className={classes.inputArea}>
-                <TextField
-                    type="email"
-                    className={classes.input}
-                    InputLabelProps={{
-                        shrink: true,
-                        classes: {
-                            root: classes.cssLabel,
-                            focused: classes.cssLabel,
-                          },
-                    }}
+      <div className={classes.forgetPage}>
+        <Card raised={true} className={classes.container}>
+          <h3 className={classes.forgetHeading}>Forget Password</h3>
+          <div className={classes.inputArea}>
+            <TextField
+              type="email"
+              className={classes.input}
+              InputLabelProps={{
+                shrink: true,
+                classes: {
+                  root: classes.cssLabel,
+                  focused: classes.cssLabel,
+                },
+              }}
+              InputProps={{
+                classes: {
+                  root: classes.notchedOutline,
+                  focused: classes.notchedOutline,
+                  notchedOutline: classes.notchedOutline,
+                },
+              }}
+              label="Email Address"
+              variant="outlined"
+              onChange={handleChange}
+            />
+            <p className="error-text">{errorText}</p>
+          </div>
 
-                    InputProps={{
-                        classes: {
-                          root: classes.notchedOutline,
-                          focused: classes.notchedOutline,
-                          notchedOutline: classes.notchedOutline,
-                        },
-                        
-                     }}
-
-                    label='Email Address'
-                    variant="outlined"
-                    onChange={handleChange}
-                />
-                <p className="error-text">{errorText}</p>
-                </div>
-                <Button onClick={handleSubmit} className={classes.buttonSend} variant="contained"  color="primary" component="span">
-                    Sent reset email
-                </Button>
-            </Card>
-        </div>
-    )
+          <MuiThemeProvider theme={themeCancelBtn}>
+            <Button
+              onClick={handleSubmit}
+              className={classes.buttonSend}
+              variant="contained"
+              color="primary"
+              component="span"
+            >
+              Sent reset email
+            </Button>
+          </MuiThemeProvider>
+        </Card>
+      </div>
+    );
 }
 
 export default ForgetPassword;
