@@ -380,7 +380,6 @@ function Home(props:any) {
                     <IconButton className="icon-btn-add" disableFocusRipple={true} onClick={handleAddButton} >
                         <AddIcon fontSize="small" className="icon-add" />
                     </IconButton>
-                    <FormDialog open={open} handleClose={handleCloseDialog} getBucketName={handleSaveBucket}/>
                 </div>
                 <div className="sb-example-1">
                     <div className="search">
@@ -416,7 +415,7 @@ function Home(props:any) {
                 )}
             </div>   
 
-            
+            <FormDialog open={open} handleClose={handleCloseDialog} getBucketName={handleSaveBucket}/>
 
         </div>
     )
