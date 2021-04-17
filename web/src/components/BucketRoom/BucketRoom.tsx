@@ -502,80 +502,131 @@ function BucketRoom(props:propTypes) {
 
 
     return (
-        <div className="bucket">
-            {openBucketOptions && (<OptionsDialog listElements={<DataOptions classes={classes} dataId={props.bucketId}
-             handleOptions={handleBucketOptions} />} open={openBucketOptions}
-              handleClose={handleClose} /> )}
-
-            {bucket &&(
+      <div className="bucket">
+        {bucket && (
+          <div>
+            <div className="room">
+              <div className="headerSection">
+                <h4 style={{ fontFamily: "Poppins,sans-serif" }}>
+                  {bucket.name}
+                </h4>
                 <div>
-                    <div className="room">
-                        <div className="headerSection">
-                            <h4 style={{ fontFamily: 'Poppins,sans-serif'}}>{bucket.name}</h4>
-                            <div>
-                            <IconButton onClick={(e)=>{fileChoose.current.click()}} className="attachIcon">
-                                <AttachFile className={classes.attachIcon}/>
-                            </IconButton>
-                            <IconButton onClick={handleOpen} className="attachIcon">
-                                <OptionsIcon className={classes.attachIcon}/>
-                            </IconButton>
-                            </div>
-                        </div>
-                        <div className="contents" ref={el => {  parentRef.current = el!; setScroll(true) }}>
-                            <div className="scrollBar" onScroll={(e)=>handleScroll(e)} ref={el => { contentRef.current = el!; setScroll(true) }}  style={{ maxHeight:300,overflow:'auto' }}>
-                            <DataList loadingContent={isLoading} handleDownloadFile={handleDownloadFile} totalCount={totalCount} reloadHandler={paginateData} setOpen={setOpenOptions} open={openOptions} handleOptions={handleOptions} dataArray={dataArray}/>
-                            </div>
-                            {/* <div className="progress-section">
+                  <IconButton
+                    onClick={(e) => {
+                      fileChoose.current.click();
+                    }}
+                    className="attachIcon"
+                  >
+                    <AttachFile className={classes.attachIcon} />
+                  </IconButton>
+                  <IconButton onClick={handleOpen} className="attachIcon">
+                    <OptionsIcon className={classes.attachIcon} />
+                  </IconButton>
+                </div>
+              </div>
+              <div
+                className="contents"
+                ref={(el) => {
+                  parentRef.current = el!;
+                  setScroll(true);
+                }}
+              >
+                <div
+                  className="scrollBar"
+                  onScroll={(e) => handleScroll(e)}
+                  ref={(el) => {
+                    contentRef.current = el!;
+                    setScroll(true);
+                  }}
+                  style={{ maxHeight: 300, overflow: "auto" }}
+                >
+                  <DataList
+                    loadingContent={isLoading}
+                    handleDownloadFile={handleDownloadFile}
+                    totalCount={totalCount}
+                    reloadHandler={paginateData}
+                    setOpen={setOpenOptions}
+                    open={openOptions}
+                    handleOptions={handleOptions}
+                    dataArray={dataArray}
+                  />
+                </div>
+                {/* <div className="progress-section">
                                 {true && (<CircularProgress className="loading-circle" />)}
                             </div> */}
-                        </div>
-                    </div>
-                    <div className="inputSection">
+              </div>
+            </div>
+            <div className="inputSection">
+              <TextField
+                margin="dense"
+                label="Type here"
+                value={textData}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  handleTextData(e);
+                }}
+                InputLabelProps={{
+                  classes: {
+                    root: classes.cssLabel,
+                    focused: classes.cssLabel,
+                  },
+                }}
+                InputProps={{
+                  classes: {
+                    root: classes.notchedOutline,
+                    focused: classes.notchedOutline,
+                    notchedOutline: classes.notchedOutline,
+                  },
+                }}
+                variant="outlined"
+                className="input"
+              />
 
-                        <TextField margin="dense" label="Type here" 
-                        value={textData}
-                        onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
-                            handleTextData(e)
-                        }}
-                        InputLabelProps={{
-                            classes: {
-                              root: classes.cssLabel,
-                              focused: classes.cssLabel,
-                            },
-                        }}
-                        
-                        InputProps={{
-                            classes: {
-                              root: classes.notchedOutline,
-                              focused: classes.notchedOutline,
-                              notchedOutline: classes.notchedOutline,
-                            },
-                            
-                         }}
+              <Button onClick={handleSend} className={classes.button}>
+                <Send className={classes.sendButton} />
+              </Button>
+            </div>
+          </div>
+        )}
 
-                        variant="outlined" className="input" />
-                        
-                        <Button onClick={handleSend} className={classes.button}>
-                            <Send className={classes.sendButton}/>
-                        </Button>
-                        
-                    </div>
-                </div>
-            )}
-            
-            
-            {uploadState && (<UploadDialog fileName={currentFile.current && currentFile.current.name} progress={uploadProgress} open={uploadState} handleClose={handleCloseUploadDialog} />)}
+        {uploadState && (
+          <UploadDialog
+            fileName={currentFile.current && currentFile.current.name}
+            progress={uploadProgress}
+            open={uploadState}
+            handleClose={handleCloseUploadDialog}
+          />
+        )}
 
-                         
-            <Snackbar
-                open={downloadStart}
-                TransitionComponent={Fade}
-                message={`Downloading ${downloadProgress}%`}
-            />
+        <Snackbar
+          open={downloadStart}
+          TransitionComponent={Fade}
+          message={`Downloading ${downloadProgress}%`}
+        />
 
-             <input ref={fileChoose} name="file" onClick={(e)=>fileChoose.current.value = ""} onChange={handleFileChange} type="file" style={{visibility:'hidden'}}/>
-        </div>
-    )
+        {openBucketOptions && (
+          <OptionsDialog
+            listElements={
+              <DataOptions
+                classes={classes}
+                dataId={props.bucketId}
+                handleOptions={handleBucketOptions}
+              />
+            }
+            open={openBucketOptions}
+            handleClose={handleClose}
+          />
+        )}
+
+        <input
+          ref={fileChoose}
+          name="file"
+          onClick={(e) => (fileChoose.current.value = "")}
+          onChange={handleFileChange}
+          type="file"
+          style={{ visibility: "hidden" }}
+        />
+      </div>
+    );
 }
 
 export default BucketRoom;
