@@ -114,7 +114,7 @@ To run and rebuild project locally in any enviroment you want these things 👇
    npm install
    ```
 4. Enter your API keys and Database credentials in .env 
-   🗒️ You can find example .env file from repo
+   🗒️ You can find example .env file from repo.
    
    ```JS
     API_KEY = ENTER YOUR API
@@ -152,7 +152,7 @@ Data-Bucket is open to contributions, but I recommend creating an issue or reply
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+5. Open a Pull Request 
 
 📖 [Learn more about open source contribution][opensource-docs]
 
